@@ -1,0 +1,4 @@
+v1.0
+https://github.com/trokvictor-dot/trok-launcher/releases/latest
+Primeira versao publica do Trok Launcher.
+Contas com nick e avatar, datas, galeria de screenshots, favoritos com capa e logo.
