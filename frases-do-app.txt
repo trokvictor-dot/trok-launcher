@@ -1,0 +1,158 @@
+%d screenshots - %s
+%s disponível - você está na %s
++ Adicionar conta
++ Adicionar link
+A lista não veio. Tentar de novo
+Abre sozinho quando o computador liga
+Abrir a pasta da data no Explorer
+Abrir a pasta das screenshots
+Abrir no navegador
+Abrir o blog TrokMods
+ABRIR O POST
+Abrir o Trok Launcher
+Abrir User Files
+Adicionar aos favoritos
+Adicionar data
+Adicione servidores na aba Internet
+Ao abrir, a Home já vem no servidor em que você parou
+Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)
+Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos
+Arquivo de backup inválido.
+Atualizar a galeria (F5)
+Atualizar agora
+Atualizar os posts do blog
+Atualização
+Atualização %s
+Azul
+Baixando a atualização...
+Baixando a atualização... %d%%
+baixando a lista de servidores...
+BEM-VINDO AO TROK LAUNCHER
+Blog TrokMods
+bom jogo!
+Branco
+buscando posts do blog...
+Buscar por nome, modo ou IP...
+Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.
+Cancelar
+Clique de novo para excluir
+Clique de novo para remover
+clique para usar
+Conectar
+CONFIGURAÇÕES
+Configurações exportadas! Leve o arquivo pro outro PC.
+consultando servidor... %s
+Conta atual (não trocar)
+Copiado!
+Copiar imagem
+Copiar o IP
+Cor personalizada
+Custom
+DATAS
+Depois
+Discord
+Discord Rich Presence
+e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o
+Editar data
+Editar servidor
+EM USO
+Entrar na comunidade do Discord
+Escolha a pasta User Files desta data
+Excluir (vai para a Lixeira do Windows)
+Expandir menu
+Exportar configurações
+Exportar configurações...
+Favoritos (%d)
+Fechar o launcher ao entrar no jogo
+Fechar para a bandeja em vez de sair
+Filtros da lista
+Framboesa
+Fundo aparece na Home; a logo troca o nome grande.
+Fórum
+GALERIA
+Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu
+gravando seu nick...
+Guia do launcher
+Imagem 16:9 da data
+Imagem de exibição do servidor
+Importar configurações
+Importar configurações...
+INFORMAÇÕES
+Iniciar com o Windows
+Iniciar minimizado na bandeja
+Internet
+Internet (%d)
+Início
+JOGADORES
+jogadores %d/%d ping %d ms %s
+Jogar
+Já está nos favoritos
+Laranja
+Lembrar o último servidor selecionado
+Link
+Logo do servidor (substitui o nome no card)
+março
+Me pague um café
+Melhorias e correções.
+MODO
+Mods, tutoriais e programas do blog TrokMods. Clique num post para abrir no navegador.
+Mostarda
+Mostra no seu perfil do Discord o servidor em que você está jogando
+Mover o último jogado para o início dos favoritos
+Nenhuma screenshot encontrada nesta data.
+NOVA ATUALIZAÇÃO
+Nova data
+Não consegui baixar sozinho.
+Não consegui exportar as configurações.
+Não encontrei o seu GTA San Andreas com SA-MP neste computador.
+O blog TrokMods está chegando.
+O launcher abre já escondido, só o ícone perto do relógio
+O launcher é de graça e sempre vai ser. O café paga as madrugadas de mod.
+O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar,
+O X esconde o launcher perto do relógio em vez de encerrar de vez
+Ocultar cheios
+Ocultar com senha
+Ocultar sem resposta
+Ocultar vazios
+Oliva
+online, com senha
+Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original
+PING
+Principal
+Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.
+Recolher menu
+Remover
+Remover conta
+Remover dos favoritos
+Remover esta data
+Remover logo
+Restaura um backup exportado em outro PC (o launcher reabre sozinho)
+Sair
+Salvar
+Salvar senhas de RCON
+Salvar senhas de servidor automaticamente
+SAMP
+sem resposta
+Senha
+SERVIDOR
+SERVIDOR COM SENHA
+SERVIDORES
+Site
+Sortear outra capa
+sábado
+terça-feira
+Tijolo
+Tire fotos no jogo com F8 e clique em Atualizar.
+Trocar caminho...
+Trocar imagem de fundo...
+Trocar imagem...
+Trocar logo...
+Trocar User Files...
+Trok Launcher
+Trok Launcher %s - feito pela equipe TrokMods
+TROKMODS
+User Files
+User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.
+vazio = nome real do servidor
+Voltar
+várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots

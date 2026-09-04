@@ -1,0 +1,43 @@
+# ---- dados do usuario (nunca vao pro repositorio) ----
+Trok Launcher.ini
+Trok Launcher.ini.*
+imagens/
+datas/
+cache/
+perfis/
+
+# ---- saidas de compilacao ----
+build/
+release/
+*.exe
+*.obj
+*.res
+*.pdb
+*.ilk
+
+# ---- artes oficiais da Rockstar (GTA San Andreas) ----
+# Ficam so na maquina: sao os loadscreens e os avatares do jogo, usados como
+# capa e foto padrao. Nao redistribuimos material de terceiros aqui.
+artes/A.png
+artes/B.png
+artes/C.png
+artes/D.png
+artes/E.png
+artes/F.png
+artes/G.png
+artes/H.png
+artes/I.png
+artes/J.png
+artes/K.png
+artes/L.png
+artes/M.png
+artes/N.png
+artes/O.png
+artes/P.png
+artes/Q.png
+artes/U.png
+avatars/
+capas/
+
+# ---- prints de trabalho (capturas de debug); as do post ficam em blog/prints/web ----
+blog/prints/*.png

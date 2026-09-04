@@ -1,0 +1,32 @@
+﻿// Recursos do Trok Launcher: icone + versao nas propriedades do exe.
+#include <winver.h>
+
+1 ICON "TrokLauncher.ico"
+10 RCDATA "artes\\alvo-512.png"
+11 RCDATA "lucide.ttf"
+12 RCDATA "artes\\blogger-logo.png"
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "041604B0"
+    BEGIN
+      VALUE "CompanyName",      "TrokMods"
+      VALUE "FileDescription",  "Trok Launcher - launcher moderno de SA-MP"
+      VALUE "FileVersion",      "1.0.0.0"
+      VALUE "ProductName",      "Trok Launcher"
+      VALUE "ProductVersion",   "1.0"
+      VALUE "LegalCopyright",   "TrokMods"
+      VALUE "OriginalFilename", "Trok Launcher.exe"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0416, 1200
+  END
+END

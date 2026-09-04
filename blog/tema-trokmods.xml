@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<!-- ============================================================
+     TROK MODS - tema do Blogger no layout da MixMods, identidade Trok
+     (laranja #F2611D, fundo azul-grafite, posts em cartao claro)
+     Aplicar em: Blogger > Tema > seta ao lado de PERSONALIZAR >
+                 Editar HTML > apagar tudo > colar este arquivo > Salvar
+     Autoria: equipe TrokMods
+     ============================================================ -->
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <b:include data='blog' name='all-head-content'/>
+  <title><data:blog.pageTitle/></title>
+  <b:skin><![CDATA[
+/* =================== TROK MODS =================== */
+:root{
+  --laranja:#F2611D; --laranja-hi:#FF8A4D;
+  --fundo:#2E3440;            /* azul-grafite da pagina (como a MixMods) */
+  --topo:#14181F;             /* barra utilitaria */
+  --header:#1B222C;           /* faixa do logo */
+  --cartao:#FFFFFF;           /* cartao do post */
+  --texto:#2B2F36; --texto-fraco:#6B7280;
+  --borda:#E5E7EB;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--texto);font-size:16px;line-height:1.65}
+a{color:var(--laranja);text-decoration:none}
+a:hover{color:var(--laranja-hi)}
+img{max-width:100%;height:auto}
+
+/* barra utilitaria (topo fino) */
+.barra-topo{background:var(--topo);color:#cfd4dc;font-size:13px}
+.barra-topo .miolo{max-width:1140px;margin:0 auto;padding:7px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.barra-topo a{color:#cfd4dc;margin-right:16px;font-weight:600}
+.barra-topo a:hover{color:#fff}
+.sociais a{display:inline-block;background:var(--laranja);color:#141414;width:24px;height:24px;line-height:24px;text-align:center;border-radius:6px;margin:0 0 0 6px;font-weight:800;font-size:12px}
+
+/* header do logo */
+.header{background:var(--header);border-bottom:4px solid var(--laranja)}
+.header .miolo{max-width:1140px;margin:0 auto;padding:26px 16px 20px;display:flex;align-items:baseline;gap:10px}
+.logo{color:#fff;font-size:42px;font-weight:900;letter-spacing:-1px;margin:0}
+.logo b{color:var(--laranja)}
+.logo-sub{color:#8b93a1;font-size:14px;font-weight:700;letter-spacing:2px}
+
+/* menu laranja */
+.menu{background:var(--laranja)}
+.menu .miolo{max-width:1140px;margin:0 auto;padding:0 8px;display:flex;flex-wrap:wrap}
+.menu a{display:block;color:#161616;font-weight:800;font-size:14px;letter-spacing:.4px;padding:12px 16px;text-transform:uppercase}
+.menu a:hover{background:rgba(0,0,0,.14);color:#000}
+
+/* grade principal */
+.grade{max-width:1140px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+@media(max-width:900px){.grade{grid-template-columns:1fr}}
+
+/* cartao de post */
+.post{background:var(--cartao);border-radius:10px;padding:26px 30px;margin-bottom:22px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.post h1.titulo,.post h2.titulo{text-align:center;margin:2px 0 6px;font-size:26px;line-height:1.25}
+.post h1.titulo a,.post h2.titulo a{color:var(--laranja)}
+.post .quando{text-align:center;color:var(--texto-fraco);font-size:13px;margin-bottom:10px}
+.chips{text-align:center;margin-bottom:16px}
+.chips a{display:inline-block;background:#F3F4F6;border:1px solid var(--borda);color:#4B5563;font-size:12px;font-weight:700;padding:3px 10px;border-radius:7px;margin:2px 3px}
+.chips a:hover{background:var(--laranja);border-color:var(--laranja);color:#141414}
+.post .corpo{font-size:16px}
+.post .corpo img{display:block;margin:14px auto;border-radius:8px}
+.post .corpo iframe{display:block;margin:14px auto;max-width:100%}
+.post .corpo a{font-weight:700}
+.leia-mais{display:block;width:max-content;margin:18px auto 2px;background:var(--laranja);color:#141414;font-weight:800;padding:10px 26px;border-radius:9px;text-transform:uppercase;font-size:14px}
+.leia-mais:hover{background:var(--laranja-hi);color:#000}
+
+/* paginacao */
+.paginas{display:flex;justify-content:space-between;margin:8px 0 30px}
+.paginas a{background:#3B4252;color:#fff;font-weight:700;padding:9px 18px;border-radius:9px;font-size:14px}
+.paginas a:hover{background:var(--laranja);color:#141414}
+
+/* sidebar */
+.lateral .bloco{background:var(--cartao);border-radius:10px;padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.lateral h3{margin:0 0 10px;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:#1F2937;border-bottom:3px solid var(--laranja);padding-bottom:8px}
+.lateral ul{list-style:none;margin:0;padding:0}
+.lateral li{border-bottom:1px solid var(--borda)}
+.lateral li a{display:block;padding:8px 2px;color:#4B5563;font-size:14px;font-weight:600}
+.lateral li a:hover{color:var(--laranja)}
+.lateral .widget-content{font-size:14px}
+
+/* rodape */
+.rodape{background:var(--topo);color:#8b93a1;text-align:center;padding:22px 16px;font-size:13px;margin-top:30px}
+.rodape a{color:#cfd4dc;font-weight:700}
+
+/* coisas do blogger que nao usamos */
+.blog-feeds,.feed-links,.post-feeds,.status-msg-wrap{display:none}
+]]></b:skin>
+</head>
+<body>
+
+  <!-- barra utilitaria -->
+  <div class='barra-topo'><div class='miolo'>
+    <div>
+      <a expr:href='data:blog.homepageUrl'>In&#237;cio</a>
+      <a href='https://github.com/trokvictor-dot/trok-launcher/releases/latest'>Baixar o Trok Launcher</a>
+    </div>
+    <div class='sociais'>
+      <a href='https://github.com/trokvictor-dot' title='GitHub'>G</a>
+      <a href='https://discord.gg/' title='Discord'>D</a>
+      <a href='https://youtube.com/' title='YouTube'>Y</a>
+    </div>
+  </div></div>
+
+  <!-- logo -->
+  <div class='header'><div class='miolo'>
+    <h1 class='logo'>Trok<b>Mods</b></h1>
+    <span class='logo-sub'>MODS DE GTA SA &#183; SA-MP</span>
+  </div></div>
+
+  <!-- menu -->
+  <div class='menu'><div class='miolo'>
+    <b:section class='menu-links' id='menu-links' maxwidgets='1' showaddelement='yes'>
+      <b:widget id='LinkList1' locked='false' title='' type='LinkList' version='1'>
+        <b:includable id='main'>
+          <a expr:href='data:blog.homepageUrl'>In&#237;cio</a>
+          <b:loop values='data:links' var='link'>
+            <a expr:href='data:link.target'><data:link.name/></a>
+          </b:loop>
+        </b:includable>
+      </b:widget>
+    </b:section>
+  </div></div>
+
+  <!-- conteudo + sidebar -->
+  <div class='grade'>
+    <div class='principal'>
+      <b:section class='posts' id='posts' maxwidgets='1' showaddelement='no'>
+        <b:widget id='Blog1' locked='true' title='Postagens' type='Blog' version='1'>
+          <b:includable id='main'>
+            <b:loop values='data:posts' var='post'>
+              <article class='post'>
+                <b:if cond='data:blog.pageType == &quot;item&quot;'>
+                  <h1 class='titulo'><data:post.title/></h1>
+                <b:else/>
+                  <h2 class='titulo'><a expr:href='data:post.url'><data:post.title/></a></h2>
+                </b:if>
+                <div class='quando'><data:post.dateHeader/></div>
+                <b:if cond='data:post.labels'>
+                  <div class='chips'>
+                    <b:loop values='data:post.labels' var='label'>
+                      <a expr:href='data:label.url'><data:label.name/></a>
+                    </b:loop>
+                  </div>
+                </b:if>
+                <div class='corpo'><data:post.body/></div>
+                <b:if cond='data:blog.pageType != &quot;item&quot;'>
+                  <a class='leia-mais' expr:href='data:post.url'>Abrir o post</a>
+                </b:if>
+              </article>
+            </b:loop>
+            <div class='paginas'>
+              <span><b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl'>&#171; Mais novos</a></b:if></span>
+              <span><b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl'>Mais antigos &#187;</a></b:if></span>
+            </div>
+          </b:includable>
+        </b:widget>
+      </b:section>
+    </div>
+
+    <aside class='lateral'>
+      <b:section class='lateral-blocos' id='lateral-blocos' showaddelement='yes'>
+        <b:widget id='Label1' locked='false' title='Categorias' type='Label' version='1'>
+          <b:includable id='main'>
+            <div class='bloco'>
+              <h3><data:title/></h3>
+              <ul>
+                <b:loop values='data:labels' var='label'>
+                  <li><a expr:href='data:label.url'><data:label.name/> (<data:label.count/>)</a></li>
+                </b:loop>
+              </ul>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='BlogArchive1' locked='false' title='Arquivo' type='BlogArchive' version='1'>
+          <b:includable id='main'>
+            <div class='bloco'>
+              <h3><data:title/></h3>
+              <ul>
+                <b:loop values='data:data' var='i'>
+                  <li><a expr:href='data:i.url'><data:i.name/> (<data:i.post-count/>)</a></li>
+                </b:loop>
+              </ul>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML1' locked='false' title='Trok Launcher' type='HTML' version='1'>
+          <b:includable id='main'>
+            <div class='bloco'>
+              <h3><data:title/></h3>
+              <div class='widget-content'><data:content/></div>
+            </div>
+          </b:includable>
+        </b:widget>
+      </b:section>
+    </aside>
+  </div>
+
+  <div class='rodape'>
+    TrokMods &#183; feito por equipe TrokMods &#183;
+    <a href='https://github.com/trokvictor-dot/trok-launcher/releases/latest'>baixe o Trok Launcher</a>
+  </div>
+
+</body>
+</html>

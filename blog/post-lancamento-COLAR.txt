@@ -1,0 +1,213 @@
+<p>Depois de muito tempo abrindo o SA-MP pelo atalho de sempre, digitando IP na mão e perdendo a lista de favoritos a cada reinstalação, resolvi fazer o launcher que eu queria usar. Esse é o <strong>Trok Launcher</strong>: um programa separado, feito do zero, que organiza seus servidores, suas contas e seus prints — e que <strong>não substitui nenhum arquivo do seu GTA</strong>.</p>
+
+<p>Ele não é um mod. Não entra na pasta do jogo, não troca .dll, não mexe no seu SA-MP. Ele fica de fora, guarda suas coisas e abre o jogo pra você.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-03-home.jpg ]]</strong></p>
+
+<h2>O que ele faz</h2>
+
+<ul>
+<li><strong>Favoritos com cara de jogo</strong> — cada servidor com capa, nome, ping e quantos estão online, sem precisar decorar IP.</li>
+<li><strong>Várias contas</strong> — nick e avatar separados, e o launcher pode trocar de conta sozinho quando você entra num servidor específico.</li>
+<li><strong>Senha de servidor e de RCON</strong> — do jeito compatível com o SA-MP original, então nada se perde.</li>
+<li><strong>Galeria de prints</strong> — todas as suas screenshots do GTA num visualizador decente.</li>
+<li><strong>Aba Mods</strong> — os posts deste blog aparecem dentro do launcher, com aviso de novidade.</li>
+<li><strong>Atualização sozinho</strong> — ele avisa, baixa e se troca sem você abrir o navegador.</li>
+</ul>
+
+<h2>Antes de baixar</h2>
+
+<ul>
+<li><strong>Windows</strong> (7 ou mais novo) e <strong>GTA San Andreas com SA-MP já instalado</strong>. O launcher não instala o jogo nem o SA-MP.</li>
+<li>Não precisa ser administrador: ele instala dentro da sua pasta de usuário.</li>
+<li>Se você não tem o SA-MP na máquina, ele abre pedindo pra você apontar o <em>gta_sa.exe</em> — e é só isso.</li>
+</ul>
+
+<h2>Instalando</h2>
+
+<p>Baixe o <strong>TrokLauncher-Setup.exe</strong> e dê dois cliques. O instalador é feito na mesma tecnologia do launcher, então já abre com a mesma cara — e <strong>não pede permissão de administrador</strong>, porque instala dentro da sua pasta de usuário.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-01-setup.jpg ]]</strong></p>
+
+<ol>
+<li>Abre a janela <strong>TROK LAUNCHER</strong>, com a frase <em>"O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo."</em></li>
+<li>O campo de pasta já vem preenchido com <em>%LOCALAPPDATA%\Trok Launcher</em>. Pode deixar assim — é a pasta recomendada. Se quiser outro lugar, use <strong>Procurar...</strong> (ele acrescenta <em>\Trok Launcher</em> no fim do que você escolher).</li>
+<li>As duas caixinhas — <strong>Criar atalho na area de trabalho</strong> e <strong>Criar atalho no menu Iniciar</strong> — já vêm marcadas. Desmarque se não quiser.</li>
+<li>Clique em <strong>INSTALAR</strong>.</li>
+<li>Se o launcher já estiver aberto, aparece <em>"O Trok Launcher esta aberto neste computador."</em> — clique em <strong>FECHAR E INSTALAR</strong> que ele fecha sozinho e continua. <strong>Suas configurações não se perdem.</strong></li>
+<li>No fim aparece <em>"Pronto! O Trok Launcher esta instalado."</em> Clique em <strong>ABRIR O LAUNCHER</strong>.</li>
+</ol>
+
+<p><strong>Pra desinstalar</strong>, vá em <strong>Configurações do Windows &gt; Aplicativos instalados &gt; Trok Launcher &gt; Desinstalar</strong>. Abre a tela <em>"Remover o Trok Launcher deste computador?"</em> com uma caixinha opcional: <strong>Apagar tambem configuracoes, contas e imagens</strong>. Se você marcar, a pasta vai embora — mas <em>"(vai para a Lixeira do Windows, da para recuperar)"</em>, como o próprio aviso diz.</p>
+
+<h2>A primeira vez que você abre</h2>
+
+<p>Na primeira abertura ele lê o registro do SA-MP e já traz <strong>seu nick e seus favoritos</strong> prontos. Você não digita nada.</p>
+
+<p>Se ele não encontrar SA-MP na máquina, aparece o aviso <strong>BEM-VINDO AO TROK LAUNCHER</strong>: <em>"Nao encontrei o seu GTA San Andreas com SA-MP neste computador. Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve."</em> Clique em <strong>Escolher o gta_sa.exe...</strong>, aponte o arquivo e pronto — o resto ele descobre sozinho.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-02-sem-gta.jpg ]]</strong></p>
+
+<p>Uma observação: o launcher precisa do <em>samp.exe</em> junto do <em>gta_sa.exe</em>. Se você apontar uma pasta que só tem o GTA limpo, ele avisa: <em>"Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar."</em></p>
+
+<h3>Antes de continuar: a barra lateral</h3>
+
+<p>A barra da esquerda começa <strong>recolhida</strong>, só com os ícones. Passar o mouse não expande — pra ver os nomes das abas escritos, clique no <strong>ícone de painel no rodapé da barra</strong>, logo acima do <em>v1.0</em>. Clique de novo pra recolher.</p>
+
+<h2>Favoritos: seus servidores com cara de jogo</h2>
+
+<p>A tela inicial mostra o servidor selecionado em tamanho grande: nome (ou a logo dele), IP com um botão de <strong>Copiar o IP</strong>, jogadores, ping e o modo. Embaixo, o botão laranja <strong>Jogar</strong>. Na parte de baixo fica o carrossel <strong>F A V O R I T O S</strong> — clique num card pra trocar o servidor de cima, e arraste os cards pra reordenar.</p>
+
+<p>Na primeira vez o carrossel vem vazio, com o recado <em>"Adicione servidores na aba Internet"</em>. É pra lá que a gente vai:</p>
+
+<ol>
+<li>Clique em <strong>Servidores</strong> na barra lateral.</li>
+<li>Lá em cima tem duas abas: <strong>Favoritos</strong> e <strong>Internet</strong>. Vá em <strong>Internet</strong> — o launcher baixa a lista pública de servidores de SA-MP e mostra <em>"baixando a lista de servidores..."</em> enquanto carrega. Se der ruim, aparece <strong>A lista nao veio. Tentar de novo</strong>.</li>
+<li>Use o campo <strong>Buscar por nome, modo ou IP...</strong> pra achar o seu servidor.</li>
+<li>Precisa filtrar? Em <strong>Filtros da lista</strong> tem <strong>Ocultar cheios</strong>, <strong>Ocultar com senha</strong>, <strong>Ocultar vazios</strong> e <strong>Ocultar sem resposta</strong>.</li>
+<li>Achou? Clique em <strong>Adicionar aos favoritos</strong>. Se já estiver lá, o botão mostra <em>"Ja esta nos favoritos"</em>.</li>
+</ol>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-04-servidores.jpg ]]</strong></p>
+
+<h3>Deixando o card do jeito que você quer</h3>
+
+<p>Todo favorito já nasce com uma capa sorteada — nenhum servidor fica sem imagem. Pra mexer nele, clique nos <strong>...</strong> no canto do card (ou use o botão direito) e vá em <strong>Editar servidor</strong>:</p>
+
+<ul>
+<li><strong>Apelido</strong> — deixe vazio que ele usa o nome real do servidor.</li>
+<li><strong>Trocar imagem de fundo...</strong> e <strong>Trocar logo...</strong> — como diz a dica na tela: <em>"Fundo aparece na Home; a logo troca o nome grande."</em></li>
+<li><strong>Sortear outra capa</strong> — se não gostou da que veio.</li>
+<li><strong>+ Adicionar link</strong> — coloca os botões de site, Discord e YouTube que aparecem embaixo do <strong>Jogar</strong>.</li>
+<li><strong>Remover dos favoritos</strong> — pede um segundo clique pra confirmar, então não tem como apagar sem querer.</li>
+</ul>
+
+<h2>Senha do servidor e senha de RCON</h2>
+
+<p>Servidor com senha? Ao clicar em <strong>Jogar</strong> aparece a janela <strong>SERVIDOR COM SENHA</strong> pedindo a senha, com <strong>Conectar</strong> e <strong>Cancelar</strong>. Nas <strong>Configurações</strong> você decide se ele guarda ou não:</p>
+
+<ul>
+<li><strong>Salvar senhas de servidor automaticamente</strong> — grava a senha do jeito compatível com o SA-MP original. Isso quer dizer que a senha vale nos dois: entrou pelo Trok Launcher, o SA-MP normal também já sabe.</li>
+<li><strong>Salvar senhas de RCON</strong> — a dica na tela explica: <em>"Opcao do proprio SA-MP, usada pelas ferramentas RCON do browser original"</em>. Se você não é admin de servidor, pode deixar como está.</li>
+</ul>
+
+<h2>Várias contas, cada uma com seu avatar</h2>
+
+<p>No canto superior direito fica o seu nick com o avatar. Clique ali que abre o painel <strong>C O N T A S</strong>:</p>
+
+<ul>
+<li>Clique numa conta pra usar ela — o nick muda na hora.</li>
+<li><strong>+ Adicionar conta</strong> cria outra, com nick e avatar próprios (os avatares vêm de uma pasta de imagens, e você pode colocar as suas).</li>
+<li>Os <strong>...</strong> de cada conta abrem a edição, onde também fica o <strong>Remover conta</strong>.</li>
+</ul>
+
+<p>O truque bom: dentro de <strong>Editar servidor</strong> você pode amarrar uma conta àquele servidor. Deixando <em>"Conta atual (nao trocar)"</em>, nada muda; escolhendo uma conta, o launcher <strong>troca de nick sozinho</strong> quando você for jogar naquele servidor. Serve pra quem tem nick de RP num servidor e nick de PVP em outro.</p>
+
+<h2>Datas: mais de uma instalação do jogo</h2>
+
+<p>Muita gente tem duas ou três pastas do GTA — a limpa, a cheia de mods, a do servidor X. No launcher, cada uma dessas é uma <strong>data</strong>. Como diz a própria tela: <em>"Cada data e uma instalacao do jogo. Clique para escolher qual sera aberta pelo JOGAR."</em> A que está valendo aparece marcada como <strong>EM USO</strong>.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-06-datas.jpg ]]</strong></p>
+
+<p>Em <strong>Adicionar data</strong> você aponta outra instalação. Nos <strong>...</strong> de cada uma (<strong>Editar data</strong>) tem:</p>
+
+<ul>
+<li><strong>Trocar caminho...</strong> — se você moveu a pasta do jogo.</li>
+<li><strong>Trocar User Files...</strong> e <strong>Abrir User Files</strong> — a tela avisa: <em>"User Files vazio = a pasta padrao em Documentos. A galeria le as screens dela."</em> Ou seja: é daqui que a Galeria puxa os prints.</li>
+<li><strong>Trocar imagem...</strong>, <strong>Remover imagem</strong> e <strong>Sortear outra capa</strong> — a capa da data, em tom monocromático pra diferenciar dos favoritos.</li>
+<li><strong>Abrir a pasta da data no Explorer</strong> — atalho pra ir direto na pasta do jogo.</li>
+<li><strong>Remover esta data</strong> — também com segundo clique pra confirmar.</li>
+</ul>
+
+<h2>Galeria: seus prints do jogo</h2>
+
+<p>A aba <strong>Galeria</strong> mostra as screenshots da instalação que está <strong>EM USO</strong>. Tirou foto no jogo com <strong>F8</strong>? Ela aparece aqui.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-05-galeria.jpg ]]</strong></p>
+
+<ul>
+<li>Clique numa miniatura pra abrir em tela cheia. Navegue com as <strong>setas</strong> do teclado e feche com <strong>ESC</strong> (ou clicando fora).</li>
+<li>Com a foto aberta você tem <strong>Copiar imagem</strong> (aparece <em>"Copiado!"</em>) e o excluir, que avisa direitinho: <em>"Excluir (vai para a Lixeira do Windows)"</em> — e ainda pede um segundo clique.</li>
+<li><strong>Atualizar a galeria (F5)</strong> relê a pasta, e tem um botão pra <strong>Abrir a pasta das screenshots</strong>.</li>
+<li>Se estiver vazia, ele explica o que fazer: <em>"Nenhuma screenshot encontrada nesta data."</em> / <em>"Tire fotos no jogo com F8 e clique em Atualizar."</em></li>
+</ul>
+
+<h2>Aba Mods: este blog dentro do launcher</h2>
+
+<p>A aba <strong>Mods</strong> é o TrokMods aparecendo dentro do programa: <em>"Novidades do blog TrokMods. Clique num post para abrir no navegador e baixar."</em> Cada post vira um card com a capa, o título e uma faixa <strong>BAIXAR MOD</strong>.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-07-mods.jpg ]]</strong></p>
+
+<p>E o melhor: <strong>não precisa ficar olhando o blog</strong>. Quando eu publico um post novo, aparece uma <strong>bolinha pulsando</strong> no ícone de Mods na barra lateral. Ele procura novidade quando o launcher abre <strong>e também sozinho, a cada 20 minutos</strong>, mesmo com o launcher escondido na bandeja — então a bolinha acende sem você fazer nada. Clicou na aba, a bolinha some. Se quiser forçar na hora, tem o botão de atualizar no canto da aba.</p>
+
+<h2>Configurações e backup</h2>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-08-config.jpg ]]</strong></p>
+
+<p>Em <strong>COR DE DESTAQUE</strong> você troca a cor do app (o laranja é a oficial, mas tem mais seis, e ainda dá pra escolher uma <strong>Cor personalizada</strong>). Os interruptores são estes:</p>
+
+<ul>
+<li><strong>Fechar o launcher ao entrar no jogo</strong> — pra não ficar dois programas abertos.</li>
+<li><strong>Fechar para a bandeja em vez de sair</strong> — o X manda ele pro reloginho do Windows.</li>
+<li><strong>Iniciar minimizado na bandeja</strong> e <strong>Iniciar com o Windows</strong>.</li>
+<li><strong>Discord Rich Presence</strong> — mostra no seu Discord o que você está jogando.</li>
+<li><strong>Lembrar o ultimo servidor selecionado</strong>.</li>
+<li><strong>Salvar senhas de servidor automaticamente</strong> e <strong>Salvar senhas de RCON</strong>.</li>
+</ul>
+
+<p>E o que eu mais uso: em <strong>BACKUP</strong> tem <strong>Exportar configuracoes...</strong> e <strong>Importar configuracoes...</strong>. Ele gera <em>um arquivo só</em> com tudo — favoritos, contas, datas e as imagens que você subiu. Vai formatar o PC ou trocar de máquina? Exporta, guarda o arquivo, importa do outro lado e está tudo de volta.</p>
+
+<h2>Atualização sem abrir navegador</h2>
+
+<p>Quando sai versão nova, aparece um botão de atualização no topo do launcher.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-09-update-aviso.jpg ]]</strong></p>
+
+<p>Clicando nele abre <strong>NOVA ATUALIZACAO</strong>, dizendo qual versão saiu e em qual você está, com a lista de <strong>N O V I D A D E S</strong>. Aí é <strong>Atualizar agora</strong> ou <strong>Depois</strong>.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-10-update.jpg ]]</strong></p>
+
+<p>Escolhendo atualizar, a barra <em>"Baixando a atualizacao..."</em> roda <strong>dentro do próprio launcher</strong>. Quando termina, ele fecha, o instalador aparece rapidinho só com <em>"Atualizando o Trok Launcher..."</em> — sem perguntar nada — e o launcher reabre sozinho na versão nova. Seus atalhos não são recriados de propósito: se você apagou algum, ele continua apagado.</p>
+
+<p>Se o download falhar (internet caiu, servidor fora), ele não te deixa na mão: mostra <em>"Nao consegui baixar sozinho."</em> com um botão <strong>Abrir no navegador</strong>.</p>
+
+<h2>Aba Informações</h2>
+
+<p>A última aba é a dos recados: versão, quem fez (<em>equipe TrokMods</em>) e o resumo do que o launcher é — incluindo a parte que eu mais faço questão de repetir: ele <strong>não substitui nenhum arquivo do seu jogo</strong>, ele abre o <em>samp.exe</em> original da instalação que você escolher.</p>
+
+<p style="text-align:center"><strong>[[ IMAGEM: ordem-11-info.jpg ]]</strong></p>
+
+<p>Tem também os <strong>L I N K S</strong> (<strong>Blog TrokMods</strong> e <strong>GitHub do launcher</strong>) e, em <strong>G O S T O U ?</strong>, o <strong>Me pague um cafe</strong> — pra quem quiser ajudar o projeto a continuar.</p>
+
+<h2>&#9888;&#65039; Se o antivírus reclamar</h2>
+
+<p>Pode acontecer de o <strong>Windows Defender</strong> acusar o instalador como <em>Trojan:Win32/Bearfoos.A!ml</em>. Aquele <strong>!ml</strong> no fim quer dizer <em>machine learning</em>: não é uma assinatura de vírus conhecido, é um "chute" do antivírus baseado em comportamento parecido. E o comportamento do instalador é parecido com o de coisa ruim, sim:</p>
+
+<ul>
+<li>ele é um <strong>executável sem assinatura digital</strong> (certificado de empresa custa caro e esse projeto é de graça);</li>
+<li>ele carrega os arquivos do launcher <strong>dentro dele mesmo</strong> e grava no disco;</li>
+<li>na atualização, ele <strong>fecha o launcher, troca os arquivos e abre de novo</strong> — que é literalmente o que um instalador precisa fazer.</li>
+</ul>
+
+<p>É falso positivo. Se você quiser conferir por conta própria, uma boa prática é passar o arquivo no <em>VirusTotal</em> antes de rodar — vários antivírus opinam ao mesmo tempo e dá pra ver que só as heurísticas reclamam. Se decidir manter, é você que escolhe liberar o arquivo no seu antivírus; nunca desligue a proteção inteira por causa de um programa.</p>
+
+<h2>Perguntas rápidas</h2>
+
+<p><strong>Isso vai me dar ban em algum servidor?</strong><br />
+O launcher não injeta nada no jogo e não mexe na pasta do GTA. Ele só grava seu nick e abre o SA-MP, igual você faria na mão.</p>
+
+<p><strong>Preciso desinstalar meu SA-MP?</strong><br />
+Não. O launcher usa a instalação que você já tem.</p>
+
+<p><strong>Funciona no celular?</strong><br />
+Não. É um programa de Windows. Mods para celular são outro assunto — veja o bloco <strong>Mobile</strong> aqui do lado.</p>
+
+<p><strong>Meus favoritos e senhas somem se eu desinstalar?</strong><br />
+Só se você marcar a caixinha que apaga as configurações — e, mesmo assim, vai pra Lixeira e dá pra recuperar.</p>
+
+<p><strong>Achei um bug / tenho uma ideia.</strong><br />
+Manda. Esse launcher tá sendo feito ouvindo quem usa.</p>
+
+<hr />
+
+<p><em>Trok Launcher v1.0 — feito por <strong>equipe TrokMods</strong>. Se te ajudou, comenta aí embaixo o que você quer na próxima versão.</em></p>
