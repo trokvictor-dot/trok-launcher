@@ -32,7 +32,9 @@ Precisa do Visual Studio Build Tools (MSVC x86). Da pasta do projeto:
 
 ## Sobre os arquivos que não estão aqui
 
-As pastas `avatars/`, `capas/` e as artes `artes/A.png`…`artes/U.png` ficam fora do repositório: são loadscreens e artes oficiais do GTA San Andreas, da Rockstar Games, usados localmente como capa e foto de perfil padrão. O launcher funciona sem elas.
+As artes `artes/A.png`…`artes/U.png` ficam fora do repositório: são os loadscreens do GTA San Andreas em tamanho cheio (15 MB), que servem só de fonte para gerar as capas. As capas prontas (`capas/`) e os avatares (`avatars/`) estão aqui porque o instalador os empacota.
+
+Todo o material do GTA San Andreas é da **Rockstar Games**. Este projeto não tem ligação com a Rockstar nem com o time do SA-MP.
 
 `Trok Launcher.ini`, `imagens/` e `datas/` também ficam fora: são a configuração e o conteúdo de quem usa.
 

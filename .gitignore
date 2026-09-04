@@ -15,9 +15,11 @@ release/
 *.pdb
 *.ilk
 
-# ---- artes oficiais da Rockstar (GTA San Andreas) ----
-# Ficam so na maquina: sao os loadscreens e os avatares do jogo, usados como
-# capa e foto padrao. Nao redistribuimos material de terceiros aqui.
+# ---- artes do GTA San Andreas (Rockstar Games) ----
+# capas/ e avatars/ VAO pro repositorio: sao os arquivos que o instalador
+# empacota, entao sem eles nao da pra montar o setup completo.
+# Fora ficam so os loadscreens originais em tamanho cheio (15 MB), que
+# servem apenas de fonte pras capas.
 artes/A.png
 artes/B.png
 artes/C.png
@@ -36,8 +38,6 @@ artes/O.png
 artes/P.png
 artes/Q.png
 artes/U.png
-avatars/
-capas/
 
 # ---- prints de trabalho (capturas de debug); as do post ficam em blog/prints/web ----
 blog/prints/*.png
