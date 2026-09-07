@@ -31,6 +31,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "shell32.lib")
 #pragma comment(lib, "advapi32.lib")
+#include <wincrypt.h>
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
 #pragma comment(lib, "dwmapi.lib")
@@ -164,6 +165,7 @@ static bool gAttPopup = false;
 static volatile int gAttBaixa = 0;   // 0 parado, 1 baixando, 2 falhou, 3 baixado (instalar+sair)
 static volatile int gAttPct = 0;     // 0..100 (-1 = servidor nao informou o tamanho)
 static char gAttArquivo[MAX_PATH] = "";
+static char gAttSha[65] = "";     // sha-256 esperado do setup (linha "sha256=" do versao.txt); vazio = sem conferencia
 
 // aba MODS: posts do blog TrokMods (feed RSS do Blogger); post novo = bolinha na sidebar
 #define URL_BLOG "https://trokmods.blogspot.com"
@@ -178,6 +180,7 @@ struct ModPost {
     char data[48];
     char resumo[200];        // comeco do texto do post, sem html
     char imgCache[MAX_PATH]; // primeira imagem do post, baixada pra pasta de cache
+    char guid[96];           // id estavel do post no Blogger (a URL muda se o titulo mudar)
 };
 static ModPost gMods[MAX_MODS];
 static IDirect3DTexture9* gModsTex[MAX_MODS]; // capas dos cards (carregadas na UI)
@@ -329,6 +332,9 @@ static ImU32 ComAlpha(ImU32 c, float a) {
     return (c & 0x00FFFFFF) | ((ImU32)(a * 255.0f) << 24);
 }
 static ImU32 Cinza(int v, int a = 255) { return IM_COL32(v, v, v, a); }
+
+// so endereco web vai pro navegador: file://, javascript: e afins vindos de ini, backup ou feed nao abrem nada
+static bool UrlWebOk(const char* u) { return u && (_strnicmp(u, "http://", 7) == 0 || _strnicmp(u, "https://", 8) == 0); }
 
 // texto sobre a cor de destaque: escuro em cor clara, branco em cor escura (contraste sempre)
 static ImU32 TextoSobreAccent(ImU32 c) {
@@ -1233,7 +1239,7 @@ static DWORD WINAPI ThreadPublicos(LPVOID) {
                     s.on = PegaInt(js + ini, len, "pc");
                     s.maxp = PegaInt(js + ini, len, "pm");
                     s.pw = PegaBool(js + ini, len, "pa");
-                    if (!strchr(s.ip, ':')) strcat(s.ip, ":7777");
+                    if (!strchr(s.ip, ':') && strlen(s.ip) + 6 < sizeof(s.ip)) strcat(s.ip, ":7777");
                     cont++;
                 }
                 ini = -1;
@@ -1585,6 +1591,19 @@ static DWORD WINAPI ThreadAtualizacao(LPVOID) {
     strncpy(gAttVersao, l1, sizeof(gAttVersao) - 1);
     strncpy(gAttUrl, l2, sizeof(gAttUrl) - 1);
     strncpy(gAttNotas, ctx, sizeof(gAttNotas) - 1);
+    gAttSha[0] = 0; // linha opcional "sha256=<64 hex>" nas notas: se existir, o exe baixado tem que bater
+    for (char* l = gAttNotas; l && *l; ) {
+        char* fimL = strchr(l, '\n');
+        size_t len = fimL ? (size_t)(fimL - l) : strlen(l);
+        if (len >= 71 && _strnicmp(l, "sha256=", 7) == 0) {
+            memcpy(gAttSha, l + 7, 64); gAttSha[64] = 0;
+            for (int i = 0; i < 64; i++) gAttSha[i] = (char)tolower((unsigned char)gAttSha[i]);
+            char* resto = fimL ? fimL + 1 : l + len;
+            memmove(l, resto, strlen(resto) + 1); // a linha do hash nao aparece nas novidades
+            continue;
+        }
+        l = fimL ? fimL + 1 : NULL;
+    }
     gAttEstado = 1;
     return 0;
 }
@@ -1592,6 +1611,30 @@ static DWORD WINAPI ThreadAtualizacao(LPVOID) {
 // onde o setup novo e gravado. NAO usamos %TEMP%: exe rodando da pasta temporaria e o
 // padrao classico de dropper e faz antivirus heuristico (ex: Bearfoos.A!ml) marcar falso
 // positivo. Pasta propria do app, ao lado da instalacao, e o caminho "de gente honesta".
+// sha-256 de um arquivo em hex minusculo (hex precisa de 65 bytes); false se nao deu pra ler/calcular
+static bool Sha256Arquivo(const char* caminho, char* hex) {
+    hex[0] = 0;
+    HANDLE f = CreateFileA(caminho, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+    if (f == INVALID_HANDLE_VALUE) return false;
+    HCRYPTPROV prov = 0; HCRYPTHASH hash = 0; bool ok = false;
+    if (CryptAcquireContextA(&prov, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT) &&
+        CryptCreateHash(prov, CALG_SHA_256, 0, 0, &hash)) {
+        unsigned char buf[16384]; DWORD lidos = 0; ok = true;
+        while (ReadFile(f, buf, sizeof(buf), &lidos, NULL) && lidos > 0)
+            if (!CryptHashData(hash, buf, lidos, 0)) { ok = false; break; }
+        if (ok) {
+            BYTE dig[32]; DWORD dl = sizeof(dig);
+            if (CryptGetHashParam(hash, HP_HASHVAL, dig, &dl, 0) && dl == 32)
+                for (int i = 0; i < 32; i++) sprintf(hex + i * 2, "%02x", dig[i]);
+            else ok = false;
+        }
+    }
+    if (hash) CryptDestroyHash(hash);
+    if (prov) CryptReleaseContext(prov, 0);
+    CloseHandle(f);
+    return ok && hex[0];
+}
+
 static void CaminhoUpdate(char* out) {
     char base[MAX_PATH];
     if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, base))) {
@@ -1600,10 +1643,7 @@ static void CaminhoUpdate(char* out) {
         _snprintf(out, MAX_PATH - 1, "%s\\Trok Launcher\\update", base);
         CreateDirectoryA(out, NULL);
         strncat(out, "\\TrokLauncher-Setup.exe", MAX_PATH - strlen(out) - 1);
-    } else {
-        GetTempPathA(MAX_PATH, out); // ultimo recurso
-        strncat(out, "TrokLauncher-Setup.exe", MAX_PATH - strlen(out) - 1);
-    }
+    } else out[0] = 0; // sem LOCALAPPDATA nao atualiza: exe rodando de %TEMP% e o padrao classico de dropper
     out[MAX_PATH - 1] = 0;
 }
 
@@ -1611,6 +1651,7 @@ static void CaminhoUpdate(char* out) {
 // o frame seguinte roda o setup em modo --atualizar (fecha, troca os arquivos e reabre)
 static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
     gAttPct = 0;
+#ifdef TROK_TESTE_UPDATE // so a amostra de teste aceita file://; em release o link tem que ser https
     char locB[MAX_PATH];
     if (UrlParaCaminhoLocal(gAttUrl, locB, MAX_PATH)) { // amostra: "baixa" copiando do disco
         char tmpL[MAX_PATH];
@@ -1631,6 +1672,8 @@ static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
         gAttBaixa = 2;
         return 0;
     }
+#endif
+    if (_strnicmp(gAttUrl, "https://", 8) != 0) { gAttBaixa = 2; return 0; } // update so por TLS
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     if (!h) { gAttBaixa = 2; return 0; }
     DWORD flagsB = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
@@ -1641,6 +1684,7 @@ static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
     if (!HttpQueryInfoA(u, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &total, &tt, &idx)) total = 0;
     char tmp[MAX_PATH];
     CaminhoUpdate(tmp);
+    if (!tmp[0]) { gAttBaixa = 2; return 0; }
     HANDLE f = CreateFileA(tmp, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (f == INVALID_HANDLE_VALUE) { InternetCloseHandle(u); InternetCloseHandle(h); gAttBaixa = 2; return 0; }
     static char buf[65536];
@@ -1662,7 +1706,9 @@ static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
         char mz[2] = { 0, 0 };
         DWORD l2 = 0;
         if (v != INVALID_HANDLE_VALUE) { ReadFile(v, mz, 2, &l2, NULL); CloseHandle(v); }
-        if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z') {
+        bool hashOk = true; // com sha256= no versao.txt, o arquivo baixado tem que bater byte a byte
+        if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z' && gAttSha[0]) { char hx[65]; hashOk = Sha256Arquivo(tmp, hx) && _stricmp(hx, gAttSha) == 0; }
+        if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z' && hashOk) {
             strncpy(gAttArquivo, tmp, MAX_PATH - 1);
             gAttPct = 100;
             gAttBaixa = 3;
@@ -1873,6 +1919,8 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         const char* bloco = it;
         ExtrairTagXml(bloco, "title", gMods[n].titulo, sizeof(gMods[n].titulo));
         ExtrairTagXml(bloco, "link", gMods[n].url, sizeof(gMods[n].url));
+        ExtrairTagXml(bloco, "guid", gMods[n].guid, sizeof(gMods[n].guid));
+        if (!gMods[n].guid[0]) { strncpy(gMods[n].guid, gMods[n].url, sizeof(gMods[n].guid) - 1); gMods[n].guid[sizeof(gMods[n].guid) - 1] = 0; }
         char pd[64];
         ExtrairTagXml(bloco, "pubDate", pd, sizeof(pd));
         const char* v = strchr(pd, ',');
@@ -1966,7 +2014,12 @@ static DWORD WINAPI ThreadMods(LPVOID) {
     }
     gNumMods = n;
     gModsEstado = (n > 0) ? 2 : 3;
-    if (n > 0 && _stricmp(gMods[0].url, gModsUltimo) != 0) gModsNovo = true; // post novo!
+    if (n > 0) {
+        if (strstr(gModsUltimo, "://")) { // valor antigo (era a URL): migra pro guid sem apitar
+            strncpy(gModsUltimo, gMods[0].guid, sizeof(gModsUltimo) - 1);
+            gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
+        } else if (_stricmp(gMods[0].guid, gModsUltimo) != 0) gModsNovo = true; // post novo!
+    }
     return 0;
 }
 
@@ -2344,6 +2397,12 @@ static bool ImportarConfig(const char* origem) {
             ok = WriteFile(fo, txt, (DWORD)strlen(txt), &esc, NULL) != 0;
             CloseHandle(fo);
         } else if (_strnicmp(rel[i], "imagens\\", 8) == 0) {
+            // so nome simples de imagem: sem subpasta, sem exe disfarcado (backup de terceiro nao vira codigo)
+            const char* nomeI = rel[i] + 8;
+            const char* extI = strrchr(nomeI, '.');
+            if (!nomeI[0] || strpbrk(nomeI, "\\/:*?\"<>|") || !extI ||
+                !(_stricmp(extI, ".png") == 0 || _stricmp(extI, ".jpg") == 0 || _stricmp(extI, ".jpeg") == 0 ||
+                  _stricmp(extI, ".bmp") == 0 || _stricmp(extI, ".gif") == 0 || _stricmp(extI, ".webp") == 0)) continue;
             char pastaI[MAX_PATH];
             _snprintf(pastaI, sizeof(pastaI) - 1, "%s\\imagens", dir);
             pastaI[sizeof(pastaI) - 1] = 0;
@@ -3013,6 +3072,15 @@ static void Jogar() {
         if (!ok) { *c = 0; break; }
     }
     for (char* c = gConnSenha; *c; c++) if (*c == '"') *c = '\'';
+    { // a pasta do jogo nunca pode ser a do proprio launcher (um backup importado poderia apontar pra la)
+        char meu[MAX_PATH];
+        DirDoExe(meu, sizeof(meu));
+        size_t lm = strlen(meu);
+        if (lm && _strnicmp(gPastaGta, meu, lm) == 0 && (gPastaGta[lm] == 0 || gPastaGta[lm] == '\\')) {
+            Avisar("A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.");
+            return;
+        }
+    }
     GravarNickRegistro(); // garante que o samp.exe abre com o nick atual
     // o samp.exe decide QUAL gta_sa.exe abrir pelo registro - aponta para a DATA selecionada
     char gtaExe[MAX_PATH];
@@ -3601,9 +3669,10 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 if (clL) {
                     char url[224];
-                    if (strstr(urlL, "://")) { strncpy(url, urlL, sizeof(url) - 1); url[sizeof(url) - 1] = 0; }
+                    url[0] = 0;
+                    if (strstr(urlL, "://")) { if (UrlWebOk(urlL)) { strncpy(url, urlL, sizeof(url) - 1); url[sizeof(url) - 1] = 0; } }
                     else sprintf(url, "https://%.190s", urlL);
-                    ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+                    if (url[0]) ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
                 }
                 sx += ssz.x + 8 + 20;
             }
@@ -4447,7 +4516,7 @@ static void DesenhaUI(HWND hwnd) {
             float CHM = yBot + HBOT + PADM;
             int idxVisto = -1; // cards acima do marco da visita ganham bolinha de NOVO
             for (int k = 0; k < gNumMods; k++)
-                if (gModsVistoAte[0] && _stricmp(gMods[k].url, gModsVistoAte) == 0) { idxVisto = k; break; }
+                if (gModsVistoAte[0] && _stricmp(gMods[k].guid, gModsVistoAte) == 0) { idxVisto = k; break; }
             for (int i = 0; i < gNumMods; i++) {
                 int col = i % porLinhaM, lin = i / porLinhaM;
                 ImGui::SetCursorPos(ImVec2(col * (CWM + GAPM), lin * (CHM + GAPM)));
@@ -4492,7 +4561,7 @@ static void DesenhaUI(HWND hwnd) {
                 TextoTruncadoCentro(ml, ca.x + CWM * 0.5f, ca.y + yDesc, CWM - PADM * 2,
                                     IM_COL32(80, 80, 86, 255), gMods[i].resumo);
                 ImGui::PopFont();
-                if (clP && _strnicmp(gMods[i].url, "http", 4) == 0)
+                if (clP && UrlWebOk(gMods[i].url))
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
                 // botao ABRIR O POST: pilula laranja centrada, do mesmo jeito que no blog
                 ImGui::PushFont(gFtBotaoPost);
@@ -4512,7 +4581,7 @@ static void DesenhaUI(HWND hwnd) {
                 ml->AddText(ImVec2((ba2.x + bb2.x - bsz2.x) * 0.5f, (ba2.y + bb2.y - bsz2.y) * 0.5f),
                             TextoSobreAccent(AC.cor), "ABRIR O POST");
                 ImGui::PopFont();
-                if (clB && _strnicmp(gMods[i].url, "http", 4) == 0)
+                if (clB && UrlWebOk(gMods[i].url))
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
             }
             int linhasM = (gNumMods + porLinhaM - 1) / porLinhaM;
@@ -5230,8 +5299,8 @@ static void DesenhaUI(HWND hwnd) {
                     gModsNovo = false; // desta visita ainda mostram a bolinha deles
                     strncpy(gModsVistoAte, gModsUltimo, sizeof(gModsVistoAte) - 1);
                     gModsVistoAte[sizeof(gModsVistoAte) - 1] = 0;
-                    if (gNumMods > 0 && _stricmp(gModsUltimo, gMods[0].url) != 0) {
-                        strncpy(gModsUltimo, gMods[0].url, sizeof(gModsUltimo) - 1);
+                    if (gNumMods > 0 && _stricmp(gModsUltimo, gMods[0].guid) != 0) {
+                        strncpy(gModsUltimo, gMods[0].guid, sizeof(gModsUltimo) - 1);
                         gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
                         SalvarConfig();
                     }
@@ -5351,7 +5420,7 @@ static void DesenhaUI(HWND hwnd) {
                     if (linkExe) { // baixa e instala sozinho, sem sair do app
                         gAttBaixa = 1;
                         CreateThread(NULL, 0, ThreadBaixarUpdate, NULL, 0, NULL);
-                    } else if (gAttUrl[0]) { // link nao e um exe: cai pro navegador
+                    } else if (UrlWebOk(gAttUrl)) { // link nao e um exe: cai pro navegador
                         ShellExecuteA(NULL, "open", gAttUrl, NULL, NULL, SW_SHOWNORMAL);
                         gAttPopup = false;
                         ImGui::CloseCurrentPopup();

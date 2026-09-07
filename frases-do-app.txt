@@ -2,7 +2,11 @@
 %s disponível - você está na %s
 + Adicionar conta
 + Adicionar link
+.gif
+.jpeg
+.webp
 A lista não veio. Tentar de novo
+A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.
 Abre sozinho quando o computador liga
 Abrir a pasta da data no Explorer
 Abrir a pasta das screenshots
@@ -95,7 +99,6 @@ março
 Me pague um café
 Melhorias e correções.
 MODO
-Mods, tutoriais e programas do blog TrokMods. Clique num post para abrir no navegador.
 Mostarda
 Mostra no seu perfil do Discord o servidor em que você está jogando
 Mover o último jogado para o início dos favoritos
@@ -154,5 +157,6 @@ TROKMODS
 User Files
 User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.
 vazio = nome real do servidor
+Visite nosso blog TrokMods. Clique num post para abrir no navegador.
 Voltar
 várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots
