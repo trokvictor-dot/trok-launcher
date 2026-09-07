@@ -170,7 +170,7 @@ static char gAttArquivo[MAX_PATH] = "";
 #define URL_DISCORD "https://discord.gg/2uHzexhg6J"   // comunidade TrokMods
 #define URL_CAFE "https://livepix.gg/trokmods"                 // "me pague um café" (placeholder)
 // GitHub so por baixo dos panos (versao.txt e download do update): nada visivel aponta pra la
-#define URL_POST_LAUNCHER URL_BLOG "/2026/09/trok-launcher-v10-o-seu-sa-mp-moderno.html"
+#define URL_POST_LAUNCHER URL_BLOG "/2026/09/trok-launcher.html"
 #define MAX_MODS 30
 struct ModPost {
     char titulo[160];

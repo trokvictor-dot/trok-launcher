@@ -4,7 +4,7 @@ Launcher moderno de **SA-MP**, feito em C++ nativo com Win32, Direct3D 9 e Dear 
 
 ## Download
 
-➡️ **[Baixar no blog TrokMods](https://trokmods.blogspot.com/2026/09/trok-launcher-v10-o-seu-sa-mp-moderno.html)**
+➡️ **[Baixar no blog TrokMods](https://trokmods.blogspot.com/2026/09/trok-launcher.html)**
 
 Instalador único, sem dependências. Windows 10/11, com GTA San Andreas e SA-MP instalados (R1/R3/R5).
 
