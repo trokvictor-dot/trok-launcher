@@ -52,9 +52,62 @@ static ImFont *gFtBody, *gFtBold, *gFtMini, *gFtTitulo;
 static IDirect3DTexture9* gTexArte = NULL;
 static float gTexArteAR = 0.52f; // largura/altura
 
+// idioma (Rockstar-style): a primeira tela pergunta; o launcher nasce com a escolha gravada no ini
+static int gLangI = 0; // 0 pt-BR, 1 en
+struct Traducao { const char* pt; const char* en; };
+static const Traducao TRADUCOES[] = {
+    { "O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo.", "Your SA-MP, modern. It doesn't replace any game file." },
+    { "P A S T A   D E   I N S T A L A C A O", "I N S T A L L   F O L D E R" },
+    { "Procurar...", "Browse..." },
+    { "Criar atalho na area de trabalho", "Create a desktop shortcut" },
+    { "Criar atalho no menu Iniciar", "Create a Start menu shortcut" },
+    { "Espaco necessario: %.1f MB", "Space needed: %.1f MB" },
+    { "INSTALAR", "INSTALL" },
+    { "Cancelar", "Cancel" },
+    { "O Trok Launcher esta aberto neste computador.", "Trok Launcher is open on this computer." },
+    { "Preciso fechar ele para atualizar os arquivos (suas configuracoes ficam).", "It needs to be closed to update the files (your settings stay)." },
+    { "FECHAR E INSTALAR", "CLOSE AND INSTALL" },
+    { "Voltar", "Back" },
+    { "Atualizando o Trok Launcher...", "Updating Trok Launcher..." },
+    { "Instalando...", "Installing..." },
+    { "Pronto! O Trok Launcher esta instalado.", "Done! Trok Launcher is installed." },
+    { "Na primeira abertura ele importa seu nick e seus favoritos do SA-MP.", "On first launch it imports your nick and favorites from SA-MP." },
+    { "ABRIR O LAUNCHER", "OPEN THE LAUNCHER" },
+    { "Fechar", "Close" },
+    { "Remover o Trok Launcher deste computador?", "Remove Trok Launcher from this computer?" },
+    { "Apagar tambem configuracoes, contas e imagens", "Also delete settings, accounts and images" },
+    { "(vai para a Lixeira do Windows, da para recuperar)", "(goes to the Windows Recycle Bin, can be recovered)" },
+    { "REMOVER", "REMOVE" },
+    { "Removendo...", "Removing..." },
+    { "Trok Launcher removido. Valeu por ter usado!", "Trok Launcher removed. Thanks for using it!" },
+    { "FECHAR", "CLOSE" },
+    { "Algo deu errado:", "Something went wrong:" },
+    { "TENTAR DE NOVO", "TRY AGAIN" },
+    { "Onde instalar o Trok Launcher", "Where to install Trok Launcher" },
+    { "Pasta de instalacao nao encontrada.", "Install folder not found." },
+    { "Instalador corrompido (payload ausente).", "Corrupted installer (payload missing)." },
+    { "Instalar Trok Launcher", "Install Trok Launcher" },
+    { "Escolha o idioma do launcher", "Choose the launcher language" },
+    { "Da para trocar depois nas Configuracoes.", "You can change it later in Settings." },
+};
+static const char* T(const char* pt) {
+    if (gLangI == 0 || !pt) return pt;
+    for (size_t i = 0; i < sizeof(TRADUCOES) / sizeof(TRADUCOES[0]); i++)
+        if (strcmp(TRADUCOES[i].pt, pt) == 0) return TRADUCOES[i].en;
+    return pt;
+}
+static void GravarIdiomaNoIni() { // %LOCALAPPDATA%\Trok Launcher\Trok Launcher.ini, [config] idioma=1|2
+    char base[MAX_PATH], ini[MAX_PATH];
+    if (FAILED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, base))) return;
+    _snprintf(ini, MAX_PATH - 1, "%s\\Trok Launcher", base); ini[MAX_PATH - 1] = 0;
+    CreateDirectoryA(ini, NULL);
+    _snprintf(ini, MAX_PATH - 1, "%s\\Trok Launcher\\Trok Launcher.ini", base); ini[MAX_PATH - 1] = 0;
+    WritePrivateProfileStringA("config", "idioma", gLangI ? "2" : "1", ini);
+}
+
 // etapas
-enum { ET_CONFIG, ET_EMUSO, ET_INSTALANDO, ET_PRONTO, ET_REMOVER, ET_REMOVENDO, ET_REMOVIDO, ET_ERRO };
-static int gEtapa = ET_CONFIG;
+enum { ET_IDIOMA, ET_CONFIG, ET_EMUSO, ET_INSTALANDO, ET_PRONTO, ET_REMOVER, ET_REMOVENDO, ET_REMOVIDO, ET_ERRO };
+static int gEtapa = ET_IDIOMA;
 static char gPastaDestino[MAX_PATH];
 static bool gAtalhoDesktop = true;
 static bool gAtalhoIniciar = true;
@@ -452,13 +505,45 @@ static void DesenhaUI(HWND hwnd) {
     dl->AddText(ImVec2(px - S(2), S(54)), Cinza(240), "TROK LAUNCHER");
     ImGui::PopFont();
 
-    if (gEtapa == ET_CONFIG) {
+    if (gEtapa == ET_IDIOMA) {
+        // primeira tela: idioma (ja vem marcado o do Windows); os dois rotulos aparecem nas duas linguas
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(120)), Cinza(160), "O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo.");
+        dl->AddText(ImVec2(px, S(120)), Cinza(200), "Escolha o idioma do launcher");
+        dl->AddText(ImVec2(px, S(146)), Cinza(130), "Choose the launcher language");
+        ImGui::PopFont();
+        ImGui::PushFont(gFtBold);
+        const char* OPI[2] = { "Portugu\u00eas (Brasil)", "English" };
+        for (int k = 0; k < 2; k++) {
+            ImGui::SetCursorScreenPos(ImVec2(px, S(196) + k * S(58)));
+            char idi[12]; sprintf(idi, "##idi%d", k);
+            bool cli = ImGui::InvisibleButton(idi, ImVec2(wCampo, S(48)));
+            ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+            bool sel = (gLangI == k), hov = ImGui::IsItemHovered();
+            dl->AddRectFilled(a, b, sel ? Cinza(30) : Cinza(hov ? 24 : 18), S(10));
+            dl->AddRect(a, b, sel ? COR_ACCENT : Cinza(hov ? 90 : 46), S(10), 0, sel ? S(2.0f) : 1.0f);
+            dl->AddCircle(ImVec2(a.x + S(22), (a.y + b.y) * 0.5f), S(7), sel ? COR_ACCENT : Cinza(110), 24, S(1.6f));
+            if (sel) dl->AddCircleFilled(ImVec2(a.x + S(22), (a.y + b.y) * 0.5f), S(3.5f), COR_ACCENT, 24);
+            dl->AddText(ImVec2(a.x + S(40), (a.y + b.y) * 0.5f - S(9)), Cinza(sel ? 245 : 200), OPI[k]);
+            if (cli) gLangI = k;
+        }
+        ImGui::PopFont();
+        ImGui::PushFont(gFtMini);
+        dl->AddText(ImVec2(px, S(334)), Cinza(110), T("Da para trocar depois nas Configuracoes."));
+        ImGui::PopFont();
+        ImGui::PushFont(gFtBold);
+        ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
+        if (BotaoPrimario(gLangI ? "CONTINUE" : "CONTINUAR", ImVec2(S(216), S(52)))) gEtapa = ET_CONFIG;
+        ImGui::SetCursorScreenPos(ImVec2(px + S(228), ds.y - S(96)));
+        if (BotaoSec(T("Cancelar"), ImVec2(S(120), S(52)))) gRodando = false;
+        ImGui::PopFont();
+    }
+    else if (gEtapa == ET_CONFIG) {
+        ImGui::PushFont(gFtBody);
+        dl->AddText(ImVec2(px, S(120)), Cinza(160), T("O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo."));
         ImGui::PopFont();
 
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px, S(168)), Cinza(140), "P A S T A   D E   I N S T A L A C A O");
+        dl->AddText(ImVec2(px, S(168)), Cinza(140), T("P A S T A   D E   I N S T A L A C A O"));
         ImGui::PopFont();
         // campo da pasta + procurar
         ImGui::SetCursorScreenPos(ImVec2(px, S(188)));
@@ -470,50 +555,50 @@ static void DesenhaUI(HWND hwnd) {
         dl->AddText(ImVec2(ca.x + S(12), ca.y + S(9)), Cinza(190), gPastaDestino);
         ImGui::PopClipRect();
         ImGui::SetCursorScreenPos(ImVec2(cb.x + S(10), S(188)));
-        if (BotaoSec("Procurar...", ImVec2(S(108), S(36)))) gPedirPasta = true;
+        if (BotaoSec(T("Procurar..."), ImVec2(S(108), S(36)))) gPedirPasta = true;
         ImGui::PopFont();
 
         ImGui::PushFont(gFtBody);
         ImGui::SetCursorScreenPos(ImVec2(px - S(4), S(248)));
-        LinhaCheck("Criar atalho na area de trabalho", &gAtalhoDesktop, wCampo);
+        LinhaCheck(T("Criar atalho na area de trabalho"), &gAtalhoDesktop, wCampo);
         ImGui::SetCursorScreenPos(ImVec2(px - S(4), S(284)));
-        LinhaCheck("Criar atalho no menu Iniciar", &gAtalhoIniciar, wCampo);
+        LinhaCheck(T("Criar atalho no menu Iniciar"), &gAtalhoIniciar, wCampo);
         ImGui::PopFont();
 
         // requisito de espaco (payload e minusculo, mas informa)
         unsigned int total = 0;
         for (int i = 0; i < gNumPak; i++) total += gPak[i].tam;
         char inf[96];
-        sprintf(inf, "Espaco necessario: %.1f MB", total / 1048576.0f);
+        sprintf(inf, T("Espaco necessario: %.1f MB"), total / 1048576.0f);
         ImGui::PushFont(gFtMini);
         dl->AddText(ImVec2(px, S(334)), Cinza(110), inf);
         ImGui::PopFont();
 
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario("INSTALAR", ImVec2(S(216), S(52)))) {
+        if (BotaoPrimario(T("INSTALAR"), ImVec2(S(216), S(52)))) {
             gArqAtual = 0;
             gErro[0] = 0;
             gEtapa = LauncherRodandoEm(gPastaDestino) ? ET_EMUSO : ET_INSTALANDO;
         }
         ImGui::SetCursorScreenPos(ImVec2(px + S(228), ds.y - S(96)));
-        if (BotaoSec("Cancelar", ImVec2(S(120), S(52)))) gRodando = false;
+        if (BotaoSec(T("Cancelar"), ImVec2(S(120), S(52)))) gRodando = false;
         ImGui::PopFont();
     }
     else if (gEtapa == ET_EMUSO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Cinza(200), "O Trok Launcher esta aberto neste computador.");
-        dl->AddText(ImVec2(px, S(168)), Cinza(140), "Preciso fechar ele para atualizar os arquivos (suas configuracoes ficam).");
+        dl->AddText(ImVec2(px, S(140)), Cinza(200), T("O Trok Launcher esta aberto neste computador."));
+        dl->AddText(ImVec2(px, S(168)), Cinza(140), T("Preciso fechar ele para atualizar os arquivos (suas configuracoes ficam)."));
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario("FECHAR E INSTALAR", ImVec2(S(236), S(52)))) {
+        if (BotaoPrimario(T("FECHAR E INSTALAR"), ImVec2(S(236), S(52)))) {
             FecharLauncherEm(gPastaDestino);
             gArqAtual = 0;
             gEtapa = ET_INSTALANDO;
         }
         ImGui::SetCursorScreenPos(ImVec2(px + S(248), ds.y - S(96)));
-        if (BotaoSec("Voltar", ImVec2(S(110), S(52)))) gEtapa = ET_CONFIG;
+        if (BotaoSec(T("Voltar"), ImVec2(S(110), S(52)))) gEtapa = ET_CONFIG;
         ImGui::PopFont();
     }
     else if (gEtapa == ET_INSTALANDO) {
@@ -521,6 +606,7 @@ static void DesenhaUI(HWND hwnd) {
         if (!InstalarProximo()) gEtapa = ET_ERRO;
         else if (gArqAtual >= gNumPak) {
             FinalizarInstalacao();
+            if (!gModoAtt) GravarIdiomaNoIni(); // atualizacao nao mexe na escolha do usuario
             if (gModoAtt) { // atualizacao: reabre o launcher novo e some
                 char alvoA[MAX_PATH];
                 _snprintf(alvoA, MAX_PATH - 1, "%s\\Trok Launcher.exe", gPastaDestino);
@@ -531,7 +617,7 @@ static void DesenhaUI(HWND hwnd) {
         }
         float frac = gNumPak ? (float)gArqAtual / gNumPak : 1.0f;
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(150)), Cinza(180), gModoAtt ? "Atualizando o Trok Launcher..." : "Instalando...");
+        dl->AddText(ImVec2(px, S(150)), Cinza(180), gModoAtt ? T("Atualizando o Trok Launcher...") : T("Instalando..."));
         ImGui::PopFont();
         ImVec2 ba(px, S(190)), bb(px + wCampo, S(198));
         dl->AddRectFilled(ba, bb, Cinza(34), S(4));
@@ -545,29 +631,29 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_PRONTO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Cinza(200), "Pronto! O Trok Launcher esta instalado.");
-        dl->AddText(ImVec2(px, S(168)), Cinza(140), "Na primeira abertura ele importa seu nick e seus favoritos do SA-MP.");
+        dl->AddText(ImVec2(px, S(140)), Cinza(200), T("Pronto! O Trok Launcher esta instalado."));
+        dl->AddText(ImVec2(px, S(168)), Cinza(140), T("Na primeira abertura ele importa seu nick e seus favoritos do SA-MP."));
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario("ABRIR O LAUNCHER", ImVec2(S(238), S(52)))) {
+        if (BotaoPrimario(T("ABRIR O LAUNCHER"), ImVec2(S(238), S(52)))) {
             char alvo[MAX_PATH];
             _snprintf(alvo, MAX_PATH - 1, "%s\\Trok Launcher.exe", gPastaDestino);
             ShellExecuteA(NULL, "open", alvo, NULL, gPastaDestino, SW_SHOWNORMAL);
             gRodando = false;
         }
         ImGui::SetCursorScreenPos(ImVec2(px + S(250), ds.y - S(96)));
-        if (BotaoSec("Fechar", ImVec2(S(110), S(52)))) gRodando = false;
+        if (BotaoSec(T("Fechar"), ImVec2(S(110), S(52)))) gRodando = false;
         ImGui::PopFont();
     }
     else if (gEtapa == ET_REMOVER) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Cinza(200), "Remover o Trok Launcher deste computador?");
+        dl->AddText(ImVec2(px, S(140)), Cinza(200), T("Remover o Trok Launcher deste computador?"));
         ImGui::SetCursorScreenPos(ImVec2(px - S(4), S(186)));
-        LinhaCheck("Apagar tambem configuracoes, contas e imagens", &gApagarConfig, wCampo);
+        LinhaCheck(T("Apagar tambem configuracoes, contas e imagens"), &gApagarConfig, wCampo);
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px + S(24), S(224)), Cinza(110), "(vai para a Lixeira do Windows, da para recuperar)");
+        dl->AddText(ImVec2(px + S(24), S(224)), Cinza(110), T("(vai para a Lixeira do Windows, da para recuperar)"));
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
@@ -579,17 +665,17 @@ static void DesenhaUI(HWND hwnd) {
             bool hov = ImGui::IsItemHovered();
             ImU32 verm = IM_COL32(214, 74, 68, 255);
             RectGradV(dl, a, b, hov ? LerpCor(verm, IM_COL32(255,255,255,255), 0.08f) : verm, IM_COL32(238, 112, 104, 255), S(12));
-            ImVec2 tsz = ImGui::CalcTextSize("REMOVER");
-            dl->AddText(ImVec2((a.x + b.x - tsz.x) * 0.5f, (a.y + b.y - tsz.y) * 0.5f), Cinza(250), "REMOVER");
+            ImVec2 tsz = ImGui::CalcTextSize(T("REMOVER"));
+            dl->AddText(ImVec2((a.x + b.x - tsz.x) * 0.5f, (a.y + b.y - tsz.y) * 0.5f), Cinza(250), T("REMOVER"));
         }
         if (rm) gEtapa = ET_REMOVENDO;
         ImGui::SetCursorScreenPos(ImVec2(px + S(192), ds.y - S(96)));
-        if (BotaoSec("Cancelar", ImVec2(S(120), S(52)))) gRodando = false;
+        if (BotaoSec(T("Cancelar"), ImVec2(S(120), S(52)))) gRodando = false;
         ImGui::PopFont();
     }
     else if (gEtapa == ET_REMOVENDO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(150)), Cinza(180), "Removendo...");
+        dl->AddText(ImVec2(px, S(150)), Cinza(180), T("Removendo..."));
         ImGui::PopFont();
         static int frameRem = 0; // o "Removendo..." aparece ANTES do trabalho pesado
         if (++frameRem >= 2) {
@@ -599,29 +685,30 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_REMOVIDO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Cinza(200), "Trok Launcher removido. Valeu por ter usado!");
+        dl->AddText(ImVec2(px, S(140)), Cinza(200), T("Trok Launcher removido. Valeu por ter usado!"));
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario("FECHAR", ImVec2(S(150), S(52)))) gRodando = false;
+        if (BotaoPrimario(T("FECHAR"), ImVec2(S(150), S(52)))) gRodando = false;
         ImGui::PopFont();
     }
     else if (gEtapa == ET_ERRO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), IM_COL32(240, 120, 116, 255), "Algo deu errado:");
+        dl->AddText(ImVec2(px, S(140)), IM_COL32(240, 120, 116, 255), T("Algo deu errado:"));
         dl->AddText(ImVec2(px, S(166)), Cinza(180), gErro);
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario("TENTAR DE NOVO", ImVec2(S(206), S(52)))) gEtapa = ET_CONFIG;
+        if (BotaoPrimario(T("TENTAR DE NOVO"), ImVec2(S(206), S(52)))) gEtapa = ET_CONFIG;
         ImGui::SetCursorScreenPos(ImVec2(px + S(218), ds.y - S(96)));
-        if (BotaoSec("Fechar", ImVec2(S(110), S(52)))) gRodando = false;
+        if (BotaoSec(T("Fechar"), ImVec2(S(110), S(52)))) gRodando = false;
         ImGui::PopFont();
     }
 
     // rodape
     ImGui::PushFont(gFtMini);
-    dl->AddText(ImVec2(px, ds.y - S(30)), Cinza(85), "Trok Launcher v" VERSAO_INST "  -  equipe TrokMods");
+    dl->AddText(ImVec2(px, ds.y - S(30)), Cinza(85), gLangI ? "Trok Launcher v" VERSAO_INST "  -  TrokMods team"
+                                                            : "Trok Launcher v" VERSAO_INST "  -  equipe TrokMods");
     ImGui::PopFont();
 
     // arrastar a janela pela faixa do topo
@@ -674,7 +761,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
             }
         }
         if (!pastaOk) {
-            MessageBoxA(NULL, "Pasta de instalacao nao encontrada.", "Trok Launcher", MB_ICONERROR);
+            MessageBoxA(NULL, T("Pasta de instalacao nao encontrada."), "Trok Launcher", MB_ICONERROR);
             CoUninitialize();
             return 1;
         }
@@ -695,7 +782,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     }
 
     if (gEtapa != ET_REMOVER && !LerPayload()) {
-        MessageBoxA(NULL, "Instalador corrompido (payload ausente).", "Trok Launcher", MB_ICONERROR);
+        MessageBoxA(NULL, T("Instalador corrompido (payload ausente)."), "Trok Launcher", MB_ICONERROR);
         return 1;
     }
     {
@@ -704,7 +791,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
             _snprintf(gPastaDestino, MAX_PATH - 1, "%s\\Trok Launcher", base);
         else strcpy(gPastaDestino, "C:\\Trok Launcher");
     }
-    if (gEtapa == ET_CONFIG && strstr(linha, "--atualizar")) { // atualizacao silenciosa
+    gLangI = (PRIMARYLANGID(GetUserDefaultUILanguage()) == LANG_PORTUGUESE) ? 0 : 1; // sugestao inicial
+    if (gEtapa == ET_IDIOMA && strstr(linha, "--atualizar")) { // atualizacao silenciosa
         gModoAtt = true;
         Sleep(500); // o launcher que nos chamou esta fechando
         FecharLauncherEm(gPastaDestino);
@@ -728,7 +816,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     gEsc = 1.0f + (razao - 1.0f) * 0.5f;
     if (gEsc < 0.85f) gEsc = 0.85f;
     if (gEsc > 1.25f) gEsc = 1.25f;
-    HWND hwnd = CreateWindowA("TrokInstaller", "Instalar Trok Launcher", WS_POPUP,
+    HWND hwnd = CreateWindowA("TrokInstaller", T("Instalar Trok Launcher"), WS_POPUP,
         (sw - janW) / 2, (sh - janH) / 2, janW, janH, NULL, NULL, hInst, NULL);
     HMODULE dwm = LoadLibraryA("dwmapi.dll");
     if (dwm) {
@@ -785,7 +873,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
         if (gPedirPasta) { // dialogo nativo FORA do frame
             gPedirPasta = false;
             BROWSEINFOA bi = { 0 };
-            bi.lpszTitle = "Onde instalar o Trok Launcher";
+            bi.lpszTitle = T("Onde instalar o Trok Launcher");
             bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
             LPITEMIDLIST pidl = SHBrowseForFolderA(&bi);
             if (pidl) {

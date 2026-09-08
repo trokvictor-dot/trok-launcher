@@ -5,6 +5,7 @@
 .gif
 .jpeg
 .webp
+127.0.0.1:7777 ou servidor.com:7777
 A lista não veio. Tentar de novo
 A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.
 Abre sozinho quando o computador liga
@@ -15,18 +16,25 @@ Abrir o blog TrokMods
 ABRIR O POST
 Abrir o Trok Launcher
 Abrir User Files
+Adicionar
 Adicionar aos favoritos
 Adicionar data
+ADICIONAR PELO IP
+Adicionar servidor pelo IP
 Adicione servidores na aba Internet
 Ao abrir, a Home já vem no servidor em que você parou
 Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)
 Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos
+April
 Arquivo de backup inválido.
 Atualizar a galeria (F5)
 Atualizar agora
 Atualizar os posts do blog
 Atualização
 Atualização %s
+August
+Automático
+Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher.
 Azul
 Baixando a atualização...
 Baixando a atualização... %d%%
@@ -35,10 +43,12 @@ BEM-VINDO AO TROK LAUNCHER
 Blog TrokMods
 bom jogo!
 Branco
+buscando os mais vistos do blog...
 buscando posts do blog...
 Buscar por nome, modo ou IP...
 Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.
 Cancelar
+class='bloco populares'
 Clique de novo para excluir
 Clique de novo para remover
 clique para usar
@@ -52,7 +62,9 @@ Copiar imagem
 Copiar o IP
 Cor personalizada
 Custom
+Data em uso (não trocar)
 DATAS
+December
 Depois
 Discord
 Discord Rich Presence
@@ -60,17 +72,23 @@ e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abr
 Editar data
 Editar servidor
 EM USO
+Endereço inválido. Use ip:porta, como 127.0.0.1:7777.
+English
 Entrar na comunidade do Discord
+Entrar no Discord
 Escolha a pasta User Files desta data
+Esse servidor já está nos favoritos.
 Excluir (vai para a Lixeira do Windows)
 Expandir menu
 Exportar configurações
 Exportar configurações...
 Favoritos (%d)
+February
 Fechar o launcher ao entrar no jogo
 Fechar para a bandeja em vez de sair
 Filtros da lista
 Framboesa
+Friday
 Fundo aparece na Home; a logo troca o nome grande.
 Fórum
 GALERIA
@@ -87,32 +105,43 @@ Iniciar minimizado na bandeja
 Internet
 Internet (%d)
 Início
+January
 JOGADORES
 jogadores %d/%d ping %d ms %s
 Jogar
+July
+June
 Já está nos favoritos
 Laranja
 Lembrar o último servidor selecionado
+Limite de favoritos atingido.
 Link
 Logo do servidor (substitui o nome no card)
+Mais vistos
+March
 março
-Me pague um café
+May
 Melhorias e correções.
 MODO
+Monday
 Mostarda
 Mostra no seu perfil do Discord o servidor em que você está jogando
 Mover o último jogado para o início dos favoritos
 Nenhuma screenshot encontrada nesta data.
 NOVA ATUALIZAÇÃO
 Nova data
+November
 Não consegui baixar sozinho.
 Não consegui exportar as configurações.
 Não encontrei o seu GTA San Andreas com SA-MP neste computador.
+O blog ainda não tem um ranking de mais vistos.
 O blog TrokMods está chegando.
 O launcher abre já escondido, só o ícone perto do relógio
-O launcher é de graça e sempre vai ser. O café paga as madrugadas de mod.
+O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods.
+O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.
 O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar,
 O X esconde o launcher perto do relógio em vez de encerrar de vez
+October
 Ocultar cheios
 Ocultar com senha
 Ocultar sem resposta
@@ -121,8 +150,10 @@ Oliva
 online, com senha
 Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original
 PING
+Português
 Principal
 Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.
+Recentes
 Recolher menu
 Remover
 Remover conta
@@ -135,15 +166,20 @@ Salvar
 Salvar senhas de RCON
 Salvar senhas de servidor automaticamente
 SAMP
+Saturday
 sem resposta
+sem SA-MP
 Senha
+September
 SERVIDOR
 SERVIDOR COM SENHA
 SERVIDORES
 Site
 Sortear outra capa
+Sunday
 sábado
 terça-feira
+Thursday
 Tijolo
 Tire fotos no jogo com F8 e clique em Atualizar.
 Trocar caminho...
@@ -154,9 +190,12 @@ Trocar User Files...
 Trok Launcher
 Trok Launcher %s - feito pela equipe TrokMods
 TROKMODS
+Tuesday
 User Files
 User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.
+vazio = nome que o servidor responder
 vazio = nome real do servidor
 Visite nosso blog TrokMods. Clique num post para abrir no navegador.
 Voltar
 várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots
+Wednesday

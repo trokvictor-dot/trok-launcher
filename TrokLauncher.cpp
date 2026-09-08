@@ -16,6 +16,7 @@
 #include <wincodec.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
@@ -64,6 +65,224 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 // cole o Application ID aqui. "0" = desligado.
 #define DISCORD_APP_ID "0"
 
+// ===================== idioma =====================
+// Rockstar-style: segue o idioma do Windows, com opcao nas Configuracoes (0 auto, 1 pt, 2 en).
+// Os textos de tela passam por T("..."): em portugues volta o proprio texto; em ingles procura na
+// tabela (o que nao esta nela fica em portugues). "##id" no fim e preservado.
+static int gIdiomaCfg = 0;
+static int gLang = 0; // efetivo: 0 pt-BR, 1 en
+struct Traducao { const char* pt; const char* en; };
+static const Traducao TRADUCOES[] = {
+    { "C A P A S   D O   L A U N C H E R", "L A U N C H E R   C O V E R S" },
+    { "C O N E C T A N D O", "C O N N E C T I N G" },
+    { "C O N T A S", "A C C O U N T S" },
+    { "clique de novo para excluir", "click again to delete" },
+    { "E D I T A R   C O N T A", "E D I T   A C C O U N T" },
+    { "EDITAR DATA", "EDIT INSTALL" },
+    { "EDITAR SERVIDOR", "EDIT SERVER" },
+    { "F A V O R I T O S", "F A V O R I T E S" },
+    { "F I L T R O S", "F I L T E R S" },
+    { "N O V A   C O N T A", "N E W   A C C O U N T" },
+    { "N O V I D A D E S", "W H A T ' S   N E W" },
+    { "Não encontrei o seu GTA San Andreas com SA-MP neste computador. Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve.", "Couldn't find your GTA San Andreas with SA-MP on this computer. Point to your install's gta_sa.exe and the launcher handles the rest." },
+    { "gravando seu nick...", "saving your nick..." },
+    { "abrindo o samp.exe...", "opening samp.exe..." },
+    { "sem SA-MP", "no SA-MP" },
+    { "Mais vistos", "Most viewed" },
+    { "Entrar na comunidade do Discord", "Join the Discord community" },
+    { "Abrir o blog TrokMods", "Open the TrokMods blog" },
+    { "MODO", "MODE" },
+    { "JOGADORES", "PLAYERS" },
+    { "Site", "Website" },
+    { "Fórum", "Forum" },
+    { "Servidores", "Servers" },
+    { "Datas", "Installs" },
+    { "Configurações", "Settings" },
+    { "Galeria", "Gallery" },
+    { "Informações", "About" },
+    { "%s disponível  -  você está na %s", "%s available - you are on %s" },
+    { "+  Adicionar conta", "+ Add account" },
+    { "+  Adicionar link", "+ Add link" },
+    { "127.0.0.1:7777 ou servidor.com:7777", "127.0.0.1:7777 or server.com:7777" },
+    { "A lista não veio. Tentar de novo", "The list didn't load. Try again" },
+    { "A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.", "The game folder can't be inside the launcher folder. Check the install in use." },
+    { "Abre sozinho quando o computador liga", "Opens by itself when the computer starts" },
+    { "Abrir a pasta da data no Explorer", "Open this install's folder in Explorer" },
+    { "Abrir a pasta das screenshots", "Open the screenshots folder" },
+    { "Abrir no navegador", "Open in the browser" },
+    { "ABRIR O POST", "OPEN POST" },
+    { "Abrir o Trok Launcher", "Open Trok Launcher" },
+    { "Abrir User Files", "Open User Files" },
+    { "Adicionar", "Add" },
+    { "Adicionar aos favoritos", "Add to favorites" },
+    { "Adicionar data", "Add install" },
+    { "ADICIONAR PELO IP", "ADD BY IP" },
+    { "Adicionar servidor pelo IP", "Add server by IP" },
+    { "Adicione servidores na aba Internet", "Add servers from the Internet tab" },
+    { "Adicione servidores no .ini", "Add servers in the .ini" },
+    { "Ao abrir, a Home já vem no servidor em que você parou", "On startup, Home opens on the server you left off" },
+    { "Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)", "When you click Play, the launcher closes (or goes to the tray, if the option below is on)" },
+    { "Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos", "When you join a server, its card moves to the front of the favorites" },
+    { "Arquivo de backup inválido.", "Invalid backup file." },
+    { "Atualizar a galeria (F5)", "Refresh the gallery (F5)" },
+    { "Atualizar agora", "Update now" },
+    { "Atualizar os posts do blog", "Refresh the blog posts" },
+    { "Atualização", "Update" },
+    { "Atualização %s", "Update %s" },
+    { "Baixando a atualização...", "Downloading the update..." },
+    { "Baixando a atualização...  %d%%", "Downloading the update... %d%%" },
+    { "baixando a lista de servidores...", "downloading the server list..." },
+    { "BEM-VINDO AO TROK LAUNCHER", "WELCOME TO TROK LAUNCHER" },
+    { "Blog TrokMods", "TrokMods blog" },
+    { "bom jogo!", "have fun!" },
+    { "buscando os mais vistos do blog...", "fetching the blog's most viewed..." },
+    { "buscando posts do blog...", "fetching blog posts..." },
+    { "Buscar por nome, modo ou IP...", "Search by name, mode or IP..." },
+    { "C O M U N I D A D E", "C O M M U N I T Y" },
+    { "C O N T A   A O   J O G A R", "A C C O U N T   W H E N   P L A Y I N G" },
+    { "C O R   D E   D E S T A Q U E", "A C C E N T   C O L O R" },
+    { "Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.", "Each install is a copy of the game. Click one to choose which PLAY opens." },
+    { "Cancelar", "Cancel" },
+    { "Clique de novo para excluir", "Click again to delete" },
+    { "Clique de novo para remover", "Click again to remove" },
+    { "clique para usar", "click to use" },
+    { "Conectar", "Connect" },
+    { "CONFIGURAÇÕES", "SETTINGS" },
+    { "Configurações exportadas! Leve o arquivo pro outro PC.", "Settings exported! Take the file to the other PC." },
+    { "consultando servidor...   %s", "querying server... %s" },
+    { "Conta atual (não trocar)", "Current account (don't switch)" },
+    { "Copiado!", "Copied!" },
+    { "Copiar imagem", "Copy image" },
+    { "Copiar o IP", "Copy IP" },
+    { "Cor personalizada", "Custom color" },
+    { "D A T A   A O   J O G A R", "I N S T A L L   W H E N   P L A Y I N G" },
+    { "D E S C R I C A O", "D E S C R I P T I O N" },
+    { "Data em uso (não trocar)", "Install in use (don't switch)" },
+    { "DATAS", "INSTALLS" },
+    { "Depois", "Later" },
+    { "E N D E R E C O   D O   S E R V I D O R", "S E R V E R   A D D R E S S" },
+    { "Editar data", "Edit install" },
+    { "Editar servidor", "Edit server" },
+    { "EM USO", "IN USE" },
+    { "Endereço inválido. Use ip:porta, como 127.0.0.1:7777.", "Invalid address. Use ip:port, like 127.0.0.1:7777." },
+    { "Entrar no Discord", "Join the Discord" },
+    { "Escolha a pasta User Files desta data", "Choose this install's User Files folder" },
+    { "Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar.", "That folder has no samp.exe - install SA-MP there to play." },
+    { "Esse servidor já está nos favoritos.", "That server is already in your favorites." },
+    { "Excluir (vai para a Lixeira do Windows)", "Delete (goes to the Windows Recycle Bin)" },
+    { "Expandir menu", "Expand menu" },
+    { "Exportar configurações", "Export settings" },
+    { "     Exportar configurações...", "Export settings..." },
+    { "Favoritos (%d)", "Favorites (%d)" },
+    { "Fechar o launcher ao entrar no jogo", "Close the launcher when the game starts" },
+    { "Fechar para a bandeja em vez de sair", "Close to the tray instead of exiting" },
+    { "Filtros da lista", "List filters" },
+    { "Fundo aparece na Home; a logo troca o nome grande.", "The background shows on Home; the logo replaces the big name." },
+    { "GALERIA", "GALLERY" },
+    { "Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu", "Creates a single file with accounts, favorites, options and the images you added" },
+    { "Guia do launcher", "Launcher guide" },
+    { "Imagem 16:9 da data", "16:9 image for the install" },
+    { "Imagem de exibição do servidor", "Server display image" },
+    { "Importar configurações", "Import settings" },
+    { "     Importar configurações...", "Import settings..." },
+    { "INFORMAÇÕES", "ABOUT" },
+    { "Iniciar com o Windows", "Start with Windows" },
+    { "Iniciar minimizado na bandeja", "Start minimized to the tray" },
+    { "jogadores %d/%d   ping %d ms   %s", "players %d/%d ping %d ms %s" },
+    { "Jogar", "Play" },
+    { "Já está nos favoritos", "Already in favorites" },
+    { "L I N K S   O F I C I A I S", "O F F I C I A L   L I N K S" },
+    { "Lembrar o último servidor selecionado", "Remember the last selected server" },
+    { "Limite de favoritos atingido.", "Favorites limit reached." },
+    { "Logo do servidor (substitui o nome no card)", "Server logo (replaces the name on the card)" },
+    { "Melhorias e correções.", "Improvements and fixes." },
+    { "Mostra no seu perfil do Discord o servidor em que você está jogando", "Shows the server you're playing on in your Discord profile" },
+    { "Mover o último jogado para o início dos favoritos", "Move the last played server to the top of favorites" },
+    { "N O M E", "N A M E" },
+    { "N O M E   ( O P C I O N A L )", "N A M E   ( O P T I O N A L )" },
+    { "N O M E   D E   E X I B I C A O", "D I S P L A Y   N A M E" },
+    { "Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas.", "No SA-MP found - point to gta_sa.exe in the Installs tab." },
+    { "Nenhuma screenshot encontrada nesta data.", "No screenshots found for this install." },
+    { "NOVA ATUALIZAÇÃO", "NEW UPDATE" },
+    { "Nova data", "New install" },
+    { "Não consegui baixar sozinho.", "Couldn't download it by myself." },
+    { "Não consegui exportar as configurações.", "Couldn't export the settings." },
+    { "O blog ainda não tem um ranking de mais vistos.", "The blog doesn't have a most-viewed ranking yet." },
+    { "O blog TrokMods está chegando.", "The TrokMods blog is coming." },
+    { "O launcher abre já escondido, só o ícone perto do relógio", "The launcher opens hidden, only the icon near the clock" },
+    { "O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods.", "The launcher is free and always will be. Questions, ideas and bugs: on the TrokMods Discord." },
+    { "O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.", "The server goes to your favorites and the launcher fetches its name and mode by itself." },
+    { "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o samp.exe original da instalacao que voce escolher.", "Trok Launcher is a modern, free SA-MP launcher: accounts with avatars, several game installs, favorites with covers, a gallery of your screenshots and automatic updates. It does NOT replace any game file - it opens the original samp.exe of the install you choose." },
+    { "O Windows nao conseguiu abrir o samp.exe desta data.", "Windows couldn't open this install's samp.exe." },
+    { "O X esconde o launcher perto do relógio em vez de encerrar de vez", "The X hides the launcher near the clock instead of quitting" },
+    { "Ocultar cheios", "Hide full" },
+    { "Ocultar com senha", "Hide passworded" },
+    { "Ocultar sem resposta", "Hide unresponsive" },
+    { "Ocultar vazios", "Hide empty" },
+    { "online, com senha", "online, passworded" },
+    { "Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT", "SA-MP's own option: the typed password is stored (plain text) in USERDATA.DAT" },
+    { "Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original", "SA-MP's own option, used by the original browser's RCON tools" },
+    { "Principal", "Main" },
+    { "Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.", "When new posts come out, they show up here by themselves - with a notice in the sidebar." },
+    { "Recolher menu", "Collapse menu" },
+    { "Remover", "Remove" },
+    { "Remover conta", "Remove account" },
+    { "Remover dos favoritos", "Remove from favorites" },
+    { "Remover esta data", "Remove this install" },
+    { "Remover logo", "Remove logo" },
+    { "Restaura um backup exportado em outro PC (o launcher reabre sozinho)", "Restores a backup exported on another PC (the launcher restarts by itself)" },
+    { "Sair", "Quit" },
+    { "Salvar", "Save" },
+    { "Salvar senhas de RCON", "Save RCON passwords" },
+    { "Salvar senhas de servidor automaticamente", "Save server passwords automatically" },
+    { "samp.exe nao encontrado na data em uso - confira a pasta na aba de datas", "samp.exe not found in the install in use - check the folder in the Installs tab" },
+    { "Selecione o gta_sa.exe da instalacao", "Select the install's gta_sa.exe" },
+    { "Selecione o gta_sa.exe da nova data", "Select the new install's gta_sa.exe" },
+    { "sem resposta", "no response" },
+    { "Senha", "Password" },
+    { "SERVIDOR COM SENHA", "PASSWORDED SERVER" },
+    { "SERVIDORES", "SERVERS" },
+    { "Sortear outra capa", "Pick another random cover" },
+    { "Tire fotos no jogo com F8 e clique em Atualizar.", "Take screenshots in game with F8 and click Refresh." },
+    { "Trocar caminho...", "Change path..." },
+    { "Trocar imagem de fundo...", "Change background image..." },
+    { "Trocar imagem...", "Change image..." },
+    { "Trocar logo...", "Change logo..." },
+    { "Trocar User Files...", "Change User Files..." },
+    { "Trok Launcher %s  -  feito pela equipe TrokMods", "Trok Launcher %s  -  made by the TrokMods team" },
+    { "User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.", "Empty User Files = the default folder in Documents. The gallery reads its screenshots." },
+    { "vazio = nome que o servidor responder", "empty = the name the server reports" },
+    { "vazio = nome real do servidor", "empty = the server's real name" },
+    { "Visite nosso blog TrokMods. Clique num post para abrir no navegador.", "Visit our TrokMods blog. Click a post to open it in the browser." },
+    { "Voltar", "Back" },
+};
+static const char* T(const char* pt) {
+    if (gLang == 0 || !pt) return pt;
+    const char* suf = strstr(pt, "##");
+    size_t L = suf ? (size_t)(suf - pt) : strlen(pt);
+    for (size_t i = 0; i < sizeof(TRADUCOES) / sizeof(TRADUCOES[0]); i++) {
+        const char* p = TRADUCOES[i].pt;
+        if (strncmp(p, pt, L) != 0 || p[L] != 0) continue;
+        if (!suf) return TRADUCOES[i].en;
+        static char anel[8][256]; static int ai = 0; // sufixo ##id: monta numa das 8 vagas
+        char* b = anel[ai]; ai = (ai + 1) & 7;
+        _snprintf(b, 255, "%s%s", TRADUCOES[i].en, suf); b[255] = 0;
+        return b;
+    }
+    return pt;
+}
+// threads "dispara e esquece": o handle e fechado na hora (senao vaza objeto de kernel)
+static void RodarThread(LPTHREAD_START_ROUTINE fn, LPVOID arg) {
+    HANDLE h = CreateThread(NULL, 0, fn, arg, 0, NULL);
+    if (h) CloseHandle(h);
+}
+
+static void DefinirIdioma() {
+    if (gIdiomaCfg == 1) gLang = 0;
+    else if (gIdiomaCfg == 2) gLang = 1;
+    else gLang = (PRIMARYLANGID(GetUserDefaultUILanguage()) == LANG_PORTUGUESE) ? 0 : 1;
+}
+
 struct Servidor {
     char nome[96];      // do .ini; substituido pelo hostname da query quando responder
     char ip[64];        // "host:porta"
@@ -74,6 +293,7 @@ struct Servidor {
     char logo[MAX_PATH];// logo: substitui o NOME no card de favorito
     char sites[4][160]; // links oficiais: 0 discord, 1 site, 2 forum, 3 youtube
     char contaPref[32]; // nick da conta pre-selecionada ao jogar ("" = conta atual)
+    char dataPref[64];  // nome da data pre-selecionada ao jogar ("" = data em uso)
     IDirect3DTexture9* tex;
     IDirect3DTexture9* texLogo;
     // resultado da query (thread) --
@@ -106,8 +326,55 @@ struct DataGta {
     char desc[160];
     char img[MAX_PATH];             // imagem 16:9 (png/jpg); vazio = card com inicial
     char userfiles[MAX_PATH];       // User Files desta data; vazio = Documentos\GTA San Andreas User Files
+    char versao[24];                // "0.3.7-R1", "0.3.DL-R1"... lida do samp.dll; vazio = sem SA-MP
     IDirect3DTexture9* tex;
 };
+
+// versao do SA-MP de uma instalacao: o samp.dll nao traz a revisao em texto, mas cada build
+// tem um entry point diferente no cabecalho PE (tabela usada por SAMPFUNCS, RakHook, RakLua...)
+static void DetectarVersaoSamp(const char* pasta, char* out, int sz) {
+    out[0] = 0;
+    char dll[MAX_PATH];
+    _snprintf(dll, MAX_PATH - 1, "%s\\samp.dll", pasta);
+    dll[MAX_PATH - 1] = 0;
+    HANDLE f = CreateFileA(dll, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+    if (f == INVALID_HANDLE_VALUE) return;
+    unsigned char cab[1024];
+    DWORD lidos = 0, ep = 0;
+    if (ReadFile(f, cab, sizeof(cab), &lidos, NULL) && lidos >= 0x40 && cab[0] == 'M' && cab[1] == 'Z') {
+        DWORD lfa = *(DWORD*)(cab + 0x3C);
+        if (lfa + 0x2C <= lidos && memcmp(cab + lfa, "PE\0\0", 4) == 0) ep = *(DWORD*)(cab + lfa + 0x28);
+    }
+    const char* v = NULL;
+    switch (ep) {
+        case 0x31DF13: v = "0.3.7-R1";   break;
+        case 0x3195DD: v = "0.3.7-R2";   break;
+        case 0xCC4D0:  v = "0.3.7-R3-1"; break;
+        case 0xCBCB0:  v = "0.3.7-R4-2"; break;
+        case 0xCBC90:  v = "0.3.7-R5-1"; break;
+        case 0xFDB60:  v = "0.3.DL-R1";  break;
+    }
+    if (v) { strncpy(out, v, sz - 1); out[sz - 1] = 0; CloseHandle(f); return; }
+    // build desconhecido (ex.: pacotes -MP do sa-mp.mp): procura a versao em texto dentro da dll
+    strncpy(out, "SA-MP ?", sz - 1);
+    DWORD tam = GetFileSize(f, NULL);
+    if (tam != INVALID_FILE_SIZE && tam > 0 && tam < 8u * 1024u * 1024u) {
+        char* buf = (char*)malloc(tam + 1);
+        if (buf) {
+            SetFilePointer(f, 0, NULL, FILE_BEGIN);
+            DWORD tot = 0, l2 = 0;
+            while (tot < tam && ReadFile(f, buf + tot, tam - tot, &l2, NULL) && l2 > 0) tot += l2;
+            for (DWORD i = 0; i + 6 < tot; i++) { // "0.3.DL" / "0.3.7" em ascii
+                if (buf[i] != '0' || buf[i + 1] != '.' || buf[i + 2] != '3' || buf[i + 3] != '.') continue;
+                if (buf[i + 4] == 'D' && buf[i + 5] == 'L') { strncpy(out, "0.3.DL ?", sz - 1); break; }
+                if (buf[i + 4] >= '0' && buf[i + 4] <= '9') { _snprintf(out, sz - 1, "0.3.%c ?", buf[i + 4]); break; }
+            }
+            free(buf);
+        }
+    }
+    out[sz - 1] = 0;
+    CloseHandle(f);
+}
 static DataGta gDatas[MAX_DATAS];
 static int gNumDatas = 0;
 static int gDataSel = 0;
@@ -170,26 +437,36 @@ static char gAttSha[65] = "";     // sha-256 esperado do setup (linha "sha256=" 
 // aba MODS: posts do blog TrokMods (feed RSS do Blogger); post novo = bolinha na sidebar
 #define URL_BLOG "https://trokmods.blogspot.com"
 #define URL_DISCORD "https://discord.gg/2uHzexhg6J"   // comunidade TrokMods
-#define URL_CAFE "https://livepix.gg/trokmods"                 // "me pague um café" (placeholder)
 // GitHub so por baixo dos panos (versao.txt e download do update): nada visivel aponta pra la
 #define URL_POST_LAUNCHER URL_BLOG "/2026/09/trok-launcher.html"
-#define MAX_MODS 30
+#define MAX_MODS 300 // o feed e paginado (150 por pagina) ate este teto
 struct ModPost {
     char titulo[160];
     char url[300];
     char data[48];
     char resumo[200];        // comeco do texto do post, sem html
     char imgCache[MAX_PATH]; // primeira imagem do post, baixada pra pasta de cache
+    char imgUrl[300];        // de onde baixar a capa (so quando o card aparece na tela)
     char guid[96];           // id estavel do post no Blogger (a URL muda se o titulo mudar)
 };
 static ModPost gMods[MAX_MODS];
-static IDirect3DTexture9* gModsTex[MAX_MODS]; // capas dos cards (carregadas na UI)
+static IDirect3DTexture9* gModsTex[MAX_MODS]; // capas dos cards (chegam pela fila de imagens)
+static unsigned char gModsPedida[MAX_MODS];   // 0 = capa nao pedida, 1 = pedida, 2 = falhou (nao insiste)
+static ModPost gModsTmp[MAX_MODS];            // montagem da thread; entra em gMods de uma vez (memcpy)
+static volatile int gModsGen = 0;             // sobe a cada lista nova: a UI solta as texturas velhas
 static volatile int gNumMods = 0;
 static volatile int gModsEstado = 0; // 0 nunca buscou, 1 buscando, 2 ok, 3 sem posts/falhou
 static bool gModsNovo = false;       // tem post que o usuario ainda nao viu
-static char gModsFeed[300] = URL_BLOG "/feeds/posts/default?alt=rss"; // troca pelo ini se quiser
+static char gModsFeed[300] = URL_BLOG "/feeds/posts/summary?alt=rss"; // resumo: 10x menor que o feed completo
 static char gModsUltimo[300] = "";   // url do post mais recente ja visto (persistido no ini)
 static char gModsVistoAte[300] = ""; // marco da visita ATUAL: cards acima dele ganham bolinha
+// "Mais vistos": ordem do widget de posts populares do blog (o Blogger conta as visualizacoes;
+// o launcher so copia a ordem e casa com os posts do feed pela url)
+#define MAX_POP 10
+static char gPopUrl[MAX_POP][300];
+static volatile int gNumPop = 0;
+static volatile int gPopEstado = 0;  // 0 nunca buscou, 1 buscando, 2 ok, 3 falhou/sem widget
+static int gModsAba = 0;             // aba TROKMODS: 0 recentes, 1 mais vistos
 
 // discord rich presence
 static bool gDiscordRP = true;
@@ -224,6 +501,9 @@ static SrvPub gPub[MAX_PUB];
 static volatile int gNumPub = 0;
 static volatile int gPubEstado = 0;  // 0 nunca pedido, 1 baixando, 2 ok, -1 falhou
 static int gSubAba = 0;              // tela servidores: 0 favoritos, 1 internet
+static bool gAddIpAbrir = false;     // modal "adicionar pelo IP" (aba servidores, como no samp.exe)
+static char gAddIp[64] = "";
+static char gAddNome[96] = "";
 static bool gOcCheios = false, gOcSenha = false, gOcVazios = false; // filtros (internet + favoritos)
 static bool gOcOff = false;                     // ocultar sem resposta (so faz sentido nos favoritos)
 static bool gFiltrosAberto = false;             // dropdown de filtros (funil ao lado da busca)
@@ -389,7 +669,7 @@ static void BolaStatus(ImDrawList* d, ImVec2 c, int ping, int senha) {
               : (senha ? IM_COL32(238, 200, 80, 235) : IM_COL32(96, 214, 116, 235));
     d->AddCircleFilled(c, 3.0f, cor, 20);
     if (ImGui::IsMouseHoveringRect(ImVec2(c.x - 7, c.y - 7), ImVec2(c.x + 7, c.y + 7)))
-        ImGui::SetTooltip("%s", ping < 0 ? "sem resposta" : (senha ? "online, com senha" : "online"));
+        ImGui::SetTooltip("%s", ping < 0 ? T("sem resposta") : (senha ? T("online, com senha") : "online"));
 }
 
 // compara nomes como humano le: 2 vem antes de 10
@@ -536,6 +816,9 @@ static void LerConfig() {
     gOcVazios = GetPrivateProfileIntA("config", "ocultar_vazios", 0, gIniPath) != 0;
     gOcOff    = GetPrivateProfileIntA("config", "ocultar_off", 0, gIniPath) != 0;
     gDiscordRP = GetPrivateProfileIntA("config", "discord_rp", 1, gIniPath) != 0;
+    gIdiomaCfg = GetPrivateProfileIntA("config", "idioma", 0, gIniPath); // 0 auto (Windows), 1 pt, 2 en
+    if (gIdiomaCfg < 0 || gIdiomaCfg > 2) gIdiomaCfg = 0;
+    DefinirIdioma();
     gNumSrv = 0;
     for (int i = 0; i < MAX_SERVIDORES; i++) {
         char chave[24], linha[2048] = ""; // 1024 truncava (7 campos + 4 links + conta passam disso)
@@ -556,25 +839,26 @@ static void LerConfig() {
         strncpy(s.ip, p1, sizeof(s.ip) - 1);
         if (p2) strncpy(s.modo, p2, sizeof(s.modo) - 1);
         s.sky = p3 ? atoi(p3) % 4 : (gNumSrv % 4);
-        // campos opcionais na ordem: apelido|imagem|logo|discord|site|forum|youtube|conta
+        // campos opcionais na ordem: apelido|imagem|logo|discord|site|forum|youtube|conta|data
         char* resto = p3 ? strchr(p3, '|') : NULL;
-        char* tok[8] = { 0 };
+        char* tok[9] = { 0 };
         int nt = 0;
         if (resto) {
             *resto++ = 0;
-            while (resto && nt < 8) { tok[nt++] = resto; char* nx = strchr(resto, '|'); if (nx) *nx++ = 0; resto = nx; }
+            while (resto && nt < 9) { tok[nt++] = resto; char* nx = strchr(resto, '|'); if (nx) *nx++ = 0; resto = nx; }
         }
         if (nt > 0) strncpy(s.apelido, tok[0], sizeof(s.apelido) - 1);
         if (nt > 1) strncpy(s.img, tok[1], sizeof(s.img) - 1);
         if (nt > 2) strncpy(s.logo, tok[2], sizeof(s.logo) - 1);
         for (int q = 0; q < 4; q++) if (nt > 3 + q) strncpy(s.sites[q], tok[3 + q], sizeof(s.sites[0]) - 1);
         if (nt > 7) strncpy(s.contaPref, tok[7], sizeof(s.contaPref) - 1);
+        if (nt > 8) strncpy(s.dataPref, tok[8], sizeof(s.dataPref) - 1);
         gNumSrv++;
     }
     if (gNumSrv == 0) { // ini sem servidores: um placeholder para a UI nao ficar vazia
         Servidor& s = gSrv[0];
         memset(&s, 0, sizeof(s));
-        strcpy(s.nome, "Adicione servidores no .ini");
+        strcpy(s.nome, T("Adicione servidores no .ini"));
         strcpy(s.ip, "127.0.0.1:7777");
         strcpy(s.modo, "-");
         s.ping = -1;
@@ -608,11 +892,13 @@ static void LerConfig() {
     if (gNumDatas == 0) { // garante ao menos uma, com a pasta atual
         DataGta& d = gDatas[0];
         memset(&d, 0, sizeof(d));
-        strcpy(d.nome, "Principal");
+        strcpy(d.nome, T("Principal"));
         strncpy(d.caminho, gPastaGta, sizeof(d.caminho) - 1);
         d.desc[0] = 0;
         gNumDatas = 1;
     }
+    for (int i = 0; i < gNumDatas; i++) // versao do SA-MP de cada data (mostrada no card)
+        DetectarVersaoSamp(gDatas[i].caminho, gDatas[i].versao, sizeof(gDatas[i].versao));
     gAvatarCor = GetPrivateProfileIntA("config", "avatar_cor", 0, gIniPath) % N_ACCENTS;
     gDataSel = GetPrivateProfileIntA("config", "data_sel", 0, gIniPath);
     if (gDataSel < 0 || gDataSel >= gNumDatas) gDataSel = 0;
@@ -678,6 +964,7 @@ static void SalvarConfig() {
     WritePrivateProfileStringA("config", "ocultar_vazios", gOcVazios ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "ocultar_off", gOcOff ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "discord_rp", gDiscordRP ? "1" : "0", gIniPath);
+    { char vi[4]; sprintf(vi, "%d", gIdiomaCfg); WritePrivateProfileStringA("config", "idioma", vi, gIniPath); }
     WritePrivateProfileStringA("config", "lembrar_ultimo", gLembrarUlt ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "ultimo_primeiro", gUltimoPrimeiro ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "mods_feed", gModsFeed, gIniPath);
@@ -1260,7 +1547,8 @@ static DWORD WINAPI ThreadPublicos(LPVOID) {
 // A UI pede (PedirImagem) e segue desenhando; a thread decodifica e devolve a textura pronta,
 // que a UI recolhe no comeco do frame (ReceberImagens). Exige device D3DCREATE_MULTITHREADED.
 
-struct JobImg { char caminho[MAX_PATH]; int maxLado; int tipo; }; // tipo: 0 = thumb da galeria, 1 = viewer
+struct JobImg { char caminho[MAX_PATH]; int maxLado; int tipo; }; // tipo: 0 = thumb da galeria, 1 = viewer, 2 = capa de post
+static void BaixarImagemMods(const char* url, char* outCache, int outSz, bool baixar = true); // definida na secao do blog
 struct ResImg { char caminho[MAX_PATH]; int tipo; IDirect3DTexture9* tex; };
 static JobImg gJobsImg[32];
 static ResImg gResImg[32];
@@ -1384,6 +1672,15 @@ static DWORD WINAPI ThreadImagens(LPVOID) {
                     GerarThumbDisco(j.caminho, thumb, j.maxLado);
                 t = CarregarImagemMax(gDev, thumb, j.maxLado);
                 if (!t) t = CarregarImagemMax(gDev, j.caminho, j.maxLado); // cache falhou: original
+            } else if (j.tipo == 2) { // capa de post: baixa pro cache se ainda nao existe
+                if (GetFileAttributesA(j.caminho) == INVALID_FILE_ATTRIBUTES) {
+                    char url[300] = "";
+                    for (int k = 0; k < gNumMods; k++)
+                        if (_stricmp(gMods[k].imgCache, j.caminho) == 0) { strncpy(url, gMods[k].imgUrl, sizeof(url) - 1); break; }
+                    char cam[MAX_PATH];
+                    if (url[0]) BaixarImagemMods(url, cam, sizeof(cam));
+                }
+                t = CarregarImagemMax(gDev, j.caminho, j.maxLado);
             } else {
                 t = CarregarImagemMax(gDev, j.caminho, j.maxLado);
             }
@@ -1470,6 +1767,13 @@ static void ReceberImagens() {
                     else gFotos[k].falhou = true; // corrompida: nao re-decodifica em loop
                     break;
                 }
+        } else if (r.tipo == 2) { // capa de post: roteia pelo caminho do cache (a lista pode ter mudado)
+            for (int k = 0; k < gNumMods; k++)
+                if (_stricmp(gMods[k].imgCache, r.caminho) == 0) {
+                    if (r.tex && !gModsTex[k]) { gModsTex[k] = r.tex; usado = true; }
+                    else if (!r.tex) gModsPedida[k] = 2;
+                    break;
+                }
         } else {
             FGSlot* s = FGSlotDe(r.caminho);
             if (s && !s->tex) {
@@ -1482,6 +1786,11 @@ static void ReceberImagens() {
     }
     gNumResImg = 0;
     LeaveCriticalSection(&gLockImg);
+    static int genUI = 0; // lista nova do blog: as texturas antigas nao batem mais com os indices
+    if (genUI != gModsGen) {
+        genUI = gModsGen;
+        for (int k = 0; k < MAX_MODS; k++) { AdiarRelease(gModsTex[k]); gModsTex[k] = NULL; gModsPedida[k] = 0; }
+    }
 }
 
 // ===================== avatares por imagem (pasta avatars\ ao lado do exe) =====================
@@ -1728,8 +2037,16 @@ static void ExtrairTagXml(const char* bloco, const char* tag, char* out, int out
     _snprintf(abre, sizeof(abre) - 1, "<%s>", tag);
     _snprintf(fecha, sizeof(fecha) - 1, "</%s>", tag);
     const char* a = strstr(bloco, abre);
-    if (!a) return;
-    a += strlen(abre);
+    if (a) a += strlen(abre);
+    else { // <tag atributos='...'>
+        char abre2[32];
+        _snprintf(abre2, sizeof(abre2) - 1, "<%s ", tag);
+        a = strstr(bloco, abre2);
+        if (!a) return;
+        a = strchr(a, '>');
+        if (!a) return;
+        a++;
+    }
     const char* f = strstr(a, fecha);
     if (!f) return;
     if (_strnicmp(a, "<![CDATA[", 9) == 0) { // Blogger costuma embrulhar o titulo em CDATA
@@ -1851,7 +2168,7 @@ static void CapaBlogger16x9(char* url, int cap) {
     strcat(ini, resto);
 }
 
-static void BaixarImagemMods(const char* url, char* outCache, int outSz) {
+static void BaixarImagemMods(const char* url, char* outCache, int outSz, bool baixar) {
     outCache[0] = 0;
     if (_strnicmp(url, "http", 4) != 0) return;
     char dir[MAX_PATH];
@@ -1864,6 +2181,7 @@ static void BaixarImagemMods(const char* url, char* outCache, int outSz) {
     for (const char* c = url; *c; c++) { hh ^= (unsigned char)*c; hh *= 16777619u; }
     _snprintf(outCache, outSz - 1, "%s\\cache\\mods_%08x.img", dir, hh);
     outCache[outSz - 1] = 0;
+    if (!baixar) return; // so o caminho: o download acontece quando o card aparece na tela
     if (GetFileAttributesA(outCache) != INVALID_FILE_ATTRIBUTES) return; // já no cache
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     if (!h) { outCache[0] = 0; return; }
@@ -1887,23 +2205,86 @@ static void BaixarImagemMods(const char* url, char* outCache, int outSz) {
     if (!ok || soma < 128) { DeleteFileA(outCache); outCache[0] = 0; }
 }
 
-static DWORD WINAPI ThreadMods(LPVOID) {
-    gModsEstado = 1;
+// mesma url de post? ignora esquema e barra final (o feed e o widget podem diferir nisso)
+static bool UrlMesmoPost(const char* a, const char* b) {
+    const char* pa = strstr(a, "://"); pa = pa ? pa + 3 : a;
+    const char* pb = strstr(b, "://"); pb = pb ? pb + 3 : b;
+    size_t la = strlen(pa), lb = strlen(pb);
+    while (la > 0 && pa[la - 1] == '/') la--;
+    while (lb > 0 && pb[lb - 1] == '/') lb--;
+    return la == lb && _strnicmp(pa, pb, la) == 0;
+}
+
+// le a lista "Mais vistos" (widget PopularPosts) na home do blog: <div class='bloco populares'>
+static void BuscarMaisVistos() {
+    gPopEstado = 1;
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-    if (!h) { gModsEstado = 3; return 0; }
-    DWORD fl = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
-    if (_strnicmp(gModsFeed, "https", 5) == 0) fl |= INTERNET_FLAG_SECURE;
-    HINTERNET u = InternetOpenUrlA(h, gModsFeed, NULL, 0, fl, 0);
-    if (!u) { InternetCloseHandle(h); gModsEstado = 3; return 0; }
-    static char xml[262144]; // feed cabe folgado em 256KB
+    if (!h) { gPopEstado = 3; return; }
+    DWORD fl = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_SECURE;
+    HINTERNET u = InternetOpenUrlA(h, URL_BLOG "/", NULL, 0, fl, 0);
+    if (!u) { InternetCloseHandle(h); gPopEstado = 3; return; }
+    const DWORD CAP = 1024u * 1024u; // a home cresce com o blog; 1MB e folga
+    char* html = (char*)malloc(CAP);
+    if (!html) { InternetCloseHandle(u); InternetCloseHandle(h); gPopEstado = 3; return; }
     DWORD tam = 0, lidos = 0;
-    while (tam < sizeof(xml) - 1 && InternetReadFile(u, xml + tam, sizeof(xml) - 1 - tam, &lidos) && lidos > 0)
-        tam += lidos;
-    xml[tam] = 0;
+    while (tam < CAP - 1 && InternetReadFile(u, html + tam, CAP - 1 - tam, &lidos) && lidos > 0) tam += lidos;
+    html[tam] = 0;
     InternetCloseHandle(u);
     InternetCloseHandle(h);
-    if (tam < 64) { gModsEstado = 3; return 0; }
+    int nP = 0;
+    const char* bl = strstr(html, "class='bloco populares'");
+    if (!bl) bl = strstr(html, "class=\"bloco populares\"");
+    if (bl) {
+        const char* fim = strstr(bl, "</ul>");
+        const char* p = bl;
+        while (nP < MAX_POP) {
+            const char* a = strstr(p, "href=");
+            if (!a || (fim && a > fim)) break;
+            char q = a[5];
+            if (q != '\'' && q != '"') { p = a + 5; continue; }
+            const char* ini = a + 6;
+            const char* e = strchr(ini, q);
+            if (!e) break;
+            int L = (int)(e - ini);
+            if (L > 8 && L < (int)sizeof(gPopUrl[0]) - 1 && _strnicmp(ini, "http", 4) == 0) {
+                memcpy(gPopUrl[nP], ini, L);
+                gPopUrl[nP][L] = 0;
+                nP++;
+            }
+            p = e + 1;
+        }
+    }
+    free(html);
+    gNumPop = nP;
+    gPopEstado = bl ? 2 : 3;
+}
+
+static DWORD WINAPI ThreadMods(LPVOID) {
+    gModsEstado = 1;
+    const DWORD CAPX = 3u * 1024u * 1024u; // uma pagina do feed de resumo (150 posts) tem ~300KB
+    char* xml = (char*)malloc(CAPX);
+    if (!xml) { gModsEstado = 3; return 0; }
     int n = 0;
+    bool falhou = false;
+    for (int pag = 0; pag < (MAX_MODS + 149) / 150 && n < MAX_MODS; pag++) {
+        char urlP[400];
+        _snprintf(urlP, sizeof(urlP) - 1, "%s%cmax-results=150&start-index=%d", gModsFeed,
+                  strchr(gModsFeed, '?') ? '&' : '?', pag * 150 + 1);
+        urlP[sizeof(urlP) - 1] = 0;
+        HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+        if (!h) { falhou = true; break; }
+        DWORD fl = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
+        if (_strnicmp(urlP, "https", 5) == 0) fl |= INTERNET_FLAG_SECURE;
+        HINTERNET u = InternetOpenUrlA(h, urlP, NULL, 0, fl, 0);
+        if (!u) { InternetCloseHandle(h); falhou = true; break; }
+        DWORD tam = 0, lidos = 0;
+        while (tam < CAPX - 1 && InternetReadFile(u, xml + tam, CAPX - 1 - tam, &lidos) && lidos > 0)
+            tam += lidos;
+        xml[tam] = 0;
+        InternetCloseHandle(u);
+        InternetCloseHandle(h);
+        if (tam < 64) { if (pag == 0) falhou = true; break; }
+        int nAntes = n;
     const char* p = xml;
     while (n < MAX_MODS) {
         const char* it = strstr(p, "<item>");
@@ -1917,20 +2298,25 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         char salvoFim = *fimW;
         *fimW = 0;
         const char* bloco = it;
-        ExtrairTagXml(bloco, "title", gMods[n].titulo, sizeof(gMods[n].titulo));
-        ExtrairTagXml(bloco, "link", gMods[n].url, sizeof(gMods[n].url));
-        ExtrairTagXml(bloco, "guid", gMods[n].guid, sizeof(gMods[n].guid));
-        if (!gMods[n].guid[0]) { strncpy(gMods[n].guid, gMods[n].url, sizeof(gMods[n].guid) - 1); gMods[n].guid[sizeof(gMods[n].guid) - 1] = 0; }
+        ExtrairTagXml(bloco, "title", gModsTmp[n].titulo, sizeof(gModsTmp[n].titulo));
+        ExtrairTagXml(bloco, "link", gModsTmp[n].url, sizeof(gModsTmp[n].url));
+        ExtrairTagXml(bloco, "guid", gModsTmp[n].guid, sizeof(gModsTmp[n].guid));
+        if (!gModsTmp[n].guid[0]) { strncpy(gModsTmp[n].guid, gModsTmp[n].url, sizeof(gModsTmp[n].guid) - 1); gModsTmp[n].guid[sizeof(gModsTmp[n].guid) - 1] = 0; }
         char pd[64];
         ExtrairTagXml(bloco, "pubDate", pd, sizeof(pd));
         const char* v = strchr(pd, ',');
         v = v ? v + 2 : pd;
         { // "Fri, 04 Sep 2026 00:55:45 +0000" -> "quinta-feira, 3 de setembro de 2026"
             // (o RSS vem em UTC; sem converter pro fuso daqui o dia sai adiantado)
-            static const char* MES[12] = { "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-                                           "julho", "agosto", "setembro", "outubro", "novembro", "dezembro" };
-            static const char* DIA[7] = { "domingo", "segunda-feira", "terça-feira", "quarta-feira",
-                                          "quinta-feira", "sexta-feira", "sábado" };
+            static const char* MES_PT[12] = { "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+                                              "julho", "agosto", "setembro", "outubro", "novembro", "dezembro" };
+            static const char* DIA_PT[7] = { "domingo", "segunda-feira", "terça-feira", "quarta-feira",
+                                             "quinta-feira", "sexta-feira", "sábado" };
+            static const char* MES_EN[12] = { "January", "February", "March", "April", "May", "June",
+                                              "July", "August", "September", "October", "November", "December" };
+            static const char* DIA_EN[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+            const char** MES = gLang ? MES_EN : MES_PT;
+            const char** DIA = gLang ? DIA_EN : DIA_PT;
             static const char* ABR_M = "JanFebMarAprMayJunJulAugSepOctNovDec";
             char sm[4] = { 0 };
             int dia = atoi(v), ano = 0, hh = 0, mm = 0;
@@ -1944,7 +2330,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                 int hz = (z[2] - '0') * 10 + (z[3] - '0'), mz = (z[4] - '0') * 10 + (z[5] - '0');
                 offMin = (hz * 60 + mz) * (z[1] == '-' ? -1 : 1);
             }
-            gMods[n].data[0] = 0;
+            gModsTmp[n].data[0] = 0;
             if (dia > 0 && mi >= 0 && ano > 1900) {
                 SYSTEMTIME st = { 0 };
                 st.wYear = (WORD)ano; st.wMonth = (WORD)(mi + 1); st.wDay = (WORD)dia;
@@ -1958,18 +2344,19 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                     ft.dwLowDateTime = u.LowPart; ft.dwHighDateTime = u.HighPart;
                     if (FileTimeToSystemTime(&ft, &utc) &&
                         SystemTimeToTzSpecificLocalTime(NULL, &utc, &loc))
-                        sprintf(gMods[n].data, "%s, %d de %s de %d", DIA[loc.wDayOfWeek % 7],
+                        sprintf(gModsTmp[n].data, gLang ? "%s, %d %s %d" : "%s, %d de %s de %d", DIA[loc.wDayOfWeek % 7],
                                 loc.wDay, MES[(loc.wMonth - 1) % 12], loc.wYear);
                 }
-                if (!gMods[n].data[0])
-                    sprintf(gMods[n].data, "%d de %s de %d", dia, MES[mi], ano);
+                if (!gModsTmp[n].data[0])
+                    sprintf(gModsTmp[n].data, gLang ? "%d %s %d" : "%d de %s de %d", dia, MES[mi], ano);
             }
-            if (!gMods[n].data[0]) { strncpy(gMods[n].data, v, 11); gMods[n].data[11] = 0; }
+            if (!gModsTmp[n].data[0]) { strncpy(gModsTmp[n].data, v, 11); gModsTmp[n].data[11] = 0; }
         }
-        DecodificarEntidades(gMods[n].titulo);
+        DecodificarEntidades(gModsTmp[n].titulo);
         // capa + resumo saem do corpo do post (<description> vem como HTML escapado)
-        gMods[n].resumo[0] = 0;
-        gMods[n].imgCache[0] = 0;
+        gModsTmp[n].resumo[0] = 0;
+        gModsTmp[n].imgCache[0] = 0;
+        gModsTmp[n].imgUrl[0] = 0;
         char imgUrl[300] = "";
         { // 1a escolha de capa: <media:thumbnail url="..."> (Blogger sempre manda)
             const char* mt = strstr(bloco, "media:thumbnail");
@@ -1989,6 +2376,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         {
             static char desc[8192];
             ExtrairTagXml(bloco, "description", desc, sizeof(desc));
+            if (!desc[0]) ExtrairTagXml(bloco, "atom:summary", desc, sizeof(desc)); // feed de resumo
             DecodificarEntidades(desc); // &lt;p&gt; -> <p> (o feed escapa o html)
             if (!imgUrl[0]) { // sem thumbnail: pega a 1a <img src="..."> do corpo
                 const char* im = strstr(desc, "<img");
@@ -2005,14 +2393,26 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                     }
                 }
             }
-            ExtrairResumoHtml(desc, gMods[n].resumo, sizeof(gMods[n].resumo));
+            ExtrairResumoHtml(desc, gModsTmp[n].resumo, sizeof(gModsTmp[n].resumo));
         }
-        if (imgUrl[0]) BaixarImagemMods(imgUrl, gMods[n].imgCache, sizeof(gMods[n].imgCache));
-        if (gMods[n].titulo[0] && _strnicmp(gMods[n].url, "http", 4) == 0) n++;
+        if (imgUrl[0]) { // guarda a url e o caminho do cache; o download fica pra quando o card aparecer
+            strncpy(gModsTmp[n].imgUrl, imgUrl, sizeof(gModsTmp[n].imgUrl) - 1);
+            gModsTmp[n].imgUrl[sizeof(gModsTmp[n].imgUrl) - 1] = 0;
+            BaixarImagemMods(imgUrl, gModsTmp[n].imgCache, sizeof(gModsTmp[n].imgCache), false);
+        }
+        if (gModsTmp[n].titulo[0] && _strnicmp(gModsTmp[n].url, "http", 4) == 0) n++;
         *fimW = salvoFim; // devolve o '<' de </item> pro strstr seguinte enxergar
         p = fimIt + 7;
     }
+        if (n - nAntes < 150) break; // ultima pagina
+    }
+    free(xml);
+    if (n == 0 && falhou) { gModsEstado = 3; return 0; }
+    EnterCriticalSection(&gLock); // publica a lista inteira de uma vez (a UI nunca ve item pela metade)
+    memcpy(gMods, gModsTmp, sizeof(ModPost) * n);
     gNumMods = n;
+    LeaveCriticalSection(&gLock);
+    gModsGen++;
     gModsEstado = (n > 0) ? 2 : 3;
     if (n > 0) {
         if (strstr(gModsUltimo, "://")) { // valor antigo (era a URL): migra pro guid sem apitar
@@ -2020,6 +2420,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
             gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
         } else if (_stricmp(gMods[0].guid, gModsUltimo) != 0) gModsNovo = true; // post novo!
     }
+    BuscarMaisVistos(); // depois dos recentes: a aba "Mais vistos" chega logo em seguida
     return 0;
 }
 
@@ -2120,7 +2521,7 @@ static void SepararLink(const char* bruto, int slot, char* rot, int rsz, char* u
         memcpy(rot, bruto, n); rot[n] = 0;
         strncpy(url, sep + 1, usz - 1); url[usz - 1] = 0;
     } else {
-        strncpy(rot, PADRAO[slot & 3], rsz - 1); rot[rsz - 1] = 0;
+        strncpy(rot, T(PADRAO[slot & 3]), rsz - 1); rot[rsz - 1] = 0;
         strncpy(url, bruto, usz - 1); url[usz - 1] = 0;
     }
     if (!rot[0]) { rot[0] = 'L'; rot[1] = 'i'; rot[2] = 'n'; rot[3] = 'k'; rot[4] = 0; }
@@ -2166,8 +2567,9 @@ static void SalvarServidores() {
         sprintf(chave, "servidor%d", i);
         if (i < gNumSrv) {
             Servidor& s = gSrv[i];
-            sprintf(linha, "%s|%s|%s|%d|%s|%s|%s|%s|%s|%s|%s|%s", s.nome, s.ip, s.modo, s.sky,
-                    s.apelido, s.img, s.logo, s.sites[0], s.sites[1], s.sites[2], s.sites[3], s.contaPref);
+            sprintf(linha, "%s|%s|%s|%d|%s|%s|%s|%s|%s|%s|%s|%s|%s", s.nome, s.ip, s.modo, s.sky,
+                    s.apelido, s.img, s.logo, s.sites[0], s.sites[1], s.sites[2], s.sites[3], s.contaPref,
+                    s.dataPref);
             WritePrivateProfileStringA("servidores", chave, linha, gIniPath);
         } else {
             WritePrivateProfileStringA("servidores", chave, NULL, gIniPath);
@@ -2221,6 +2623,17 @@ static void SalvarEdicaoData(int i) {
     if (i < 0 || i >= gNumDatas) return;
     for (char* c = gEditNome; *c; c++) if (*c == '|') *c = '/';
     for (char* c = gEditDesc; *c; c++) if (*c == '|') *c = '/';
+    if (gEditNome[0] && _stricmp(gDatas[i].nome, gEditNome) != 0) {
+        // renomeou: os favoritos que tinham esta data como padrao seguem junto
+        bool mudou = false;
+        for (int k = 0; k < gNumSrv; k++)
+            if (gSrv[k].dataPref[0] && _stricmp(gSrv[k].dataPref, gDatas[i].nome) == 0) {
+                strncpy(gSrv[k].dataPref, gEditNome, sizeof(gSrv[0].dataPref) - 1);
+                gSrv[k].dataPref[sizeof(gSrv[0].dataPref) - 1] = 0;
+                mudou = true;
+            }
+        if (mudou) SalvarServidores();
+    }
     strncpy(gDatas[i].nome, gEditNome, sizeof(gDatas[0].nome) - 1);
     strncpy(gDatas[i].desc, gEditDesc, sizeof(gDatas[0].desc) - 1);
     SalvarDatas();
@@ -2647,13 +3060,13 @@ static void ProcessarPedidosDatas() {
     if (gPickImagem >= 0 && gPickImagem < gNumDatas) {
         int i = gPickImagem; gPickImagem = -1;
         char arq[MAX_PATH];
-        if (EscolherArquivo("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0", "Imagem 16:9 da data", arq, sizeof(arq))) {
+        if (EscolherArquivo(T("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0"), T("Imagem 16:9 da data"), arq, sizeof(arq))) {
             char velho[MAX_PATH];
             strncpy(velho, gDatas[i].img, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
             char local[MAX_PATH];
             ImportarImagem(arq, local, sizeof(local), 800, false); // card de data: 800 basta
             strncpy(gDatas[i].img, local, sizeof(gDatas[i].img) - 1);
-            if (gDatas[i].tex) { gDatas[i].tex->Release(); gDatas[i].tex = NULL; }
+            if (gDatas[i].tex) { AdiarRelease(gDatas[i].tex); gDatas[i].tex = NULL; }
             gDatas[i].tex = CarregarImagemMax(gDev, local, 800);
             SalvarDatas();
             DescartarImagemImportada(velho); // a copia antiga nao fica de orfa
@@ -2662,17 +3075,18 @@ static void ProcessarPedidosDatas() {
     if (gPickCaminho >= 0 && gPickCaminho < gNumDatas) {
         int i = gPickCaminho; gPickCaminho = -1;
         char arq[MAX_PATH];
-        if (EscolherArquivo("gta_sa.exe\0gta_sa.exe\0Executaveis\0*.exe\0\0", "Selecione o gta_sa.exe da instalacao", arq, sizeof(arq))) {
+        if (EscolherArquivo("gta_sa.exe\0gta_sa.exe\0Executaveis\0*.exe\0\0", T("Selecione o gta_sa.exe da instalacao"), arq, sizeof(arq))) {
             char* b = strrchr(arq, '\\');
             if (b) *b = 0;
             strncpy(gDatas[i].caminho, arq, sizeof(gDatas[i].caminho) - 1);
+            DetectarVersaoSamp(arq, gDatas[i].versao, sizeof(gDatas[i].versao));
             if (i == gDataSel) { strncpy(gPastaGta, arq, sizeof(gPastaGta) - 1); SalvarConfig(); }
             SalvarDatas();
             char sampChk[MAX_PATH]; // pasta valida mas sem SA-MP? avisa na hora
             _snprintf(sampChk, MAX_PATH - 1, "%s\\samp.exe", arq);
             sampChk[MAX_PATH - 1] = 0;
             if (GetFileAttributesA(sampChk) == INVALID_FILE_ATTRIBUTES)
-                Avisar("Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar.");
+                Avisar(T("Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar."));
             gSampOk = SampValido();
         } else if (i == gDataSel && !SampValido()) {
             gBoasVindas = true; // cancelou o picker sem SA-MP: o aviso volta
@@ -2681,7 +3095,7 @@ static void ProcessarPedidosDatas() {
     if (gPickImgSrv >= 0 && gPickImgSrv < gNumSrv) {
         int i = gPickImgSrv; gPickImgSrv = -1;
         char arq[MAX_PATH];
-        if (EscolherArquivo("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0", "Imagem de exibição do servidor", arq, sizeof(arq))) {
+        if (EscolherArquivo(T("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0"), T("Imagem de exibição do servidor"), arq, sizeof(arq))) {
             char velho[MAX_PATH];
             strncpy(velho, gSrv[i].img, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
             char local[MAX_PATH];
@@ -2690,7 +3104,7 @@ static void ProcessarPedidosDatas() {
             if (gSrv[i].tex) {
                 if (gSrv[i].tex == gFundoAtual) gFundoAtual = NULL; // pode estar em fade no fundo
                 if (gSrv[i].tex == gFundoAnt) gFundoAnt = NULL;
-                gSrv[i].tex->Release(); gSrv[i].tex = NULL;
+                AdiarRelease(gSrv[i].tex); gSrv[i].tex = NULL;
             }
             gSrv[i].tex = CarregarImagemMax(gDev, local, 1600);
             SalvarServidores();
@@ -2700,7 +3114,7 @@ static void ProcessarPedidosDatas() {
     if (gPickUserFiles >= 0 && gPickUserFiles < gNumDatas) {
         int i = gPickUserFiles; gPickUserFiles = -1;
         char pasta[MAX_PATH];
-        if (EscolherPasta("Escolha a pasta User Files desta data", pasta, sizeof(pasta))) {
+        if (EscolherPasta(T("Escolha a pasta User Files desta data"), pasta, sizeof(pasta))) {
             strncpy(gDatas[i].userfiles, pasta, sizeof(gDatas[0].userfiles) - 1);
             SalvarDatas();
             gFotosDir[0] = 0; // forca a galeria a reescanear
@@ -2709,13 +3123,13 @@ static void ProcessarPedidosDatas() {
     if (gPickLogoSrv >= 0 && gPickLogoSrv < gNumSrv) {
         int i = gPickLogoSrv; gPickLogoSrv = -1;
         char arq[MAX_PATH];
-        if (EscolherArquivo("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0", "Logo do servidor (substitui o nome no card)", arq, sizeof(arq))) {
+        if (EscolherArquivo(T("Imagens (png, jpg, bmp)\0*.png;*.jpg;*.jpeg;*.bmp\0\0"), T("Logo do servidor (substitui o nome no card)"), arq, sizeof(arq))) {
             char velho[MAX_PATH];
             strncpy(velho, gSrv[i].logo, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
             char local[MAX_PATH];
             ImportarImagem(arq, local, sizeof(local), 640, true); // logo: png preserva transparencia
             strncpy(gSrv[i].logo, local, sizeof(gSrv[i].logo) - 1);
-            if (gSrv[i].texLogo) { gSrv[i].texLogo->Release(); gSrv[i].texLogo = NULL; }
+            if (gSrv[i].texLogo) { AdiarRelease(gSrv[i].texLogo); gSrv[i].texLogo = NULL; }
             gSrv[i].texLogo = CarregarImagemMax(gDev, local, 640);
             SalvarServidores();
             DescartarImagemImportada(velho);
@@ -2724,39 +3138,40 @@ static void ProcessarPedidosDatas() {
     if (gPedirExportCfg) {
         gPedirExportCfg = false;
         char arq[MAX_PATH];
-        if (EscolherArquivoSalvar("Backup do Trok Launcher (*.trokcfg)\0*.trokcfg\0\0",
-                                  "Exportar configurações", "TrokLauncher-backup.trokcfg",
+        if (EscolherArquivoSalvar(T("Backup do Trok Launcher (*.trokcfg)\0*.trokcfg\0\0"),
+                                  T("Exportar configurações"), "TrokLauncher-backup.trokcfg",
                                   "trokcfg", arq, sizeof(arq))) {
-            if (ExportarConfig(arq)) Avisar("Configurações exportadas! Leve o arquivo pro outro PC.");
-            else Avisar("Não consegui exportar as configurações.");
+            if (ExportarConfig(arq)) Avisar(T("Configurações exportadas! Leve o arquivo pro outro PC."));
+            else Avisar(T("Não consegui exportar as configurações."));
         }
     }
     if (gPedirImportCfg) {
         gPedirImportCfg = false;
         char arq[MAX_PATH];
-        if (EscolherArquivo("Backup do Trok Launcher (*.trokcfg)\0*.trokcfg\0\0",
-                            "Importar configurações", arq, sizeof(arq))) {
+        if (EscolherArquivo(T("Backup do Trok Launcher (*.trokcfg)\0*.trokcfg\0\0"),
+                            T("Importar configurações"), arq, sizeof(arq))) {
             if (ImportarConfig(arq)) { // reabre pra recarregar tudo (a config antiga vira .antes-import)
                 gPulaSalvarSaida = true; // senao o SalvarConfig da saida desfaz o que acabou de entrar
                 char eu[MAX_PATH];
                 GetModuleFileNameA(NULL, eu, MAX_PATH);
                 ShellExecuteA(NULL, "open", eu, NULL, NULL, SW_SHOWNORMAL);
                 gRodando = false;
-            } else Avisar("Arquivo de backup inválido.");
+            } else Avisar(T("Arquivo de backup inválido."));
         }
     }
     if (gAddData) {
         gAddData = false;
         if (gNumDatas < MAX_DATAS) {
             char arq[MAX_PATH];
-            if (EscolherArquivo("gta_sa.exe\0gta_sa.exe\0Executaveis\0*.exe\0\0", "Selecione o gta_sa.exe da nova data", arq, sizeof(arq))) {
+            if (EscolherArquivo("gta_sa.exe\0gta_sa.exe\0Executaveis\0*.exe\0\0", T("Selecione o gta_sa.exe da nova data"), arq, sizeof(arq))) {
                 char* b = strrchr(arq, '\\');
                 if (b) *b = 0;
                 DataGta& d = gDatas[gNumDatas];
                 memset(&d, 0, sizeof(d));
                 strncpy(d.caminho, arq, sizeof(d.caminho) - 1);
+                DetectarVersaoSamp(arq, d.versao, sizeof(d.versao));
                 const char* nomePasta = strrchr(arq, '\\');
-                strncpy(d.nome, nomePasta ? nomePasta + 1 : "Nova data", sizeof(d.nome) - 1);
+                strncpy(d.nome, nomePasta ? nomePasta + 1 : T("Nova data"), sizeof(d.nome) - 1);
                 strcpy(d.desc, "");
                 SortearCapaPadrao(d.img, sizeof(d.img)); // data nova ja nasce com capa (mono)
                 if (d.img[0]) {
@@ -2790,15 +3205,91 @@ static void FavoritarPublico(int i) {
     SalvarServidores();
 }
 
+// "ip:porta" digitado -> normalizado (porta padrao 7777, aceita link samp://); false = invalido
+static bool NormalizarIp(const char* bruto, char* out, int sz) {
+    char h[64];
+    int n = 0;
+    for (const char* c = bruto; *c && n < 63; c++)
+        if (*c != ' ' && *c != '\t' && *c != '\r' && *c != '\n') h[n++] = *c;
+    h[n] = 0;
+    if (_strnicmp(h, "samp://", 7) == 0) memmove(h, h + 7, strlen(h + 7) + 1);
+    size_t L = strlen(h);
+    while (L > 0 && h[L - 1] == '/') h[--L] = 0;
+    if (!h[0]) return false;
+    int porta = 7777;
+    char* dp = strrchr(h, ':');
+    if (dp) {
+        *dp = 0;
+        if (!dp[1]) return false;
+        for (const char* c = dp + 1; *c; c++) if (*c < '0' || *c > '9') return false;
+        porta = atoi(dp + 1);
+    }
+    if (porta < 1 || porta > 65535) return false;
+    L = strlen(h);
+    if (L == 0 || L > 48) return false;
+    for (const char* c = h; *c; c++) {
+        bool ok = (*c >= 'a' && *c <= 'z') || (*c >= 'A' && *c <= 'Z') || (*c >= '0' && *c <= '9') ||
+                  *c == '.' || *c == '-' || *c == '_';
+        if (!ok) return false;
+    }
+    if (h[0] == '.' || h[L - 1] == '.') return false;
+    _snprintf(out, sz - 1, "%s:%d", h, porta);
+    out[sz - 1] = 0;
+    return true;
+}
+
+static bool FavoritoExiste(const char* ip) {
+    for (int i = 0; i < gNumSrv; i++) if (_stricmp(gSrv[i].ip, ip) == 0) return true;
+    return false;
+}
+
+// favorito novo a partir de um ip digitado; a query traz o nome real logo em seguida
+static void FavoritarIp(const char* ip, const char* nome) {
+    if (gNumSrv >= MAX_SERVIDORES) { Avisar(T("Limite de favoritos atingido.")); return; }
+    static Servidor tmp;
+    memset(&tmp, 0, sizeof(tmp));
+    strncpy(tmp.ip, ip, sizeof(tmp.ip) - 1);
+    strncpy(tmp.nome, ip, sizeof(tmp.nome) - 1); // ate o servidor responder, mostra o ip
+    if (nome && nome[0]) strncpy(tmp.apelido, nome, sizeof(tmp.apelido) - 1);
+    for (char* c = tmp.apelido; *c; c++) if (*c == '|') *c = '/';
+    strcpy(tmp.modo, "-");
+    tmp.sky = gNumSrv % 4;
+    tmp.ping = -1;
+    SortearCapaPadrao(tmp.img, sizeof(tmp.img)); // nenhum favorito comeca sem imagem
+    if (tmp.img[0]) tmp.tex = CarregarImagemMax(gDev, tmp.img, 1600);
+    EnterCriticalSection(&gLock);
+    gSrv[gNumSrv] = tmp;
+    gNumSrv++;
+    LeaveCriticalSection(&gLock);
+    SalvarServidores();
+}
+
 // ===================== jogar =====================
 
 // um jogo por vez: abrir outro servidor fecha o gta/samp que estiver rodando
+// o exe do processo esta dentro de uma das NOSSAS datas? (nunca fechar um gta_sa/samp de outro lugar)
+static bool ProcessoEhDeUmaData(DWORD pid) {
+    HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!h) return false;
+    char cam[MAX_PATH] = "";
+    DWORD tam = MAX_PATH;
+    bool ok = QueryFullProcessImageNameA(h, 0, cam, &tam) != 0;
+    CloseHandle(h);
+    if (!ok) return false;
+    for (int i = 0; i < gNumDatas; i++) {
+        size_t L = strlen(gDatas[i].caminho);
+        if (L && _strnicmp(cam, gDatas[i].caminho, L) == 0 && (cam[L] == '\\' || cam[L] == 0)) return true;
+    }
+    return false;
+}
+
 static void FecharJogoAnterior() {
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snap == INVALID_HANDLE_VALUE) return;
     PROCESSENTRY32 pe = { sizeof(pe) };
     if (Process32First(snap, &pe)) do {
         if (_stricmp(pe.szExeFile, "gta_sa.exe") != 0 && _stricmp(pe.szExeFile, "samp.exe") != 0) continue;
+        if (!ProcessoEhDeUmaData(pe.th32ProcessID)) continue;
         HANDLE h = OpenProcess(PROCESS_TERMINATE, FALSE, pe.th32ProcessID);
         if (h) { TerminateProcess(h, 0); CloseHandle(h); }
     } while (Process32Next(snap, &pe));
@@ -2992,6 +3483,29 @@ static bool SampValido() { // a data em uso tem samp.exe?
     return GetFileAttributesA(c) != INVALID_FILE_ATTRIBUTES;
 }
 
+// favorito com DATA pre-selecionada: troca a instalacao em uso antes de conectar
+// (igual a conta: se o usuario escolheu uma data NA MAO nesta sessao, a escolha dele vence)
+static bool gTrocouDataManual = false;
+static void AplicarDataDoFavorito(const char* ip) {
+    if (gTrocouDataManual) return;
+    for (int i = 0; i < gNumSrv; i++) {
+        if (_stricmp(gSrv[i].ip, ip) != 0) continue;
+        if (!gSrv[i].dataPref[0]) return;
+        for (int q = 0; q < gNumDatas; q++) {
+            if (_stricmp(gDatas[q].nome, gSrv[i].dataPref) != 0) continue;
+            if (q != gDataSel) {
+                gDataSel = q;
+                strncpy(gPastaGta, gDatas[q].caminho, sizeof(gPastaGta) - 1);
+                gPastaGta[sizeof(gPastaGta) - 1] = 0;
+                SalvarConfig();
+                gSampOk = SampValido();
+            }
+            return;
+        }
+        return; // data sumiu (renomeada/removida): fica na que esta em uso
+    }
+}
+
 static void IniciarConexaoReal(const char* nome, const char* ip) {
     if (gUltimoPrimeiro) { // "mover o último jogado para o início": acha pelo ip e sobe
         int achou = -1;
@@ -3002,8 +3516,9 @@ static void IniciarConexaoReal(const char* nome, const char* ip) {
     }
 
     if (gConectando) return;
+    AplicarDataDoFavorito(ip);
     if (!gSampOk) { // sem SA-MP nada de matar processo/overlay: avisa e guia
-        Avisar("Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas.");
+        Avisar(T("Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas."));
         gBoasVindas = true;
         return;
     }
@@ -3028,8 +3543,9 @@ static void IniciarConexaoReal(const char* nome, const char* ip) {
 // comSenha: -1 = descobrir pelo favorito (query); 0/1 explicito (lista da internet)
 static void IniciarConexao(const char* nome, const char* ip, int comSenha = -1) {
     if (gConectando) return;
+    AplicarDataDoFavorito(ip);
     if (!gSampOk) {
-        Avisar("Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas.");
+        Avisar(T("Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas."));
         gBoasVindas = true;
         return;
     }
@@ -3059,7 +3575,7 @@ static void Jogar() {
         sprintf(sampChk, "%s\\samp.exe", gPastaGta);
         if (GetFileAttributesA(sampChk) == INVALID_FILE_ATTRIBUTES) {
             char m[200];
-            _snprintf(m, sizeof(m) - 1, "samp.exe nao encontrado na data em uso - confira a pasta na aba de datas");
+            _snprintf(m, sizeof(m) - 1, T("samp.exe nao encontrado na data em uso - confira a pasta na aba de datas"));
             m[sizeof(m) - 1] = 0;
             Avisar(m);
             return;
@@ -3077,7 +3593,7 @@ static void Jogar() {
         DirDoExe(meu, sizeof(meu));
         size_t lm = strlen(meu);
         if (lm && _strnicmp(gPastaGta, meu, lm) == 0 && (gPastaGta[lm] == 0 || gPastaGta[lm] == '\\')) {
-            Avisar("A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.");
+            Avisar(T("A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso."));
             return;
         }
     }
@@ -3097,7 +3613,7 @@ static void Jogar() {
     else strcpy(args, gConnIp);
     gConnSenha[0] = 0;
     HINSTANCE h = ShellExecuteA(NULL, "open", sampExe, args, gPastaGta, SW_SHOWNORMAL);
-    if ((INT_PTR)h <= 32) Avisar("O Windows nao conseguiu abrir o samp.exe desta data.");
+    if ((INT_PTR)h <= 32) Avisar(T("O Windows nao conseguiu abrir o samp.exe desta data."));
     if ((INT_PTR)h > 32) {
         gRPJogando = true; // discord: "Jogando em <servidor>"
         gRPDesde = (long long)time(NULL);
@@ -3396,6 +3912,8 @@ static void DesenhaUI(HWND hwnd) {
         if (GetTickCount() - tChkSamp > 1000) {
             tChkSamp = GetTickCount();
             gSampOk = SampValido();
+            for (int i = 0; i < gNumDatas; i++) // instalou o SA-MP com o launcher aberto? o card atualiza
+                if (!gDatas[i].versao[0]) DetectarVersaoSamp(gDatas[i].caminho, gDatas[i].versao, sizeof(gDatas[i].versao));
         }
     }
 
@@ -3406,7 +3924,7 @@ static void DesenhaUI(HWND hwnd) {
             if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_F)) { gTela = 1; gFocarBusca = true; } // buscar
             if (ImGui::IsKeyPressed(ImGuiKey_F5)) { // atualizar o que estiver na tela
                 if (gTela == 4) EscanearFotos();
-                else if (gTela == 1 && gSubAba == 1) gPubEstado = 0;
+                else if (gTela == 1 && gSubAba == 1 && gPubEstado != 1) gPubEstado = 0;
             }
             if (ImGui::IsKeyPressed(ImGuiKey_Escape)) { gEscolherAvatar = false; gFiltrosAberto = false; }
         }
@@ -3492,7 +4010,7 @@ static void DesenhaUI(HWND hwnd) {
     gCtTopA = ImVec2(ds.x - 160 - nsz.x, 6); gCtTopB = ImVec2(ds.x - 84, 54);
     if (gAttEstado == 1) { // atualizacao disponivel: botao com icone de download antes do avatar
         char rotA[48];
-        sprintf(rotA, "Atualização %s", gAttVersao);
+        sprintf(rotA, T("Atualização %s"), gAttVersao);
         ImVec2 asz = ImGui::CalcTextSize(rotA);
         float bwA = asz.x + 44, bxA = gCtTopA.x - 12 - bwA;
         ImGui::SetCursorScreenPos(ImVec2(bxA, 14));
@@ -3585,9 +4103,9 @@ static void DesenhaUI(HWND hwnd) {
         ImVec2 ipSz = ImGui::CalcTextSize(sSel.ip);
         char resto[220];
         if (sSel.ping >= 0)
-            sprintf(resto, "jogadores %d/%d   ping %d ms   %s", sSel.online, sSel.maxp, sSel.ping, modoSel);
+            sprintf(resto, T("jogadores %d/%d   ping %d ms   %s"), sSel.online, sSel.maxp, sSel.ping, modoSel);
         else
-            sprintf(resto, "consultando servidor...   %s", modoSel);
+            sprintf(resto, T("consultando servidor...   %s"), modoSel);
         ImVec2 rSz = ImGui::CalcTextSize(resto);
         dl->AddText(ImVec2(metaX, yMeta), Cinza(182), sSel.ip);
         // icone COPIAR colado no ip (respiro maior antes do resto, p/ ler como par ip+copiar)
@@ -3601,7 +4119,7 @@ static void DesenhaUI(HWND hwnd) {
             float ccx = icoX + 7, ccy = yMeta + ipSz.y * 0.5f;
             if (tCopiado > 0) Icone(dl, ImVec2(ccx, ccy), I_CHECK, AC.hi, 16.0f);
             else Icone(dl, ImVec2(ccx, ccy), I_COPIAR, Cinza(cph ? 250 : 150), 15.0f);
-            Dica(tCopiado > 0 ? "Copiado!" : "Copiar o IP");
+            Dica(tCopiado > 0 ? T("Copiado!") : T("Copiar o IP"));
             if (cpc && OpenClipboard(hwnd)) {
                 EmptyClipboard();
                 HGLOBAL m = GlobalAlloc(GMEM_MOVEABLE, strlen(sSel.ip) + 1);
@@ -3626,9 +4144,9 @@ static void DesenhaUI(HWND hwnd) {
         ImU32 gBase = LerpCor(gTopo, AC.hi, 0.55f);
         BrilhoSuave(dl, a, b, AC.cor, hov ? 12.0f : 9.0f, hov ? 38 : 22); // hover = o "normal" de antes
         RectGradVertical(dl, a, b, gTopo, gBase, 16.0f);
-        ImVec2 jsz = ImGui::CalcTextSize("Jogar");
+        ImVec2 jsz = ImGui::CalcTextSize(T("Jogar"));
         float cxm = (a.x + b.x) * 0.5f + 12.0f;
-        dl->AddText(ImVec2(cxm - jsz.x * 0.5f, (a.y + b.y - jsz.y) * 0.5f - 1), TextoSobreAccent(AC.cor), "Jogar");
+        dl->AddText(ImVec2(cxm - jsz.x * 0.5f, (a.y + b.y - jsz.y) * 0.5f - 1), TextoSobreAccent(AC.cor), T("Jogar"));
         float ty = (a.y + b.y) * 0.5f, tx = cxm - jsz.x * 0.5f - 30.0f;
         dl->AddTriangleFilled(ImVec2(tx, ty - 9), ImVec2(tx, ty + 9), ImVec2(tx + 15, ty), TextoSobreAccent(AC.cor));
         ImGui::PopFont();
@@ -3695,8 +4213,8 @@ static void DesenhaUI(HWND hwnd) {
         hx -= offH; // o slide e SO do conteudo de cima: o rail nao sai do lugar
         float ry = ds.y - 202;
         ImGui::PushFont(gFtMini);
-        ImVec2 favSz = ImGui::CalcTextSize("F A V O R I T O S");
-        dl->AddText(ImVec2(hx, ry - 22), Cinza(156), "F A V O R I T O S");
+        ImVec2 favSz = ImGui::CalcTextSize(T("F A V O R I T O S"));
+        dl->AddText(ImVec2(hx, ry - 22), Cinza(156), T("F A V O R I T O S"));
         ImGui::PopFont();
         ImGui::SetCursorScreenPos(ImVec2(hx, ry));
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
@@ -3773,7 +4291,7 @@ static void DesenhaUI(HWND hwnd) {
             ImVec2 ma(cb.x - 36, ca.y + 8), mb(cb.x - 10, ca.y + 28);
             mhc = ImGui::IsMouseHoveringRect(ma, mb);
             DesenhaReticencias(rl, ma, mb, mhc);
-            if (mhc && !gMouseNoDrop) ImGui::SetTooltip("Editar servidor");
+            if (mhc && !gMouseNoDrop) ImGui::SetTooltip(T("Editar servidor"));
             if (mhc && !gMouseNoDrop && ImGui::IsMouseClicked(0)) {
                 gEditSrv = i;
                 strncpy(gEditApelido, sc.apelido, sizeof(gEditApelido) - 1);
@@ -3831,13 +4349,13 @@ static void DesenhaUI(HWND hwnd) {
         pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
         ImGui::SetCursorPos(ImVec2(24, 20));
         ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "SERVIDORES");
+        ImGui::TextColored(ImColor(Cinza(245)), T("SERVIDORES"));
         ImGui::PopFont();
         // sub-abas estilo Riot: texto com sublinhado no ativo
         ImGui::PushFont(gFtBold);
         char abaF[32], abaI[32];
-        sprintf(abaF, "Favoritos (%d)", gNumSrv);
-        sprintf(abaI, gPubEstado == 2 ? "Internet (%d)" : "Internet", gNumPub);
+        sprintf(abaF, T("Favoritos (%d)"), gNumSrv);
+        sprintf(abaI, gPubEstado == 2 ? T("Internet (%d)") : "Internet", gNumPub);
         for (int t2 = 0; t2 < 2; t2++) {
             const char* rot = t2 == 0 ? abaF : abaI;
             ImVec2 rsz = ImGui::CalcTextSize(rot);
@@ -3850,12 +4368,25 @@ static void DesenhaUI(HWND hwnd) {
             if (at) pl->AddRectFilled(ImVec2(ta.x + 4, ta.y + 26), ImVec2(ta.x + 4 + rsz.x, ta.y + 29), AC.cor, 2);
         }
         ImGui::PopFont();
+        { // "+" no canto: adicionar favorito pelo IP (como no samp.exe original)
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 36, 18));
+            bool addCl = ImGui::InvisibleButton("##addipbtn", ImVec2(36, 34));
+            ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
+            bool ah = ImGui::IsItemHovered();
+            if (ah) pl->AddRectFilled(aa, ab, Cinza(255, 16), 9);
+            ImVec2 cc((aa.x + ab.x) * 0.5f, (aa.y + ab.y) * 0.5f);
+            ImU32 pc = Cinza(ah ? 250 : 170);
+            pl->AddLine(ImVec2(cc.x - 8, cc.y), ImVec2(cc.x + 8, cc.y), pc, 2.2f);
+            pl->AddLine(ImVec2(cc.x, cc.y - 8), ImVec2(cc.x, cc.y + 8), pc, 2.2f);
+            Dica(T("Adicionar servidor pelo IP"));
+            if (addCl) { gAddIpAbrir = true; gAddIp[0] = 0; gAddNome[0] = 0; }
+        }
         ImGui::SetCursorPos(ImVec2(24, 58));
         ImGui::PushFont(gFtMono);
         float wBusca = pb.x - pa.x - 48 - 44.0f; // reserva o funil (favoritos e internet)
         ImGui::PushItemWidth(wBusca);
         if (gFocarBusca) { ImGui::SetKeyboardFocusHere(); gFocarBusca = false; } // Ctrl+F
-        ImGui::InputTextWithHint("##busca", "Buscar por nome, modo ou IP...", gBusca, sizeof(gBusca));
+        ImGui::InputTextWithHint("##busca", T("Buscar por nome, modo ou IP..."), gBusca, sizeof(gBusca));
         ImGui::PopItemWidth();
         {   // lupa no canto direito da barra de busca
             ImVec2 ba2 = ImGui::GetItemRectMin(), bb2 = ImGui::GetItemRectMax();
@@ -3877,7 +4408,7 @@ static void DesenhaUI(HWND hwnd) {
             Icone(pl, ImVec2(fcx, fcy), I_FUNIL, fc, 17.0f);
             if (gOcCheios || gOcSenha || gOcVazios || gOcOff) // badge: tem filtro ativo
                 pl->AddCircleFilled(ImVec2(fb.x - 3, fa.y + 3), 3.5f, AC.cor, 16);
-            Dica("Filtros da lista");
+            Dica(T("Filtros da lista"));
         }
         // colunas proporcionais a largura (alinhadas entre header e linhas)
         float wLista = pb.x - pa.x - 48;
@@ -3893,7 +4424,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushFont(gFtMini);
             for (int c = 0; c < nCols; c++) {
                 ImGui::SetCursorPos(ImVec2(hx4[c], 104));
-                ImVec2 hsz = ImGui::CalcTextSize(HC[c]);
+                ImVec2 hsz = ImGui::CalcTextSize(T(HC[c]));
                 char idh[8]; sprintf(idh, "##hc%d", c);
                 if (ImGui::InvisibleButton(idh, ImVec2(hsz.x + 16, 18))) {
                     if (gOrdCol != c) { gOrdCol = c; gOrdAsc = true; }
@@ -3902,7 +4433,7 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImVec2 ha = ImGui::GetItemRectMin();
                 ImU32 hcc = (gOrdCol == c) ? Cinza(240) : (ImGui::IsItemHovered() ? Cinza(200) : Cinza(125));
-                pl->AddText(ImVec2(ha.x, ha.y + 2), hcc, HC[c]);
+                pl->AddText(ImVec2(ha.x, ha.y + 2), hcc, T(HC[c]));
                 if (gOrdCol == c) {
                     float sx = ha.x + hsz.x + 6, sy = ha.y + 6;
                     if (gOrdAsc) pl->AddTriangleFilled(ImVec2(sx, sy + 6), ImVec2(sx + 8, sy + 6), ImVec2(sx + 4, sy), hcc);
@@ -3990,7 +4521,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button("Jogar", ImVec2(80, 32)) && !gConectando) { gSel = i; IniciarConexao(nm, sc.ip); }
+            if (ImGui::Button(T("Jogar"), ImVec2(80, 32)) && !gConectando) { gSel = i; IniciarConexao(nm, sc.ip); }
             ImGui::PopStyleColor(4);
             ImGui::PopFont();
             }
@@ -4002,16 +4533,16 @@ static void DesenhaUI(HWND hwnd) {
         }
         else {
             // ---- INTERNET: lista publica (baixa uma vez, favoritar grava no ini) ----
-            if (gPubEstado == 0) CreateThread(NULL, 0, ThreadPublicos, NULL, 0, NULL);
+            if (gPubEstado == 0) RodarThread(ThreadPublicos, NULL);
             if (gPubEstado == 1) {
                 ImGui::SetCursorPos(ImVec2(10, 18));
                 ImGui::PushFont(gFtMono);
-                ImGui::TextColored(ImColor(Cinza(150)), "baixando a lista de servidores...");
+                ImGui::TextColored(ImColor(Cinza(150)), T("baixando a lista de servidores..."));
                 ImGui::PopFont();
             } else if (gPubEstado == -1) {
                 ImGui::SetCursorPos(ImVec2(10, 18));
                 ImGui::PushFont(gFtBold);
-                if (BotaoSec("A lista não veio. Tentar de novo", ImVec2(280, 36))) gPubEstado = 0;
+                if (BotaoSec(T("A lista não veio. Tentar de novo"), ImVec2(280, 36))) gPubEstado = 0;
                 ImGui::PopFont();
             } else {
                 static int idxsP[MAX_PUB];
@@ -4079,7 +4610,7 @@ static void DesenhaUI(HWND hwnd) {
                         Icone(ll, ImVec2(scx, scy), I_FAVORITO,
                               jaFav ? AC.cor : Cinza(fHov3 ? 245 : 150), 19.0f);
                     }
-                    Dica(jaFav ? "Já está nos favoritos" : "Adicionar aos favoritos");
+                    Dica(jaFav ? T("Já está nos favoritos") : T("Adicionar aos favoritos"));
                     if (favCl && !jaFav) FavoritarPublico(i);
                     {
                     ImGui::SetCursorScreenPos(ImVec2(la.x + wRow - 78, la.y + 11)); // mesmo y do marcador
@@ -4087,7 +4618,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-                    if (ImGui::Button("Jogar", ImVec2(70, 32)) && !gConectando) IniciarConexao(sp.nome, sp.ip, sp.pw);
+                    if (ImGui::Button(T("Jogar"), ImVec2(70, 32)) && !gConectando) IniciarConexao(sp.nome, sp.ip, sp.pw);
                     ImGui::PopStyleColor(4);
                     }
                     ImGui::PopFont();
@@ -4109,18 +4640,18 @@ static void DesenhaUI(HWND hwnd) {
             ImVec2 dA = ImGui::GetWindowPos(), dB = ImVec2(dA.x + FW, dA.y + FH);
             ImGui::SetCursorPos(ImVec2(16, 12));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "F I L T R O S");
+            ImGui::TextColored(ImColor(Cinza(156)), T("F I L T R O S"));
             ImGui::PopFont();
             bool fMud = false;
             ImGui::PushFont(gFtBody);
             ImGui::SetCursorPos(ImVec2(14, 36));
-            fMud |= LinhaFiltro("Ocultar cheios", &gOcCheios);
+            fMud |= LinhaFiltro(T("Ocultar cheios"), &gOcCheios);
             ImGui::SetCursorPos(ImVec2(14, 72));
-            fMud |= LinhaFiltro("Ocultar com senha", &gOcSenha);
+            fMud |= LinhaFiltro(T("Ocultar com senha"), &gOcSenha);
             ImGui::SetCursorPos(ImVec2(14, 108));
-            fMud |= LinhaFiltro("Ocultar vazios", &gOcVazios);
+            fMud |= LinhaFiltro(T("Ocultar vazios"), &gOcVazios);
             ImGui::SetCursorPos(ImVec2(14, 144));
-            fMud |= LinhaFiltro("Ocultar sem resposta", &gOcOff);
+            fMud |= LinhaFiltro(T("Ocultar sem resposta"), &gOcOff);
             ImGui::PopFont();
             if (fMud) SalvarConfig();
             ImGui::EndChild();
@@ -4144,11 +4675,11 @@ static void DesenhaUI(HWND hwnd) {
         pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
         ImGui::SetCursorPos(ImVec2(24, 20));
         ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "DATAS");
+        ImGui::TextColored(ImColor(Cinza(245)), T("DATAS"));
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), "Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.");
+        ImGui::TextColored(ImColor(Cinza(140)), T("Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR."));
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 76));
         ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 96), false);
@@ -4178,8 +4709,8 @@ static void DesenhaUI(HWND hwnd) {
                 wl->AddLine(ImVec2(c.x - 14, c.y), ImVec2(c.x + 14, c.y), tra, 3);
                 wl->AddLine(ImVec2(c.x, c.y - 14), ImVec2(c.x, c.y + 14), tra, 3);
                 ImGui::PushFont(gFtBold);
-                ImVec2 asz = ImGui::CalcTextSize("Adicionar data");
-                wl->AddText(ImVec2(c.x - asz.x * 0.5f, c.y + 26), tra, "Adicionar data");
+                ImVec2 asz = ImGui::CalcTextSize(T("Adicionar data"));
+                wl->AddText(ImVec2(c.x - asz.x * 0.5f, c.y + 26), tra, T("Adicionar data"));
                 ImGui::PopFont();
                 if (cl) gAddData = true;
                 continue;
@@ -4207,22 +4738,30 @@ static void DesenhaUI(HWND hwnd) {
             wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 48), ImVec2(cb.x, cb.y - 13),
                 Cinza(8, 175), Cinza(8, 175), Cinza(8, 235), Cinza(8, 235));
             wl->AddRectFilled(ImVec2(ca.x, cb.y - 13), cb, Cinza(8, 235), 13, ImDrawFlags_RoundCornersBottom);
-            ImGui::PushFont(gFtBold);
-            wl->AddText(ImVec2(ca.x + 14, cb.y - 52), Cinza(248), d.nome);
-            ImGui::PopFont();
+            // versao do SA-MP (lida do samp.dll) no canto direito da linha do nome
+            const char* vs = d.versao[0] ? d.versao : T("sem SA-MP");
+            // sem descricao o bloco desce (senao sobra um vao no pe do card); nome e descricao longos ganham "..."
+            float yNome = d.desc[0] ? cb.y - 52 : cb.y - 40;
             ImGui::PushFont(gFtMini);
-            ImGui::PushClipRect(ca, ImVec2(cb.x - 8, cb.y), true);
-            wl->AddText(ImVec2(ca.x + 14, cb.y - 28), Cinza(165), d.desc[0] ? d.desc : " ");
-            ImGui::PopClipRect();
+            ImVec2 vsz = ImGui::CalcTextSize(vs);
+            wl->AddText(ImVec2(cb.x - 14 - vsz.x, yNome + 3), d.versao[0] ? Cinza(200) : IM_COL32(240, 120, 116, 255), vs);
             ImGui::PopFont();
+            ImGui::PushFont(gFtBold);
+            TextoTruncado(wl, ImVec2(ca.x + 14, yNome), (cb.x - 14 - vsz.x - 12) - (ca.x + 14), Cinza(248), d.nome);
+            ImGui::PopFont();
+            if (d.desc[0]) {
+                ImGui::PushFont(gFtMini);
+                TextoTruncado(wl, ImVec2(ca.x + 14, cb.y - 28), (cb.x - 14) - (ca.x + 14), Cinza(165), d.desc);
+                ImGui::PopFont();
+            }
             ImU32 borda = (i == gDataSel) ? AC.cor : (ch ? Cinza(90) : Cinza(46));
             wl->AddRect(ca, cb, borda, 13, 0, (i == gDataSel) ? 2.0f : 1.0f);
             if (i == gDataSel) { // pill EM USO
                 ImGui::PushFont(gFtMini);
-                ImVec2 psz = ImGui::CalcTextSize("EM USO");
+                ImVec2 psz = ImGui::CalcTextSize(T("EM USO"));
                 ImVec2 t0(ca.x + 12, ca.y + 10);
                 wl->AddRectFilled(t0, ImVec2(t0.x + psz.x + 16, t0.y + 20), AC.cor, 10);
-                wl->AddText(ImVec2(t0.x + 8, t0.y + 3), TextoSobreAccent(AC.cor), "EM USO");
+                wl->AddText(ImVec2(t0.x + 8, t0.y + 3), TextoSobreAccent(AC.cor), T("EM USO"));
                 ImGui::PopFont();
             }
             // botao "..." no canto superior direito - teste de clique por retangulo puro,
@@ -4242,8 +4781,8 @@ static void DesenhaUI(HWND hwnd) {
             }
             if (fh2 && !gMouseNoDrop && ImGui::IsMouseClicked(0))
                 ShellExecuteA(NULL, "open", d.caminho, NULL, NULL, SW_SHOWNORMAL);
-            if (mh && !gMouseNoDrop) ImGui::SetTooltip("Editar data");
-            if (fh2 && !gMouseNoDrop) ImGui::SetTooltip("Abrir a pasta da data no Explorer");
+            if (mh && !gMouseNoDrop) ImGui::SetTooltip(T("Editar data"));
+            if (fh2 && !gMouseNoDrop) ImGui::SetTooltip(T("Abrir a pasta da data no Explorer"));
             if (mh && !gMouseNoDrop && ImGui::IsMouseClicked(0)) {
                 gRenomear = i; // abre o painel de edicao (desenhado no nivel raiz)
                 strncpy(gEditNome, d.nome, sizeof(gEditNome) - 1);
@@ -4251,6 +4790,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             if (cl && !mh && !fh2) {
                 gDataSel = i;
+                gTrocouDataManual = true; // escolha manual vence a data padrao dos favoritos
                 strncpy(gPastaGta, d.caminho, sizeof(gPastaGta) - 1);
                 SalvarConfig();
             }
@@ -4309,7 +4849,7 @@ static void DesenhaUI(HWND hwnd) {
         pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
         ImGui::SetCursorPos(ImVec2(24, 20));
         ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "GALERIA");
+        ImGui::TextColored(ImColor(Cinza(245)), T("GALERIA"));
         ImGui::PopFont();
         // sub-abas: uma por User Files unico (mesmo estilo das abas de Servidores)
         if (nTabs > 1) {
@@ -4331,7 +4871,7 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::SetCursorPos(ImVec2(24, 52));
         ImGui::PushFont(gFtMini);
         char subt[160];
-        sprintf(subt, "%d screenshots  -  %s", gNumFotos, tabs[gGalData].rotulo);
+        sprintf(subt, T("%d screenshots  -  %s"), gNumFotos, tabs[gGalData].rotulo);
         ImGui::TextColored(ImColor(Cinza(140)), "%s", subt); // "%s": nome de data pode ter %
         ImGui::PopFont();
         {
@@ -4347,7 +4887,7 @@ static void DesenhaUI(HWND hwnd) {
                 ImU32 icor = Cinza(pHov ? 250 : 175);
                 Icone(pl, ImVec2(cx3, cy3), I_PASTA_ABRIR, icor, 17.0f);
             }
-            Dica("Abrir a pasta das screenshots");
+            Dica(T("Abrir a pasta das screenshots"));
             if (pastaCl)
                 ShellExecuteA(NULL, "open", GetFileAttributesA(gFotosDir) != INVALID_FILE_ATTRIBUTES ? gFotosDir : ufRaiz,
                               NULL, NULL, SW_SHOWNORMAL);
@@ -4358,7 +4898,7 @@ static void DesenhaUI(HWND hwnd) {
             if (rHov) pl->AddRectFilled(ra, rb, Cinza(255, 18), 9);
             Icone(pl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), I_ATUALIZAR,
                   Cinza(rHov ? 250 : 175), 17.0f);
-            Dica("Atualizar a galeria (F5)");
+            Dica(T("Atualizar a galeria (F5)"));
             if (attCl) EscanearFotos();
         }
         ImGui::SetCursorPos(ImVec2(24, 82));
@@ -4367,12 +4907,12 @@ static void DesenhaUI(HWND hwnd) {
         if (gNumFotos == 0) {
             ImGui::SetCursorPos(ImVec2(6, 16));
             ImGui::PushFont(gFtBody);
-            ImGui::TextColored(ImColor(Cinza(150)), "Nenhuma screenshot encontrada nesta data.");
+            ImGui::TextColored(ImColor(Cinza(150)), T("Nenhuma screenshot encontrada nesta data."));
             ImGui::PopFont();
             ImGui::SetCursorPos(ImVec2(6, 44));
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(105)), "%s", gFotosDir);
-            ImGui::TextColored(ImColor(Cinza(105)), "Tire fotos no jogo com F8 e clique em Atualizar.");
+            ImGui::TextColored(ImColor(Cinza(105)), T("Tire fotos no jogo com F8 e clique em Atualizar."));
             ImGui::PopFont();
         } else if (gFotoVista < 0) { // com o visualizador aberto a grade descansa
             ImDrawList* gl2 = ImGui::GetWindowDrawList();
@@ -4431,8 +4971,25 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), "Visite nosso blog TrokMods. Clique num post para abrir no navegador.");
+        ImGui::TextColored(ImColor(Cinza(140)), T("Visite nosso blog TrokMods. Clique num post para abrir no navegador."));
         ImGui::PopFont();
+        { // sub-abas estilo Riot (como em Servidores): Recentes | Mais vistos
+            ImGui::PushFont(gFtBold);
+            const char* ROT[2] = { "Recentes", "Mais vistos" };
+            float xab = 24.0f;
+            for (int t2 = 0; t2 < 2; t2++) {
+                ImVec2 rsz = ImGui::CalcTextSize(T(ROT[t2]));
+                ImGui::SetCursorPos(ImVec2(xab, 78.0f));
+                char idab[16]; sprintf(idab, "##abamods%d", t2);
+                if (ImGui::InvisibleButton(idab, ImVec2(rsz.x + 8, 30))) gModsAba = t2;
+                ImVec2 ta = ImGui::GetItemRectMin();
+                bool at = (gModsAba == t2), hab = ImGui::IsItemHovered();
+                pl->AddText(ImVec2(ta.x + 4, ta.y + 2), at ? Cinza(250) : (hab ? Cinza(210) : Cinza(140)), T(ROT[t2]));
+                if (at) pl->AddRectFilled(ImVec2(ta.x + 4, ta.y + 26), ImVec2(ta.x + 4 + rsz.x, ta.y + 29), AC.cor, 2);
+                xab += rsz.x + 8 + 26;
+            }
+            ImGui::PopFont();
+        }
         { // comunidade no Discord + blog, a esquerda do atualizar
             struct AtalhoMods { const char* gl; const char* url; const char* dica; };
             static const AtalhoMods ATALHOS[2] = {
@@ -4454,7 +5011,7 @@ static void DesenhaUI(HWND hwnd) {
                     pl->AddImage((ImTextureID)gLogoBlogger, ImVec2(cIco.x - r, cIco.y - r),
                                  ImVec2(cIco.x + r, cIco.y + r), ImVec2(0, 0), ImVec2(1, 1), corIco);
                 } else Icone(pl, cIco, ATALHOS[k].gl, corIco, 17.0f);
-                Dica(ATALHOS[k].dica);
+                Dica(T(ATALHOS[k].dica));
                 if (cl) ShellExecuteA(NULL, "open", ATALHOS[k].url, NULL, NULL, SW_SHOWNORMAL);
             }
         }
@@ -4466,26 +5023,26 @@ static void DesenhaUI(HWND hwnd) {
             if (refHov) pl->AddRectFilled(ra, rb, Cinza(255, 16), 9);
             Icone(pl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), I_ATUALIZAR,
                   Cinza(refHov ? 250 : 170), 17.0f);
-            Dica("Atualizar os posts do blog");
+            Dica(T("Atualizar os posts do blog"));
             if (refCl && gModsEstado != 1) {
-                for (int k = 0; k < MAX_MODS; k++) { AdiarRelease(gModsTex[k]); gModsTex[k] = NULL; }
-                CreateThread(NULL, 0, ThreadMods, NULL, 0, NULL);
+                for (int k = 0; k < MAX_MODS; k++) { AdiarRelease(gModsTex[k]); gModsTex[k] = NULL; gModsPedida[k] = 0; }
+                RodarThread(ThreadMods, NULL);
             }
         }
-        ImGui::SetCursorPos(ImVec2(24, 84));
-        ImGui::BeginChild("##modslista", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 104), false);
+        ImGui::SetCursorPos(ImVec2(24, 116));
+        ImGui::BeginChild("##modslista", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 136), false);
         ImDrawList* ml = ImGui::GetWindowDrawList();
         if (gNumMods == 0) {
             ImGui::SetCursorPos(ImVec2(6, 16));
             ImGui::PushFont(gFtBody);
             if (gModsEstado == 1)
-                ImGui::TextColored(ImColor(Cinza(150)), "buscando posts do blog...");
+                ImGui::TextColored(ImColor(Cinza(150)), T("buscando posts do blog..."));
             else
-                ImGui::TextColored(ImColor(Cinza(150)), "O blog TrokMods está chegando.");
+                ImGui::TextColored(ImColor(Cinza(150)), T("O blog TrokMods está chegando."));
             ImGui::PopFont();
             ImGui::SetCursorPos(ImVec2(6, 44));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(105)), "Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.");
+            ImGui::TextColored(ImColor(Cinza(105)), T("Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral."));
             ImGui::PopFont();
         } else {
             // grade de CARDS: miniatura do post do blog - fundo branco, titulo laranja,
@@ -4500,11 +5057,14 @@ static void DesenhaUI(HWND hwnd) {
             float imgH = (CWM - PADM * 2) * 9.0f / 16.0f;
             ImGui::PushFont(gFtPostTit);                  // faixa do titulo = maior titulo da lista
             float altT = ImGui::GetTextLineHeight();
-            int maxLin = 1;
-            for (int k = 0; k < gNumMods; k++) {
-                char a1[224], a2[224];
-                int nl = TextoDuasLinhas(a1, a2, sizeof(a1), gMods[k].titulo, CWM - PADM * 2 - 22.0f);
-                if (nl > maxLin) maxLin = nl;
+            static int maxLin = 1, genML = -1; static float cwML = -1; // recalcula so com lista/largura nova
+            if (genML != gModsGen || cwML != CWM) {
+                genML = gModsGen; cwML = CWM; maxLin = 1;
+                for (int k = 0; k < gNumMods; k++) {
+                    char a1[224], a2[224];
+                    int nl = TextoDuasLinhas(a1, a2, sizeof(a1), gMods[k].titulo, CWM - PADM * 2 - 22.0f);
+                    if (nl > maxLin) maxLin = nl;
+                }
             }
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
@@ -4517,8 +5077,23 @@ static void DesenhaUI(HWND hwnd) {
             int idxVisto = -1; // cards acima do marco da visita ganham bolinha de NOVO
             for (int k = 0; k < gNumMods; k++)
                 if (gModsVistoAte[0] && _stricmp(gMods[k].guid, gModsVistoAte) == 0) { idxVisto = k; break; }
-            for (int i = 0; i < gNumMods; i++) {
-                int col = i % porLinhaM, lin = i / porLinhaM;
+            // ordem dos cards: recentes (feed) ou mais vistos (widget do blog, casado pela url)
+            int ordem[MAX_MODS], nOrd = 0;
+            if (gModsAba == 1) {
+                for (int r = 0; r < gNumPop && r < MAX_POP; r++)
+                    for (int k = 0; k < gNumMods; k++)
+                        if (UrlMesmoPost(gMods[k].url, gPopUrl[r])) { ordem[nOrd++] = k; break; }
+            } else for (int k = 0; k < gNumMods; k++) ordem[nOrd++] = k;
+            if (nOrd == 0) {
+                ImGui::SetCursorPos(ImVec2(6, 16));
+                ImGui::PushFont(gFtBody);
+                ImGui::TextColored(ImColor(Cinza(150)), gPopEstado == 1 ? T("buscando os mais vistos do blog...")
+                                                                         : T("O blog ainda não tem um ranking de mais vistos."));
+                ImGui::PopFont();
+            }
+            for (int o = 0; o < nOrd; o++) {
+                int i = ordem[o];
+                int col = o % porLinhaM, lin = o / porLinhaM;
                 ImGui::SetCursorPos(ImVec2(col * (CWM + GAPM), lin * (CHM + GAPM)));
                 char idm[16]; sprintf(idm, "##post%d", i);
                 bool clP = ImGui::InvisibleButton(idm, ImVec2(CWM, yBot - 6)); // card (sem o botao)
@@ -4550,10 +5125,18 @@ static void DesenhaUI(HWND hwnd) {
                     ml->AddCircleFilled(ImVec2(cb2.x - 18, ca.y + 25), 5.0f,
                                         ComAlpha(AC.cor, 0.45f + 0.55f * pulso2), 14);
                 }
-                // capa 16:9 abaixo dos textos (carregada preguicosamente do cache)
-                if (!gModsTex[i] && gMods[i].imgCache[0] &&
-                    GetFileAttributesA(gMods[i].imgCache) != INVALID_FILE_ATTRIBUTES)
-                    gModsTex[i] = CarregarImagemMax(gDev, gMods[i].imgCache, 640);
+                // capa 16:9 abaixo dos textos: pedida a fila de imagens SO quando o card esta na tela
+                // (download + decode fora da UI); cards que ficaram longe devolvem a textura
+                {
+                    bool visP = ImGui::IsRectVisible(ca, cb2);
+                    if (visP && !gModsTex[i] && gMods[i].imgCache[0] && gModsPedida[i] == 0) {
+                        if (PedirImagem(gMods[i].imgCache, 640, 2)) gModsPedida[i] = 1;
+                    } else if (!visP && gModsTex[i]) {
+                        float wy = ImGui::GetWindowPos().y, wh = ImGui::GetWindowSize().y;
+                        float dist = (ca.y > wy + wh) ? ca.y - (wy + wh) : wy - cb2.y;
+                        if (dist > wh * 2.0f) { AdiarRelease(gModsTex[i]); gModsTex[i] = NULL; gModsPedida[i] = 0; }
+                    }
+                }
                 ImVec2 ia(ca.x + PADM, ca.y + yImg), ib(cb2.x - PADM, ca.y + yImg + imgH);
                 ml->AddRectFilled(ia, ib, IM_COL32(233, 233, 236, 255), 8.0f); // enquanto a capa carrega
                 if (gModsTex[i]) ImagemCapa(ml, gModsTex[i], ia, ib, 8.0f, hovP ? 0 : 16);
@@ -4565,7 +5148,7 @@ static void DesenhaUI(HWND hwnd) {
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
                 // botao ABRIR O POST: pilula laranja centrada, do mesmo jeito que no blog
                 ImGui::PushFont(gFtBotaoPost);
-                float wBot = ImGui::CalcTextSize("ABRIR O POST").x + 58.0f;
+                float wBot = ImGui::CalcTextSize(T("ABRIR O POST")).x + 58.0f;
                 ImGui::PopFont();
                 if (wBot > CWM - PADM * 2) wBot = CWM - PADM * 2;
                 ImGui::SetCursorPos(ImVec2(col * (CWM + GAPM) + (CWM - wBot) * 0.5f,
@@ -4577,14 +5160,14 @@ static void DesenhaUI(HWND hwnd) {
                 ImU32 topoB = hovB ? LerpCor(AC.cor, IM_COL32(255, 255, 255, 255), 0.10f) : AC.cor;
                 RectGradVertical(ml, ba2, bb2, topoB, LerpCor(topoB, AC.hi, 0.55f), 9.0f); // canto do blog
                 ImGui::PushFont(gFtBotaoPost);
-                ImVec2 bsz2 = ImGui::CalcTextSize("ABRIR O POST");
+                ImVec2 bsz2 = ImGui::CalcTextSize(T("ABRIR O POST"));
                 ml->AddText(ImVec2((ba2.x + bb2.x - bsz2.x) * 0.5f, (ba2.y + bb2.y - bsz2.y) * 0.5f),
-                            TextoSobreAccent(AC.cor), "ABRIR O POST");
+                            TextoSobreAccent(AC.cor), T("ABRIR O POST"));
                 ImGui::PopFont();
                 if (clB && UrlWebOk(gMods[i].url))
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
             }
-            int linhasM = (gNumMods + porLinhaM - 1) / porLinhaM;
+            int linhasM = (nOrd + porLinhaM - 1) / porLinhaM;
             ImGui::SetCursorPos(ImVec2(0, linhasM * (CHM + GAPM)));
             ImGui::Dummy(ImVec2(1, 1)); // estende o scroll ate o fim da grade
         }
@@ -4592,7 +5175,7 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::EndChild();
     }
     else if (gTela == 6) {
-        // ---- INFORMACOES (projeto, contatos, cafe) ----
+        // ---- INFORMACOES (projeto, contatos, comunidade) ----
         ImGui::SetCursorScreenPos(ImVec2(116, 78));
         ImGui::BeginChild("##info", ImVec2(ds.x - 148, ds.y - 130), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
@@ -4601,37 +5184,37 @@ static void DesenhaUI(HWND hwnd) {
         pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
         ImGui::SetCursorPos(ImVec2(24, 20));
         ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "INFORMAÇÕES");
+        ImGui::TextColored(ImColor(Cinza(245)), T("INFORMAÇÕES"));
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), "Trok Launcher %s  -  feito pela equipe TrokMods", VERSAO);
+        ImGui::TextColored(ImColor(Cinza(140)), T("Trok Launcher %s  -  feito pela equipe TrokMods"), VERSAO);
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 84));
         ImGui::PushFont(gFtBody);
         ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + (pb.x - pa.x) - 72);
         ImGui::TextColored(ImColor(Cinza(200)),
-            "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, "
+            T("O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, "
             "várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots "
             "e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o "
-            "samp.exe original da instalacao que voce escolher.");
+            "samp.exe original da instalacao que voce escolher."));
         ImGui::PopTextWrapPos();
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 190));
         ImGui::PushFont(gFtMini);
-        ImGui::TextColored(ImColor(Cinza(156)), "L I N K S");
+        ImGui::TextColored(ImColor(Cinza(156)), T("L I N K S"));
         ImGui::PopFont();
         ImGui::PushFont(gFtBody);
         ImGui::SetCursorPos(ImVec2(24, 212));
-        if (BotaoSec("Blog TrokMods", ImVec2(180, 40)))
+        if (BotaoSec(T("Blog TrokMods"), ImVec2(180, 40)))
             ShellExecuteA(NULL, "open", URL_BLOG, NULL, NULL, SW_SHOWNORMAL);
         ImGui::SameLine(0, 10);
-        if (BotaoSec("Guia do launcher", ImVec2(180, 40))) // post de lancamento (tutorial completo)
+        if (BotaoSec(T("Guia do launcher"), ImVec2(180, 40))) // post de lancamento (tutorial completo)
             ShellExecuteA(NULL, "open", URL_POST_LAUNCHER, NULL, NULL, SW_SHOWNORMAL);
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 274));
         ImGui::PushFont(gFtMini);
-        ImGui::TextColored(ImColor(Cinza(156)), "G O S T O U ?");
+        ImGui::TextColored(ImColor(Cinza(156)), T("C O M U N I D A D E"));
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 296));
         ImGui::PushFont(gFtBold);
@@ -4639,13 +5222,13 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-        if (ImGui::Button("Me pague um café", ImVec2(196, 44)))
-            ShellExecuteA(NULL, "open", URL_CAFE, NULL, NULL, SW_SHOWNORMAL);
+        if (ImGui::Button(T("Entrar no Discord"), ImVec2(196, 44)))
+            ShellExecuteA(NULL, "open", URL_DISCORD, NULL, NULL, SW_SHOWNORMAL);
         ImGui::PopStyleColor(4);
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(24, 348));
-        ImGui::TextColored(ImColor(Cinza(110)), "O launcher é de graça e sempre vai ser. O café paga as madrugadas de mod.");
+        ImGui::TextColored(ImColor(Cinza(110)), T("O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods."));
         ImGui::PopFont();
         ImGui::EndChild();
     }
@@ -4660,14 +5243,17 @@ static void DesenhaUI(HWND hwnd) {
         pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
         ImGui::SetCursorPos(ImVec2(26, 20));
         ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "CONFIGURAÇÕES");
+        ImGui::TextColored(ImColor(Cinza(245)), T("CONFIGURAÇÕES"));
         ImGui::PopFont();
         // nick saiu daqui: mora nas CONTAS (avatar/nick do topo); a conta 0 e a do samp padrão
         ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(26, 66)); ImGui::TextColored(ImColor(Cinza(156)), "C O R   D E   D E S T A Q U E");
+        ImGui::SetCursorPos(ImVec2(26, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("C O R   D E   D E S T A Q U E"));
         ImGui::PopFont();
-        for (int i = 0; i < N_ACCENTS; i++) {
-            ImGui::SetCursorPos(ImVec2(26.0f + i * 52.0f, 88.0f));
+        // ordem de exibicao: o LARANJA (padrao do app) vem primeiro; os indices do ini nao mudam
+        static const int ORDEM_CORES[N_ACCENTS] = { 2, 0, 1, 3, 4, 5, 6 };
+        for (int k = 0; k < N_ACCENTS; k++) {
+            int i = ORDEM_CORES[k];
+            ImGui::SetCursorPos(ImVec2(26.0f + k * 52.0f, 88.0f));
             char id[12]; sprintf(id, "##sw%d", i);
             if (ImGui::InvisibleButton(id, ImVec2(40, 40))) { gAccent = i; SalvarConfig(); }
             ImVec2 sa = ImGui::GetItemRectMin();
@@ -4702,7 +5288,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             wl->AddCircleFilled(c, r - 5.0f, gAccentCustom.cor, 32);
             if (gAccent >= N_ACCENTS) wl->AddCircle(c, r + 3.5f, Cinza(245), 32, 2.0f);
-            Dica("Cor personalizada");
+            Dica(T("Cor personalizada"));
             if (ImGui::BeginPopup("##corcustom")) {
                 static float corSel[3] = { 0, 0, 0 };
                 if (ImGui::IsWindowAppearing()) {
@@ -4724,56 +5310,84 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::EndPopup();
             }
         }
+        { // IDIOMA ao lado das cores: automatico (segue o Windows) / portugues / english
+            ImGui::PushFont(gFtMini);
+            ImGui::SetCursorPos(ImVec2(520, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("I D I O M A"));
+            ImGui::PopFont();
+            const char* OPI[3] = { "Automático", "Português", "English" };
+            float xi = 520.0f;
+            ImGui::PushFont(gFtBold);
+            for (int k = 0; k < 3; k++) {
+                const char* rot = (k == 0) ? T("Automático") : OPI[k];
+                ImVec2 tsz = ImGui::CalcTextSize(rot);
+                ImGui::SetCursorPos(ImVec2(xi, 92));
+                char idi[12]; sprintf(idi, "##idi%d", k);
+                bool cli = ImGui::InvisibleButton(idi, ImVec2(tsz.x + 28, 32));
+                ImVec2 ia = ImGui::GetItemRectMin(), ib = ImGui::GetItemRectMax();
+                bool sel = (gIdiomaCfg == k), hv = ImGui::IsItemHovered();
+                ImDrawList* wl = ImGui::GetWindowDrawList();
+                if (sel) wl->AddRectFilled(ia, ib, AC.cor, 16.0f);
+                else {
+                    wl->AddRectFilled(ia, ib, Cinza(hv ? 40 : 26), 16.0f);
+                    wl->AddRect(ia, ib, Cinza(hv ? 120 : 60), 16.0f, 0, 1.0f);
+                }
+                wl->AddText(ImVec2(ia.x + 14, ia.y + 7), sel ? TextoSobreAccent(AC.cor) : Cinza(hv ? 240 : 190), rot);
+                if (k == 0) Dica(T("Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher."));
+                if (cli && gIdiomaCfg != k) { gIdiomaCfg = k; DefinirIdioma(); SalvarConfig(); }
+                xi += tsz.x + 28 + 8;
+            }
+            ImGui::PopFont();
+        }
         // opcoes em LINHAS de lista (hover + divisoria), switch a direita no destaque
         {
             float wLin = pb.x - pa.x - 48;
             ImGui::PushFont(gFtBody);
             ImGui::SetCursorPos(ImVec2(24, 150));
-            if (LinhaOpcao("Fechar o launcher ao entrar no jogo", &gFecharAoJogar, wLin)) SalvarConfig();
-            Dica("Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)");
+            if (LinhaOpcao(T("Fechar o launcher ao entrar no jogo"), &gFecharAoJogar, wLin)) SalvarConfig();
+            Dica(T("Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)"));
             ImGui::SetCursorPos(ImVec2(24, 199));
-            if (LinhaOpcao("Fechar para a bandeja em vez de sair", &gFecharBandeja, wLin)) SalvarConfig();
-            Dica("O X esconde o launcher perto do relógio em vez de encerrar de vez");
+            if (LinhaOpcao(T("Fechar para a bandeja em vez de sair"), &gFecharBandeja, wLin)) SalvarConfig();
+            Dica(T("O X esconde o launcher perto do relógio em vez de encerrar de vez"));
             ImGui::SetCursorPos(ImVec2(24, 248));
-            if (LinhaOpcao("Iniciar minimizado na bandeja", &gIniciarMin, wLin)) SalvarConfig();
-            Dica("O launcher abre já escondido, só o ícone perto do relógio");
+            if (LinhaOpcao(T("Iniciar minimizado na bandeja"), &gIniciarMin, wLin)) SalvarConfig();
+            Dica(T("O launcher abre já escondido, só o ícone perto do relógio"));
             ImGui::SetCursorPos(ImVec2(24, 297));
             static bool iniciarWin = IniciarComWindowsAtivo(); // lido do registro uma vez
-            if (LinhaOpcao("Iniciar com o Windows", &iniciarWin, wLin)) DefinirIniciarComWindows(iniciarWin);
-            Dica("Abre sozinho quando o computador liga");
+            if (LinhaOpcao(T("Iniciar com o Windows"), &iniciarWin, wLin)) DefinirIniciarComWindows(iniciarWin);
+            Dica(T("Abre sozinho quando o computador liga"));
             ImGui::SetCursorPos(ImVec2(24, 346));
             if (LinhaOpcao("Discord Rich Presence", &gDiscordRP, wLin)) SalvarConfig();
-            Dica("Mostra no seu perfil do Discord o servidor em que você está jogando");
+            Dica(T("Mostra no seu perfil do Discord o servidor em que você está jogando"));
             ImGui::SetCursorPos(ImVec2(24, 395));
-            if (LinhaOpcao("Lembrar o último servidor selecionado", &gLembrarUlt, wLin)) SalvarConfig();
-            Dica("Ao abrir, a Home já vem no servidor em que você parou");
+            if (LinhaOpcao(T("Lembrar o último servidor selecionado"), &gLembrarUlt, wLin)) SalvarConfig();
+            Dica(T("Ao abrir, a Home já vem no servidor em que você parou"));
             ImGui::SetCursorPos(ImVec2(24, 444));
-            if (LinhaOpcao("Mover o último jogado para o início dos favoritos", &gUltimoPrimeiro, wLin)) SalvarConfig();
-            Dica("Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos");
+            if (LinhaOpcao(T("Mover o último jogado para o início dos favoritos"), &gUltimoPrimeiro, wLin)) SalvarConfig();
+            Dica(T("Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos"));
             // opções do SA-MP ORIGINAL (mesmo registro: mudar aqui muda la, e vice-versa)
             ImGui::SetCursorPos(ImVec2(24, 493));
-            if (LinhaOpcao("Salvar senhas de servidor automaticamente", &gSalvarSenhaServ, wLin))
+            if (LinhaOpcao(T("Salvar senhas de servidor automaticamente"), &gSalvarSenhaServ, wLin))
                 GravarOpcaoSampRegistro("SaveServPasses", gSalvarSenhaServ);
-            Dica("Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT");
+            Dica(T("Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT"));
             ImGui::SetCursorPos(ImVec2(24, 542));
-            if (LinhaOpcao("Salvar senhas de RCON", &gSalvarSenhaRcon, wLin))
+            if (LinhaOpcao(T("Salvar senhas de RCON"), &gSalvarSenhaRcon, wLin))
                 GravarOpcaoSampRegistro("SaveRconPasses", gSalvarSenhaRcon);
-            Dica("Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original");
+            Dica(T("Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original"));
             ImGui::SetCursorPos(ImVec2(26, 602));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "B A C K U P");
+            ImGui::TextColored(ImColor(Cinza(156)), T("B A C K U P"));
             ImGui::PopFont();
             ImGui::SetCursorPos(ImVec2(24, 624));
-            if (BotaoSec("     Exportar configurações...", ImVec2(232, 38))) gPedirExportCfg = true;
-            Dica("Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu");
+            if (BotaoSec(T("     Exportar configurações..."), ImVec2(232, 38))) gPedirExportCfg = true;
+            Dica(T("Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu"));
             { // icone lucide: exportar (upload)
                 ImVec2 ea = ImGui::GetItemRectMin(), eb = ImGui::GetItemRectMax();
                 Icone(ImGui::GetWindowDrawList(), ImVec2(ea.x + 24, (ea.y + eb.y) * 0.5f), I_SUBIR,
                       Cinza(ImGui::IsItemHovered() ? 230 : 170), 16.0f);
             }
             ImGui::SameLine(0, 10);
-            if (BotaoSec("     Importar configurações...", ImVec2(232, 38))) gPedirImportCfg = true;
-            Dica("Restaura um backup exportado em outro PC (o launcher reabre sozinho)");
+            if (BotaoSec(T("     Importar configurações..."), ImVec2(232, 38))) gPedirImportCfg = true;
+            Dica(T("Restaura um backup exportado em outro PC (o launcher reabre sozinho)"));
             { // icone lucide: importar (download)
                 ImVec2 ea = ImGui::GetItemRectMin(), eb = ImGui::GetItemRectMax();
                 Icone(ImGui::GetWindowDrawList(), ImVec2(ea.x + 24, (ea.y + eb.y) * 0.5f), I_BAIXAR,
@@ -4786,7 +5400,7 @@ static void DesenhaUI(HWND hwnd) {
 
     // ===== painel "Editar data" (nivel raiz - popup dentro de child nao abre direito) =====
     {
-        if (gRenomear >= 0 && !ImGui::IsPopupOpen("Editar data##trok")) ImGui::OpenPopup("Editar data##trok");
+        if (gRenomear >= 0 && !ImGui::IsPopupOpen(T("Editar data##trok"))) ImGui::OpenPopup(T("Editar data##trok"));
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         // vestido com o design do app (o modal cru do imgui vem com barra azul)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
@@ -4795,58 +5409,58 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
         ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
         ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
-        if (ImGui::BeginPopupModal("Editar data##trok", NULL,
+        if (ImGui::BeginPopupModal(T("Editar data##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             int i = gRenomear;
             ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), "EDITAR DATA");
+            ImGui::TextColored(ImColor(Cinza(245)), T("EDITAR DATA"));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "N O M E");
+            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushItemWidth(384);
             ImGui::InputText("##ednome", gEditNome, sizeof(gEditNome));
             ImGui::Dummy(ImVec2(1, 6));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "D E S C R I C A O");
+            ImGui::TextColored(ImColor(Cinza(156)), T("D E S C R I C A O"));
             ImGui::PopFont();
             ImGui::InputText("##eddesc", gEditDesc, sizeof(gEditDesc));
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(1, 12));
-            if (BotaoSec("Trocar imagem...", ImVec2(188, 38))) {
+            if (BotaoSec(T("Trocar imagem..."), ImVec2(188, 38))) {
                 SalvarEdicaoData(i);
                 gPickImagem = i; gRenomear = -1;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Trocar caminho...", ImVec2(188, 38))) {
+            if (BotaoSec(T("Trocar caminho..."), ImVec2(188, 38))) {
                 SalvarEdicaoData(i);
                 gPickCaminho = i; gRenomear = -1;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::Dummy(ImVec2(1, 2));
-            if (BotaoSec("Trocar User Files...", ImVec2(188, 38))) {
+            if (BotaoSec(T("Trocar User Files..."), ImVec2(188, 38))) {
                 SalvarEdicaoData(i);
                 gPickUserFiles = i; gRenomear = -1;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Abrir User Files", ImVec2(188, 38))) {
+            if (BotaoSec(T("Abrir User Files"), ImVec2(188, 38))) {
                 char uf[MAX_PATH];
                 UserFilesDaData(gDatas[i], uf, sizeof(uf));
                 ShellExecuteA(NULL, "open", uf, NULL, NULL, SW_SHOWNORMAL);
             }
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(133)), "User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.");
+            ImGui::TextColored(ImColor(Cinza(133)), T("User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela."));
             ImGui::PopFont();
             // fileira de capas PRONTAS - previa ja em monocromatico, como fica no card de data
             GarantirCapasUI();
             if (gNumCapasUI > 0) {
                 ImGui::Dummy(ImVec2(1, 6));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), "C A P A S   D O   L A U N C H E R");
+                ImGui::TextColored(ImColor(Cinza(156)), T("C A P A S   D O   L A U N C H E R"));
                 ImGui::PopFont();
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
                 ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
@@ -4886,7 +5500,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             if (gDatas[i].img[0]) {
                 ImGui::Dummy(ImVec2(1, 2));
-                if (BotaoSec("Sortear outra capa##dt", ImVec2(384, 30))) {
+                if (BotaoSec(T("Sortear outra capa##dt"), ImVec2(384, 30))) {
                     // nunca fica sem imagem: sorteia outra (mono) respeitando as regras
                     char velho[MAX_PATH];
                     strncpy(velho, gDatas[i].img, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
@@ -4907,12 +5521,12 @@ static void DesenhaUI(HWND hwnd) {
             if (!podeRemover) ImGui::BeginDisabled();
             static float tConfRemD = 0; // idem: 2 cliques
             if (tConfRemD > 0) tConfRemD -= dt;
-            bool remDataCl = BotaoSec(tConfRemD > 0 ? "Clique de novo para remover##rmd" : "Remover esta data##rmd",
+            bool remDataCl = BotaoSec(tConfRemD > 0 ? T("Clique de novo para remover##rmd") : T("Remover esta data##rmd"),
                     ImVec2(384, 34), podeRemover ? IM_COL32(240, 120, 116, 255) : Cinza(95)) && podeRemover;
             if (remDataCl && tConfRemD <= 0) tConfRemD = 3.0f;
             else if (remDataCl) {
                 tConfRemD = 0;
-                if (gDatas[i].tex) { gDatas[i].tex->Release(); gDatas[i].tex = NULL; }
+                if (gDatas[i].tex) { AdiarRelease(gDatas[i].tex); gDatas[i].tex = NULL; }
                 for (int j = i; j < gNumDatas - 1; j++) gDatas[j] = gDatas[j + 1];
                 gNumDatas--;
                 if (gDataSel >= gNumDatas) gDataSel = gNumDatas - 1;
@@ -4929,14 +5543,14 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button("Salvar", ImVec2(188, 40))) {
+            if (ImGui::Button(T("Salvar"), ImVec2(188, 40))) {
                 SalvarEdicaoData(i);
                 gRenomear = -1;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::PopStyleColor(4);
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Cancelar", ImVec2(188, 40))) { gRenomear = -1; ImGui::CloseCurrentPopup(); }
+            if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) { gRenomear = -1; ImGui::CloseCurrentPopup(); }
             ImGui::PopFont();
             ImGui::PopFont();
             ImGui::EndPopup();
@@ -4947,10 +5561,10 @@ static void DesenhaUI(HWND hwnd) {
 
     // ===== painel "Editar servidor" (favoritos: apelido, imagem, remover) =====
     {
-        if (gEditSrv >= 0 && !ImGui::IsPopupOpen("Editar servidor##trok")) {
+        if (gEditSrv >= 0 && !ImGui::IsPopupOpen(T("Editar servidor##trok"))) {
             gAddLink = false;
             CompactarLinks(gSrv[gEditSrv]); // slots sem buraco = indice do slot vira a ordem
-            ImGui::OpenPopup("Editar servidor##trok");
+            ImGui::OpenPopup(T("Editar servidor##trok"));
         }
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
@@ -4959,23 +5573,23 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
         ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
         ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
-        if (ImGui::BeginPopupModal("Editar servidor##trok", NULL,
+        if (ImGui::BeginPopupModal(T("Editar servidor##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             int i = gEditSrv;
             ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), "EDITAR SERVIDOR");
+            ImGui::TextColored(ImColor(Cinza(245)), T("EDITAR SERVIDOR"));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "N O M E   D E   E X I B I C A O");
+            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E   D E   E X I B I C A O"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushItemWidth(384);
-            ImGui::InputTextWithHint("##edapelido", "vazio = nome real do servidor", gEditApelido, sizeof(gEditApelido));
+            ImGui::InputTextWithHint("##edapelido", T("vazio = nome real do servidor"), gEditApelido, sizeof(gEditApelido));
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "C O N T A   A O   J O G A R");
+            ImGui::TextColored(ImColor(Cinza(156)), T("C O N T A   A O   J O G A R"));
             ImGui::PopFont();
             {
                 // capsula mostra AVATAR + NICK da conta escolhida; clique abre a lista
@@ -4989,7 +5603,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImDrawList* dcp = ImGui::GetWindowDrawList();
                     if (bh) dcp->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
                     dcp->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
-                    const char* rotC = (selPerfil >= 0) ? gPerfis[selPerfil].nick : "Conta atual (não trocar)";
+                    const char* rotC = (selPerfil >= 0) ? gPerfis[selPerfil].nick : T("Conta atual (não trocar)");
                     ImGui::PushFont(gFtBold);
                     ImVec2 tszC = ImGui::CalcTextSize(rotC);
                     float larg = 24 + 8 + tszC.x;
@@ -5019,7 +5633,7 @@ static void DesenhaUI(HWND hwnd) {
                         else DesenhaAvatar(cl2, qa, qb, gPerfis[q].avatar, gPerfis[q].cor, 8.0f);
                         ImGui::PushFont(gFtBold);
                         cl2->AddText(ImVec2(la2.x + 48, la2.y + 12), Cinza(238),
-                                     q < 0 ? "Conta atual (não trocar)" : gPerfis[q].nick);
+                                     q < 0 ? T("Conta atual (não trocar)") : gPerfis[q].nick);
                         ImGui::PopFont();
                         if (clq) {
                             if (q < 0) gSrv[i].contaPref[0] = 0;
@@ -5034,7 +5648,72 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "L I N K S   O F I C I A I S");
+            ImGui::TextColored(ImColor(Cinza(156)), T("D A T A   A O   J O G A R"));
+            ImGui::PopFont();
+            {
+                // capsula mostra CAPA + NOME da data escolhida; clique abre a lista (como a conta)
+                int selData = -1;
+                for (int q = 0; q < gNumDatas; q++)
+                    if (gSrv[i].dataPref[0] && _stricmp(gDatas[q].nome, gSrv[i].dataPref) == 0) { selData = q; break; }
+                if (ImGui::InvisibleButton("##dtpref", ImVec2(384, 36))) ImGui::OpenPopup("##popdata");
+                {
+                    ImVec2 ba = ImGui::GetItemRectMin(), bb = ImGui::GetItemRectMax();
+                    bool bh = ImGui::IsItemHovered();
+                    ImDrawList* dcp = ImGui::GetWindowDrawList();
+                    if (bh) dcp->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
+                    dcp->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
+                    const char* rotD = (selData >= 0) ? gDatas[selData].nome : T("Data em uso (não trocar)");
+                    ImGui::PushFont(gFtBold);
+                    ImVec2 tszD = ImGui::CalcTextSize(rotD);
+                    float larg = 36 + 8 + tszD.x;
+                    float x0 = (ba.x + bb.x - larg) * 0.5f, ymid = (ba.y + bb.y) * 0.5f;
+                    ImVec2 qa(x0, ymid - 10), qb(x0 + 36, ymid + 10); // capa 16:9 pequena
+                    if (selData >= 0 && gDatas[selData].tex) ImagemCapa(dcp, gDatas[selData].tex, qa, qb, 5.0f, 0);
+                    else dcp->AddRect(qa, qb, Cinza(110), 5.0f, 0, 1.4f); // sem troca: quadro vazado
+                    dcp->AddText(ImVec2(x0 + 44, ymid - tszD.y * 0.5f), Cinza(bh ? 240 : 205), rotD);
+                    ImGui::PopFont();
+                }
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+                if (ImGui::BeginPopup("##popdata")) {
+                    ImDrawList* cl2 = ImGui::GetWindowDrawList();
+                    for (int q = -1; q < gNumDatas; q++) { // -1 = "data em uso (nao trocar)"
+                        char idq[16]; sprintf(idq, "##pd%d", q + 1);
+                        bool selQ = (q < 0) ? !gSrv[i].dataPref[0]
+                                            : _stricmp(gDatas[q].nome, gSrv[i].dataPref) == 0;
+                        bool clq = ImGui::InvisibleButton(idq, ImVec2(360, 44));
+                        ImVec2 la2 = ImGui::GetItemRectMin(), lb2 = ImGui::GetItemRectMax();
+                        bool hv = ImGui::IsItemHovered();
+                        if (hv) cl2->AddRectFilled(la2, lb2, Cinza(255, 14), 9);
+                        if (selQ) cl2->AddRect(la2, lb2, ComAlpha(AC.cor, 0.85f), 9, 0, 1.5f);
+                        ImVec2 qa(la2.x + 7, la2.y + 7), qb(la2.x + 60, la2.y + 37); // capa 16:9
+                        if (q < 0) cl2->AddRect(qa, qb, Cinza(110), 6, 0, 1.5f);
+                        else if (gDatas[q].tex) ImagemCapa(cl2, gDatas[q].tex, qa, qb, 6.0f, 0);
+                        else cl2->AddRectFilled(qa, qb, Cinza(40), 6);
+                        // versao do SA-MP da data a direita; o nome trunca antes de encostar nela
+                        const char* vq = (q >= 0) ? (gDatas[q].versao[0] ? gDatas[q].versao : T("sem SA-MP")) : "";
+                        ImGui::PushFont(gFtMini);
+                        ImVec2 vqs = ImGui::CalcTextSize(vq);
+                        if (q >= 0) cl2->AddText(ImVec2(lb2.x - 12 - vqs.x, la2.y + 15),
+                                                 gDatas[q].versao[0] ? Cinza(150) : IM_COL32(240, 120, 116, 255), vq);
+                        ImGui::PopFont();
+                        ImGui::PushFont(gFtBold);
+                        TextoTruncado(cl2, ImVec2(la2.x + 70, la2.y + 12), (lb2.x - 12 - (q >= 0 ? vqs.x + 10 : 0)) - (la2.x + 70),
+                                      Cinza(238), q < 0 ? T("Data em uso (não trocar)") : gDatas[q].nome);
+                        ImGui::PopFont();
+                        if (clq) {
+                            if (q < 0) gSrv[i].dataPref[0] = 0;
+                            else strncpy(gSrv[i].dataPref, gDatas[q].nome, sizeof(gSrv[0].dataPref) - 1);
+                            SalvarServidores();
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+                ImGui::PopStyleVar();
+            }
+            ImGui::Dummy(ImVec2(1, 8));
+            ImGui::PushFont(gFtMini);
+            ImGui::TextColored(ImColor(Cinza(156)), T("L I N K S   O F I C I A I S"));
             ImGui::PopFont();
             {
                 // lista livre: cada link tem nome e url proprios (viram botoes na Home)
@@ -5073,7 +5752,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::PopClipRect();
                     ImGui::PopFont();
                     ImGui::SetCursorScreenPos(ImVec2(lp.x + 384 - 78, lp.y + 4));
-                    char idr[24]; sprintf(idr, "Remover##lk%d", q);
+                    char idr[24]; sprintf(idr, T("Remover##lk%d"), q);
                     if (BotaoSec(idr, ImVec2(78, 26), IM_COL32(240, 120, 116, 255))) {
                         gSrv[i].sites[q][0] = 0;
                         CompactarLinks(gSrv[i]);
@@ -5084,7 +5763,7 @@ static void DesenhaUI(HWND hwnd) {
                 bool temVaga = false;
                 for (int q = 0; q < 4; q++) if (!gSrv[i].sites[q][0]) temVaga = true;
                 if (temVaga && !gAddLink) {
-                    if (BotaoSec("+  Adicionar link", ImVec2(384, 30))) { gAddLink = true; gNovoRot[0] = gNovoUrl[0] = 0; }
+                    if (BotaoSec(T("+  Adicionar link"), ImVec2(384, 30))) { gAddLink = true; gNovoRot[0] = gNovoUrl[0] = 0; }
                 } else if (temVaga) {
                     ImGui::PushItemWidth(120);
                     ImGui::InputTextWithHint("##nrot", "nome", gNovoRot, sizeof(gNovoRot));
@@ -5108,7 +5787,7 @@ static void DesenhaUI(HWND hwnd) {
                 }
             }
             ImGui::Dummy(ImVec2(1, 12));
-            if (BotaoSec("Trocar imagem de fundo...", ImVec2(188, 38))) {
+            if (BotaoSec(T("Trocar imagem de fundo..."), ImVec2(188, 38))) {
                 for (char* c = gEditApelido; *c; c++) if (*c == '|') *c = '/';
                 strncpy(gSrv[i].apelido, gEditApelido, sizeof(gSrv[0].apelido) - 1);
                 SalvarServidores();
@@ -5116,7 +5795,7 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Trocar logo...", ImVec2(188, 38))) {
+            if (BotaoSec(T("Trocar logo..."), ImVec2(188, 38))) {
                 for (char* c = gEditApelido; *c; c++) if (*c == '|') *c = '/';
                 strncpy(gSrv[i].apelido, gEditApelido, sizeof(gSrv[0].apelido) - 1);
                 SalvarServidores();
@@ -5124,14 +5803,14 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::CloseCurrentPopup();
             }
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(133)), "Fundo aparece na Home; a logo troca o nome grande.");
+            ImGui::TextColored(ImColor(Cinza(133)), T("Fundo aparece na Home; a logo troca o nome grande."));
             ImGui::PopFont();
             // fileira de capas PRONTAS do launcher: clica e aplica na hora
             GarantirCapasUI();
             if (gNumCapasUI > 0) {
                 ImGui::Dummy(ImVec2(1, 6));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), "C A P A S   D O   L A U N C H E R");
+                ImGui::TextColored(ImColor(Cinza(156)), T("C A P A S   D O   L A U N C H E R"));
                 ImGui::PopFont();
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
                 ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
@@ -5175,7 +5854,7 @@ static void DesenhaUI(HWND hwnd) {
             if (gSrv[i].img[0] || gSrv[i].logo[0]) {
                 ImGui::Dummy(ImVec2(1, 2));
                 if (gSrv[i].img[0]) {
-                    if (BotaoSec("Sortear outra capa", ImVec2(188, 30))) {
+                    if (BotaoSec(T("Sortear outra capa"), ImVec2(188, 30))) {
                         // "remover" nunca deixa sem imagem: sorteia outra respeitando as regras
                         char velho[MAX_PATH];
                         strncpy(velho, gSrv[i].img, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
@@ -5193,7 +5872,7 @@ static void DesenhaUI(HWND hwnd) {
                     if (gSrv[i].logo[0]) ImGui::SameLine(0, 8);
                 }
                 if (gSrv[i].logo[0]) {
-                    if (BotaoSec("Remover logo", ImVec2(188, 30))) {
+                    if (BotaoSec(T("Remover logo"), ImVec2(188, 30))) {
                         char velho[MAX_PATH];
                         strncpy(velho, gSrv[i].logo, sizeof(velho) - 1); velho[sizeof(velho) - 1] = 0;
                         gSrv[i].logo[0] = 0;
@@ -5207,7 +5886,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::Dummy(ImVec2(1, 4));
             static float tConfRemF = 0; // remover e destrutivo: pede confirmacao (2 cliques)
             if (tConfRemF > 0) tConfRemF -= dt;
-            bool remFavCl = BotaoSec(tConfRemF > 0 ? "Clique de novo para remover##rmf" : "Remover dos favoritos##rmf",
+            bool remFavCl = BotaoSec(tConfRemF > 0 ? T("Clique de novo para remover##rmf") : T("Remover dos favoritos##rmf"),
                                      ImVec2(384, 34), IM_COL32(240, 120, 116, 255));
             if (remFavCl && tConfRemF <= 0) tConfRemF = 3.0f;
             else if (remFavCl) {
@@ -5216,14 +5895,14 @@ static void DesenhaUI(HWND hwnd) {
                 if (gSrv[i].tex) {
                     if (gSrv[i].tex == gFundoAtual) gFundoAtual = NULL;
                     if (gSrv[i].tex == gFundoAnt) gFundoAnt = NULL;
-                    gSrv[i].tex->Release(); gSrv[i].tex = NULL;
+                    AdiarRelease(gSrv[i].tex); gSrv[i].tex = NULL;
                 }
-                if (gSrv[i].texLogo) { gSrv[i].texLogo->Release(); gSrv[i].texLogo = NULL; }
+                if (gSrv[i].texLogo) { AdiarRelease(gSrv[i].texLogo); gSrv[i].texLogo = NULL; }
                 for (int j = i; j < gNumSrv - 1; j++) gSrv[j] = gSrv[j + 1];
                 gNumSrv--;
                 if (gNumSrv < 1) { // nunca fica vazio
                     memset(&gSrv[0], 0, sizeof(gSrv[0]));
-                    strcpy(gSrv[0].nome, "Adicione servidores na aba Internet");
+                    strcpy(gSrv[0].nome, T("Adicione servidores na aba Internet"));
                     strcpy(gSrv[0].ip, "127.0.0.1:7777");
                     gSrv[0].ping = -1;
                     gNumSrv = 1;
@@ -5240,7 +5919,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button("Salvar", ImVec2(188, 40))) {
+            if (ImGui::Button(T("Salvar"), ImVec2(188, 40))) {
                 for (char* c = gEditApelido; *c; c++) if (*c == '|') *c = '/';
                 strncpy(gSrv[i].apelido, gEditApelido, sizeof(gSrv[0].apelido) - 1);
                 SalvarServidores();
@@ -5249,7 +5928,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImGui::PopStyleColor(4);
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Cancelar", ImVec2(188, 40))) { gEditSrv = -1; ImGui::CloseCurrentPopup(); }
+            if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) { gEditSrv = -1; ImGui::CloseCurrentPopup(); }
             ImGui::PopFont();
             ImGui::PopFont();
             ImGui::EndPopup();
@@ -5304,7 +5983,7 @@ static void DesenhaUI(HWND hwnd) {
                         gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
                         SalvarConfig();
                     }
-                    if (gModsEstado == 0) CreateThread(NULL, 0, ThreadMods, NULL, 0, NULL);
+                    if (gModsEstado == 0) RodarThread(ThreadMods, NULL);
                 }
             }
             bool hov = ImGui::IsItemHovered();
@@ -5315,9 +5994,9 @@ static void DesenhaUI(HWND hwnd) {
             IconeNav(sl, ImVec2(38, y + 23), i, gTela == i ? Cinza(250) : (hov ? Cinza(215) : Cinza(125)));
             if (alfaTxt > 8) { // nome da aba (aparece junto com a expansao)
                 ImGui::PushFont(gFtBold);
-                ImVec2 tsz = ImGui::CalcTextSize(NOMES_NAV[i]);
+                ImVec2 tsz = ImGui::CalcTextSize(T(NOMES_NAV[i]));
                 sl->AddText(ImVec2(66, y + (46 - tsz.y) * 0.5f),
-                            Cinza(gTela == i ? 245 : (hov ? 220 : 150), alfaTxt), NOMES_NAV[i]);
+                            Cinza(gTela == i ? 245 : (hov ? 220 : 150), alfaTxt), T(NOMES_NAV[i]));
                 ImGui::PopFont();
             }
             if (i == 5 && gModsNovo && gTela != 5) { // post novo no blog: bolinha pulsando
@@ -5334,7 +6013,7 @@ static void DesenhaUI(HWND hwnd) {
             // ícone lucide do painel (o mesmo conceito do launcher da Rockstar)
             ImU32 cS = Cinza(hovS ? 225 : 115);
             Icone(sl, ImVec2(38.0f, ds.y - 49.0f), gSideAberta ? I_PAINEL_FECHA : I_PAINEL_ABRE, cS, 19.0f);
-            if (hovS) ImGui::SetTooltip(gSideAberta ? "Recolher menu" : "Expandir menu");
+            if (hovS) ImGui::SetTooltip(gSideAberta ? T("Recolher menu") : T("Expandir menu"));
         }
         ImGui::PushFont(gFtMini);
         sl->AddText(ImVec2(28, ds.y - 26), Cinza(95), VERSAO);
@@ -5351,7 +6030,7 @@ static void DesenhaUI(HWND hwnd) {
             ShellExecuteA(NULL, "open", gAttArquivo, "--atualizar", NULL, SW_SHOWNORMAL);
             gRodando = false;
         }
-        if (gAttPopup && !ImGui::IsPopupOpen("Atualização##trok")) ImGui::OpenPopup("Atualização##trok");
+        if (gAttPopup && !ImGui::IsPopupOpen(T("Atualização##trok"))) ImGui::OpenPopup(T("Atualização##trok"));
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
@@ -5359,19 +6038,19 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
         ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
         ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
-        if (ImGui::BeginPopupModal("Atualização##trok", NULL,
+        if (ImGui::BeginPopupModal(T("Atualização##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), "NOVA ATUALIZAÇÃO");
+            ImGui::TextColored(ImColor(Cinza(245)), T("NOVA ATUALIZAÇÃO"));
             ImGui::PopFont();
             ImGui::PushFont(gFtMini);
             char vtxt[80];
-            sprintf(vtxt, "%s disponível  -  você está na %s", gAttVersao, VERSAO);
+            sprintf(vtxt, T("%s disponível  -  você está na %s"), gAttVersao, VERSAO);
             ImGui::TextColored(ImColor(Cinza(140)), "%s", vtxt); // "%s": conteudo vem da internet
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 10));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), "N O V I D A D E S");
+            ImGui::TextColored(ImColor(Cinza(156)), T("N O V I D A D E S"));
             ImGui::PopFont();
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(10, 10, 10, 255)));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
@@ -5380,7 +6059,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::SetCursorPos(ImVec2(12, 10));
             ImGui::PushFont(gFtBody);
             ImGui::PushTextWrapPos(370);
-            ImGui::TextColored(ImColor(Cinza(205)), "%s", gAttNotas[0] ? gAttNotas : "Melhorias e correções.");
+            ImGui::TextColored(ImColor(Cinza(205)), "%s", gAttNotas[0] ? gAttNotas : T("Melhorias e correções."));
             ImGui::PopTextWrapPos();
             ImGui::PopFont();
             ImGui::EndChild();
@@ -5404,8 +6083,8 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImGui::PushFont(gFtMini);
                 char ptx[48];
-                if (pctD >= 0) sprintf(ptx, "Baixando a atualização...  %d%%", pctD);
-                else strcpy(ptx, "Baixando a atualização...");
+                if (pctD >= 0) sprintf(ptx, T("Baixando a atualização...  %d%%"), pctD);
+                else strcpy(ptx, T("Baixando a atualização..."));
                 al->AddText(ImVec2(bp.x, bp.y + 24), Cinza(150), ptx);
                 ImGui::PopFont();
             } else {
@@ -5416,10 +6095,10 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
                 const char* pex = strrchr(gAttUrl, '.');
                 bool linkExe = pex && _stricmp(pex, ".exe") == 0;
-                if (ImGui::Button("Atualizar agora", ImVec2(188, 40))) {
+                if (ImGui::Button(T("Atualizar agora"), ImVec2(188, 40))) {
                     if (linkExe) { // baixa e instala sozinho, sem sair do app
                         gAttBaixa = 1;
-                        CreateThread(NULL, 0, ThreadBaixarUpdate, NULL, 0, NULL);
+                        RodarThread(ThreadBaixarUpdate, NULL);
                     } else if (UrlWebOk(gAttUrl)) { // link nao e um exe: cai pro navegador
                         ShellExecuteA(NULL, "open", gAttUrl, NULL, NULL, SW_SHOWNORMAL);
                         gAttPopup = false;
@@ -5428,14 +6107,14 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImGui::PopStyleColor(4);
                 ImGui::SameLine(0, 8);
-                if (BotaoSec("Depois", ImVec2(188, 40))) { gAttPopup = false; ImGui::CloseCurrentPopup(); }
+                if (BotaoSec(T("Depois"), ImVec2(188, 40))) { gAttPopup = false; ImGui::CloseCurrentPopup(); }
                 ImGui::PopFont();
                 if (gAttBaixa == 2) { // download falhou: avisa e oferece o navegador
                     ImGui::Dummy(ImVec2(1, 6));
                     ImGui::PushFont(gFtMini);
-                    ImGui::TextColored(ImColor(IM_COL32(240, 120, 116, 255)), "Não consegui baixar sozinho.");
+                    ImGui::TextColored(ImColor(IM_COL32(240, 120, 116, 255)), T("Não consegui baixar sozinho."));
                     ImGui::SameLine(0, 10);
-                    if (ImGui::SmallButton("Abrir no navegador")) { // manda pro post do blog, nao pro GitHub
+                    if (ImGui::SmallButton(T("Abrir no navegador"))) { // manda pro post do blog, nao pro GitHub
                         ShellExecuteA(NULL, "open", URL_POST_LAUNCHER, NULL, NULL, SW_SHOWNORMAL);
                     }
                     ImGui::PopFont();
@@ -5461,13 +6140,13 @@ static void DesenhaUI(HWND hwnd) {
         if (ImGui::BeginPopupModal("BemVindo##trok", NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), "BEM-VINDO AO TROK LAUNCHER");
+            ImGui::TextColored(ImColor(Cinza(245)), T("BEM-VINDO AO TROK LAUNCHER"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushTextWrapPos(400);
             ImGui::TextColored(ImColor(Cinza(190)),
-                "Não encontrei o seu GTA San Andreas com SA-MP neste computador. "
-                "Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve.");
+                T("Não encontrei o seu GTA San Andreas com SA-MP neste computador. "
+                "Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve."));
             ImGui::PopTextWrapPos();
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 12));
@@ -5488,9 +6167,9 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PopStyleVar(3);
     }
 
-    // ===== modal: senha do servidor (aparece sozinho ao conectar em servidor trancado) =====
+    // ===== modal: adicionar favorito pelo IP (host:porta, nome opcional) =====
     {
-        if (gPedirSenha && !ImGui::IsPopupOpen("Senha##trok")) ImGui::OpenPopup("Senha##trok");
+        if (gAddIpAbrir && !ImGui::IsPopupOpen("AddIp##trok")) ImGui::OpenPopup("AddIp##trok");
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
@@ -5498,10 +6177,78 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
         ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
         ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
-        if (ImGui::BeginPopupModal("Senha##trok", NULL,
+        if (ImGui::BeginPopupModal("AddIp##trok", NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), "SERVIDOR COM SENHA");
+            ImGui::TextColored(ImColor(Cinza(245)), T("ADICIONAR PELO IP"));
+            ImGui::PopFont();
+            ImGui::PushFont(gFtMini);
+            ImGui::TextColored(ImColor(Cinza(140)), T("O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho."));
+            ImGui::PopFont();
+            ImGui::Dummy(ImVec2(1, 10));
+            ImGui::PushFont(gFtMini);
+            ImGui::TextColored(ImColor(Cinza(156)), T("E N D E R E C O   D O   S E R V I D O R"));
+            ImGui::PopFont();
+            ImGui::PushItemWidth(384);
+            ImGui::PushFont(gFtBold);
+            if (!ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0)) ImGui::SetKeyboardFocusHere();
+            bool entrou = ImGui::InputTextWithHint("##addip", T("127.0.0.1:7777 ou servidor.com:7777"), gAddIp, sizeof(gAddIp),
+                                                   ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::PopFont();
+            ImGui::Dummy(ImVec2(1, 6));
+            ImGui::PushFont(gFtMini);
+            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E   ( O P C I O N A L )"));
+            ImGui::PopFont();
+            ImGui::PushFont(gFtBody);
+            bool entrou2 = ImGui::InputTextWithHint("##addnome", T("vazio = nome que o servidor responder"), gAddNome, sizeof(gAddNome),
+                                                    ImGuiInputTextFlags_EnterReturnsTrue);
+            ImGui::PopFont();
+            ImGui::PopItemWidth();
+            ImGui::Dummy(ImVec2(1, 12));
+            ImGui::PushFont(gFtBold);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
+            bool adicionar = ImGui::Button(T("Adicionar"), ImVec2(188, 40));
+            ImGui::PopStyleColor(4);
+            ImGui::SameLine(0, 8);
+            if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) {
+                gAddIpAbrir = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopFont();
+            if (adicionar || entrou || entrou2) {
+                char ipN[64];
+                if (!NormalizarIp(gAddIp, ipN, sizeof(ipN))) Avisar(T("Endereço inválido. Use ip:porta, como 127.0.0.1:7777."));
+                else if (FavoritoExiste(ipN)) Avisar(T("Esse servidor já está nos favoritos."));
+                else {
+                    FavoritarIp(ipN, gAddNome);
+                    gAddIpAbrir = false;
+                    gSubAba = 0; // mostra o favorito recem-criado
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::EndPopup();
+        }
+        ImGui::PopStyleColor(3);
+        ImGui::PopStyleVar(3);
+    }
+
+    // ===== modal: senha do servidor (aparece sozinho ao conectar em servidor trancado) =====
+    {
+        if (gPedirSenha && !ImGui::IsPopupOpen(T("Senha##trok"))) ImGui::OpenPopup(T("Senha##trok"));
+        ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        if (ImGui::BeginPopupModal(T("Senha##trok"), NULL,
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
+            ImGui::PushFont(gFtBotao);
+            ImGui::TextColored(ImColor(Cinza(245)), T("SERVIDOR COM SENHA"));
             ImGui::PopFont();
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(140)), "%s", gPendNome); // "%s": nome vem do servidor (não e format string!)
@@ -5520,10 +6267,10 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            bool conectar = ImGui::Button("Conectar", ImVec2(188, 40));
+            bool conectar = ImGui::Button(T("Conectar"), ImVec2(188, 40));
             ImGui::PopStyleColor(4);
             ImGui::SameLine(0, 8);
-            if (BotaoSec("Cancelar", ImVec2(188, 40))) {
+            if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) {
                 gPedirSenha = false;
                 gConnSenha[0] = 0;
                 ImGui::CloseCurrentPopup();
@@ -5647,7 +6394,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImU32 exCor = conf ? IM_COL32(240, 96, 92, 255) : Cinza(exHov ? 250 : 175);
                     if (exHov || conf) vl->AddRectFilled(la2, lb2, conf ? IM_COL32(240, 96, 92, 34) : Cinza(255, 18), 9);
                     Icone(vl, ImVec2((la2.x + lb2.x) * 0.5f, (la2.y + lb2.y) * 0.5f), I_LIXEIRA, exCor, 18.0f);
-                    Dica(conf ? "Clique de novo para excluir" : "Excluir (vai para a Lixeira do Windows)");
+                    Dica(conf ? T("Clique de novo para excluir") : T("Excluir (vai para a Lixeira do Windows)"));
                     if (ImGui::IsKeyPressed(ImGuiKey_Delete)) exCl = true;
                     if (exCl) {
                         if (conf) {
@@ -5670,12 +6417,12 @@ static void DesenhaUI(HWND hwnd) {
                     ImU32 cpCor = Cinza(cpHov ? 250 : 175);
                     if (cpHov) vl->AddRectFilled(ca2, cb2v, Cinza(255, 18), 9);
                     Icone(vl, ImVec2((ca2.x + cb2v.x) * 0.5f, (ca2.y + cb2v.y) * 0.5f), I_COPIAR, cpCor, 17.0f);
-                    Dica("Copiar imagem");
+                    Dica(T("Copiar imagem"));
                     if (cpCl && !fechar && CopiarImagemClipboard(gHwnd, gFotos[gFotoVista >= 0 ? gFotoVista : 0].caminho)) tCop2 = 1.3f;
                     // avisos ao lado dos icones
                     ImGui::PushFont(gFtMini);
-                    if (conf) vl->AddText(ImVec2(cb2v.x + 10, la2.y + 11), IM_COL32(240, 120, 116, 255), "clique de novo para excluir");
-                    else if (tCop2 > 0) vl->AddText(ImVec2(cb2v.x + 10, la2.y + 11), Cinza(220), "Copiado!");
+                    if (conf) vl->AddText(ImVec2(cb2v.x + 10, la2.y + 11), IM_COL32(240, 120, 116, 255), T("clique de novo para excluir"));
+                    else if (tCop2 > 0) vl->AddText(ImVec2(cb2v.x + 10, la2.y + 11), Cinza(220), T("Copiado!"));
                     ImGui::PopFont();
                 }
                 // botao direito na foto: menu com "Copiar imagem" (vai em resolucao original)
@@ -5687,7 +6434,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImDrawList* cx2 = ImGui::GetWindowDrawList();
                     static float tCop = 0;
                     if (tCop > 0) tCop -= dt;
-                    const char* rotCop = tCop > 0 ? "Copiado!" : "Copiar imagem";
+                    const char* rotCop = tCop > 0 ? T("Copiado!") : T("Copiar imagem");
                     ImGui::PushFont(gFtBody);
                     ImVec2 csz2 = ImGui::CalcTextSize(rotCop);
                     if (ImGui::InvisibleButton("##cpimg", ImVec2(csz2.x + 60, 32))) {
@@ -5748,7 +6495,7 @@ static void DesenhaUI(HWND hwnd) {
                 // ---- lista de contas ----
                 ImGui::SetCursorPos(ImVec2(16, 12));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), "C O N T A S");
+                ImGui::TextColored(ImColor(Cinza(156)), T("C O N T A S"));
                 ImGui::PopFont();
                 float y2 = 36;
                 for (int i = 0; i < gNumPerfis; i++) {
@@ -5768,7 +6515,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::PopFont();
                     ImGui::PushFont(gFtMini);
                     ml->AddText(ImVec2(la.x + 60, la.y + 31), (i == gPerfilSel) ? AC.hi : Cinza(120),
-                                (i == gPerfilSel) ? "EM USO" : "clique para usar");
+                                (i == gPerfilSel) ? T("EM USO") : T("clique para usar"));
                     ImGui::PopFont();
                     // "..." da conta: editar nick/avatar/remover
                     DesenhaReticencias(ml, ma, mb, mh);
@@ -5788,7 +6535,7 @@ static void DesenhaUI(HWND hwnd) {
                 if (gNumPerfis < MAX_PERFIS) {
                     ImGui::SetCursorPos(ImVec2(14, y2 + 4));
                     ImGui::PushFont(gFtBold);
-                    if (BotaoSec("+  Adicionar conta", ImVec2(332, 42))) {
+                    if (BotaoSec(T("+  Adicionar conta"), ImVec2(332, 42))) {
                         gContaEdit = -2; // modo CRIACAO: so vira conta de verdade no Salvar
                         strcpy(gEditNick, "Novo_Nick");
                         gEditCor = gNumPerfis % N_ACCENTS;
@@ -5806,11 +6553,11 @@ static void DesenhaUI(HWND hwnd) {
                 int i = gContaEdit;
                 ImGui::SetCursorPos(ImVec2(16, 12));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), gContaEdit == -2 ? "N O V A   C O N T A" : "E D I T A R   C O N T A");
+                ImGui::TextColored(ImColor(Cinza(156)), gContaEdit == -2 ? T("N O V A   C O N T A") : T("E D I T A R   C O N T A"));
                 ImGui::PopFont();
                 ImGui::SetCursorPos(ImVec2(16, 40));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(120)), "N I C K");
+                ImGui::TextColored(ImColor(Cinza(120)), T("N I C K"));
                 ImGui::PopFont();
                 ImGui::SetCursorPos(ImVec2(14, 58));
                 ImGui::PushItemWidth(332);
@@ -5820,7 +6567,7 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::PopItemWidth();
                 ImGui::SetCursorPos(ImVec2(16, 100));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(120)), "A V A T A R");
+                ImGui::TextColored(ImColor(Cinza(120)), T("A V A T A R"));
                 ImGui::PopFont();
                 if (gNumAvatares > 0) { // grade de IMAGENS da pasta de avatares
                     for (int c = 0; c < gNumAvatares; c++) {
@@ -5854,7 +6601,7 @@ static void DesenhaUI(HWND hwnd) {
                 float yb = 122.0f + linhasAv * 68.0f + 4.0f;
                 if (gContaEdit >= 0 && gNumPerfis > 1) {
                     ImGui::SetCursorPos(ImVec2(14, yb));
-                    if (BotaoSec("Remover conta", ImVec2(332, 32), IM_COL32(240, 120, 116, 255))) {
+                    if (BotaoSec(T("Remover conta"), ImVec2(332, 32), IM_COL32(240, 120, 116, 255))) {
                         for (int j = i; j < gNumPerfis - 1; j++) gPerfis[j] = gPerfis[j + 1];
                         gNumPerfis--;
                         if (gPerfilSel > i) gPerfilSel--;
@@ -5873,7 +6620,7 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
                 ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-                if (ImGui::Button("Salvar", ImVec2(162, 40)) && gContaEdit != -1) {
+                if (ImGui::Button(T("Salvar"), ImVec2(162, 40)) && gContaEdit != -1) {
                     for (char* c = gEditNick; *c; c++) if (*c == ' ' || *c == '|') *c = '_'; // nick SA-MP nao tem espaco
                     if (!gEditNick[0]) strcpy(gEditNick, "Nick_Sobrenome");
                     if (gContaEdit == -2) { // criacao: a conta so nasce AQUI
@@ -5901,7 +6648,7 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImGui::PopStyleColor(4);
                 ImGui::SameLine(0, 8);
-                if (BotaoSec("Voltar", ImVec2(162, 40))) gContaEdit = -1;
+                if (BotaoSec(T("Voltar"), ImVec2(162, 40))) gContaEdit = -1;
                 ImGui::PopFont();
             }
             ImGui::EndChild();
@@ -5976,8 +6723,8 @@ static void DesenhaUI(HWND hwnd) {
         for (const char* pc = gConnNome; *pc && ni < 94; pc++) nomeUp[ni++] = (*pc >= 'a' && *pc <= 'z') ? *pc - 32 : *pc;
         nomeUp[ni] = 0;
         ImGui::PushFont(gFtMini);
-        ImVec2 e1 = ImGui::CalcTextSize("C O N E C T A N D O");
-        ov->AddText(ImVec2((ds.x - e1.x) * 0.5f, ds.y * 0.38f), AccentAtual().hi, "C O N E C T A N D O");
+        ImVec2 e1 = ImGui::CalcTextSize(T("C O N E C T A N D O"));
+        ov->AddText(ImVec2((ds.x - e1.x) * 0.5f, ds.y * 0.38f), AccentAtual().hi, T("C O N E C T A N D O"));
         ImGui::PopFont();
         ImGui::PushFont(gFtDisplay);
         ImVec2 e2 = ImGui::CalcTextSize(nomeUp);
@@ -5989,7 +6736,7 @@ static void DesenhaUI(HWND hwnd) {
         ov->AddRectFilledMultiColor(ImVec2(bx0, by), ImVec2(bx0 + 300 * frac, by + 5),
             AccentAtual().cor, AccentAtual().hi, AccentAtual().hi, AccentAtual().cor);
         ImGui::PushFont(gFtMono);
-        const char* etapa = gConnT < 0.6f ? "gravando seu nick..." : (gConnT < 1.2f ? "abrindo o samp.exe..." : "bom jogo!");
+        const char* etapa = gConnT < 0.6f ? T("gravando seu nick...") : (gConnT < 1.2f ? T("abrindo o samp.exe...") : T("bom jogo!"));
         ImVec2 e3 = ImGui::CalcTextSize(etapa);
         ov->AddText(ImVec2((ds.x - e3.x) * 0.5f, by + 18), Cinza(150), etapa);
         ImGui::PopFont();
@@ -6085,8 +6832,8 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
             SetForegroundWindow(h);
         } else if (l == WM_RBUTTONUP) {
             HMENU menu = CreatePopupMenu();
-            AppendMenuA(menu, MF_STRING, 1, "Abrir o Trok Launcher");
-            AppendMenuA(menu, MF_STRING, 2, "Sair");
+            AppendMenuA(menu, MF_STRING, 1, T("Abrir o Trok Launcher"));
+            AppendMenuA(menu, MF_STRING, 2, T("Sair"));
             POINT pt; GetCursorPos(&pt);
             SetForegroundWindow(h);
             int cmd = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_NONOTIFY, pt.x, pt.y, 0, h, NULL);
@@ -6274,9 +7021,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     }
 
     HANDLE hq = CreateThread(NULL, 0, ThreadQuery, NULL, 0, NULL);
-    CreateThread(NULL, 0, ThreadAtualizacao, NULL, 0, NULL); // checa versao nova (silencioso)
-    CreateThread(NULL, 0, ThreadMods, NULL, 0, NULL);        // posts do blog (bolinha se tiver novo)
-    CreateThread(NULL, 0, ThreadDiscord, NULL, 0, NULL);     // rich presence (se houver app id)
+    RodarThread(ThreadAtualizacao, NULL); // checa versao nova (silencioso)
+    RodarThread(ThreadMods, NULL);        // posts do blog (bolinha se tiver novo)
+    RodarThread(ThreadDiscord, NULL);     // rich presence (se houver app id)
     InitializeCriticalSection(&gLockImg);
     gEvImg = CreateEventA(NULL, FALSE, FALSE, NULL);
     HANDLE hImg[2]; // guardadas p/ esperar no shutdown (senao usam gDev ja liberado)
@@ -6300,7 +7047,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
             const DWORD INTERVALO = 20u * 60u * 1000u; // 20 min
             if (gModsEstado != 1 && (GetTickCount() - ultimoFeed) > INTERVALO) {
                 ultimoFeed = GetTickCount();
-                CreateThread(NULL, 0, ThreadMods, NULL, 0, NULL);
+                RodarThread(ThreadMods, NULL);
             }
         }
         if (!IsWindowVisible(hwnd)) { Sleep(60); continue; } // escondido na bandeja: nao renderiza

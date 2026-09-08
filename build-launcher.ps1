@@ -27,7 +27,7 @@ $cmd = @"
 call "$vcvars" >nul 2>&1
 if errorlevel 1 exit /b 1
 $(if ($res) { "rc /nologo /fo $res `"$dir\TrokLauncher.rc`"`r`nif errorlevel 1 exit /b 1" })
-cl /nologo /utf-8 /MT $flags /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista $res /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /OPT:REF /OPT:ICF /MANIFEST:EMBED /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+cl /nologo /utf-8 /MT $flags /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista $res /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /OPT:REF /OPT:ICF /MANIFEST:EMBED /MANIFESTINPUT:"$dir\TrokLauncher.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 "@
 $bat = Join-Path $env:TEMP ("build-launcher-" + [guid]::NewGuid().ToString('N') + '.bat')
 Set-Content -Path $bat -Value $cmd -Encoding ASCII
