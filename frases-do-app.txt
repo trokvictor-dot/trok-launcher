@@ -1,4 +1,5 @@
 %d screenshots - %s
+%d selecionadas
 %s disponível - você está na %s
 + Adicionar conta
 + Adicionar link
@@ -22,10 +23,12 @@ Adicionar data
 ADICIONAR PELO IP
 Adicionar servidor pelo IP
 Adicione servidores na aba Internet
+Agustus
 Ao abrir, a Home já vem no servidor em que você parou
 Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)
 Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos
 April
+Aralık
 Arquivo de backup inválido.
 Atualizar a galeria (F5)
 Atualizar agora
@@ -36,6 +39,8 @@ August
 Automático
 Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher.
 Azul
+Ağustos
+Bahasa Indonesia
 Baixando a atualização...
 Baixando a atualização... %d%%
 baixando a lista de servidores...
@@ -50,6 +55,7 @@ Cada data é uma instalação do jogo. Clique para escolher qual será aberta pe
 Cancelar
 class='bloco populares'
 Clique de novo para excluir
+Clique de novo para excluir %d
 Clique de novo para remover
 clique para usar
 Conectar
@@ -61,28 +67,36 @@ Copiado!
 Copiar imagem
 Copiar o IP
 Cor personalizada
+Cuma
+Cumartesi
 Custom
 Data em uso (não trocar)
 DATAS
 December
 Depois
+Desember
 Discord
 Discord Rich Presence
 e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o
 Editar data
 Editar servidor
+Ekim
 EM USO
 Endereço inválido. Use ip:porta, como 127.0.0.1:7777.
 English
 Entrar na comunidade do Discord
 Entrar no Discord
 Escolha a pasta User Files desta data
+Español
 Esse servidor já está nos favoritos.
+Excluir %d
 Excluir (vai para a Lixeira do Windows)
 Expandir menu
 Exportar configurações
 Exportar configurações...
+Eylül
 Favoritos (%d)
+Februari
 February
 Fechar o launcher ao entrar no jogo
 Fechar para a bandeja em vez de sair
@@ -95,6 +109,7 @@ GALERIA
 Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu
 gravando seu nick...
 Guia do launcher
+Haziran
 Imagem 16:9 da data
 Imagem de exibição do servidor
 Importar configurações
@@ -105,29 +120,43 @@ Iniciar minimizado na bandeja
 Internet
 Internet (%d)
 Início
+Januari
 January
 JOGADORES
 jogadores %d/%d ping %d ms %s
 Jogar
+Juli
 July
+Jumat
 June
+Juni
 Já está nos favoritos
+Kamis
+Kasım
 Laranja
 Lembrar o último servidor selecionado
 Limite de favoritos atingido.
+Limpar seleção
 Link
 Logo do servidor (substitui o nome no card)
 Mais vistos
 March
+Maret
+Mart
 março
 May
+Mayıs
+Mei
 Melhorias e correções.
+Minggu
+miércoles
 MODO
 Monday
 Mostarda
 Mostra no seu perfil do Discord o servidor em que você está jogando
 Mover o último jogado para o início dos favoritos
 Nenhuma screenshot encontrada nesta data.
+Nisan
 NOVA ATUALIZAÇÃO
 Nova data
 November
@@ -141,18 +170,24 @@ O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discor
 O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.
 O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar,
 O X esconde o launcher perto do relógio em vez de encerrar de vez
+Ocak
 October
 Ocultar cheios
 Ocultar com senha
 Ocultar sem resposta
 Ocultar vazios
+Oktober
 Oliva
 online, com senha
 Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original
+Pazar
+Pazartesi
+Perşembe
 PING
 Português
 Principal
 Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.
+Rabu
 Recentes
 Recolher menu
 Remover
@@ -161,15 +196,20 @@ Remover dos favoritos
 Remover esta data
 Remover logo
 Restaura um backup exportado em outro PC (o launcher reabre sozinho)
+Sabtu
 Sair
 Salvar
 Salvar senhas de RCON
 Salvar senhas de servidor automaticamente
+Salı
 SAMP
 Saturday
+Selasa
+Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)
 sem resposta
 sem SA-MP
 Senha
+Senin
 September
 SERVIDOR
 SERVIDOR COM SENHA
@@ -178,6 +218,7 @@ Site
 Sortear outra capa
 Sunday
 sábado
+Temmuz
 terça-feira
 Thursday
 Tijolo
@@ -191,6 +232,7 @@ Trok Launcher
 Trok Launcher %s - feito pela equipe TrokMods
 TROKMODS
 Tuesday
+Türkçe
 User Files
 User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.
 vazio = nome que o servidor responder
@@ -199,3 +241,5 @@ Visite nosso blog TrokMods. Clique num post para abrir no navegador.
 Voltar
 várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots
 Wednesday
+Çarşamba
+Şubat

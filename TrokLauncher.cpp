@@ -69,209 +69,212 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 // Rockstar-style: segue o idioma do Windows, com opcao nas Configuracoes (0 auto, 1 pt, 2 en).
 // Os textos de tela passam por T("..."): em portugues volta o proprio texto; em ingles procura na
 // tabela (o que nao esta nela fica em portugues). "##id" no fim e preservado.
-static int gIdiomaCfg = 0;
-static int gLang = 0; // efetivo: 0 pt-BR, 1 en
-struct Traducao { const char* pt; const char* en; };
+static int gIdiomaCfg = 0; // 0 automatico (Windows), 1 pt, 2 en, 3 es, 4 ru, 5 id, 6 tr
+static int gLang = 0; // efetivo: 0 pt-BR, 1 en, 2 es, 3 ru, 4 id, 5 tr
+struct Traducao { const char* t[6]; }; // pt, en, es, ru, id, tr (coluna vazia cai pro ingles)
 static const Traducao TRADUCOES[] = {
-    { "Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)", "Select several (or Ctrl+click; Ctrl+A selects all)" },
-    { "%d selecionadas", "%d selected" },
-    { "Excluir %d", "Delete %d" },
-    { "Clique de novo para excluir %d", "Click again to delete %d" },
-    { "Limpar seleção", "Clear selection" },
-    { "C A P A S   D O   L A U N C H E R", "L A U N C H E R   C O V E R S" },
-    { "C O N E C T A N D O", "C O N N E C T I N G" },
-    { "C O N T A S", "A C C O U N T S" },
-    { "clique de novo para excluir", "click again to delete" },
-    { "E D I T A R   C O N T A", "E D I T   A C C O U N T" },
-    { "EDITAR DATA", "EDIT INSTALL" },
-    { "EDITAR SERVIDOR", "EDIT SERVER" },
-    { "F A V O R I T O S", "F A V O R I T E S" },
-    { "F I L T R O S", "F I L T E R S" },
-    { "N O V A   C O N T A", "N E W   A C C O U N T" },
-    { "N O V I D A D E S", "W H A T ' S   N E W" },
-    { "Não encontrei o seu GTA San Andreas com SA-MP neste computador. Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve.", "Couldn't find your GTA San Andreas with SA-MP on this computer. Point to your install's gta_sa.exe and the launcher handles the rest." },
-    { "gravando seu nick...", "saving your nick..." },
-    { "abrindo o samp.exe...", "opening samp.exe..." },
-    { "sem SA-MP", "no SA-MP" },
-    { "Mais vistos", "Most viewed" },
-    { "Entrar na comunidade do Discord", "Join the Discord community" },
-    { "Abrir o blog TrokMods", "Open the TrokMods blog" },
-    { "MODO", "MODE" },
-    { "JOGADORES", "PLAYERS" },
-    { "Site", "Website" },
-    { "Fórum", "Forum" },
-    { "Servidores", "Servers" },
-    { "Datas", "Installs" },
-    { "Configurações", "Settings" },
-    { "Galeria", "Gallery" },
-    { "Informações", "About" },
-    { "%s disponível  -  você está na %s", "%s available - you are on %s" },
-    { "+  Adicionar conta", "+ Add account" },
-    { "+  Adicionar link", "+ Add link" },
-    { "127.0.0.1:7777 ou servidor.com:7777", "127.0.0.1:7777 or server.com:7777" },
-    { "A lista não veio. Tentar de novo", "The list didn't load. Try again" },
-    { "A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.", "The game folder can't be inside the launcher folder. Check the install in use." },
-    { "Abre sozinho quando o computador liga", "Opens by itself when the computer starts" },
-    { "Abrir a pasta da data no Explorer", "Open this install's folder in Explorer" },
-    { "Abrir a pasta das screenshots", "Open the screenshots folder" },
-    { "Abrir no navegador", "Open in the browser" },
-    { "ABRIR O POST", "OPEN POST" },
-    { "Abrir o Trok Launcher", "Open Trok Launcher" },
-    { "Abrir User Files", "Open User Files" },
-    { "Adicionar", "Add" },
-    { "Adicionar aos favoritos", "Add to favorites" },
-    { "Adicionar data", "Add install" },
-    { "ADICIONAR PELO IP", "ADD BY IP" },
-    { "Adicionar servidor pelo IP", "Add server by IP" },
-    { "Adicione servidores na aba Internet", "Add servers from the Internet tab" },
-    { "Adicione servidores no .ini", "Add servers in the .ini" },
-    { "Ao abrir, a Home já vem no servidor em que você parou", "On startup, Home opens on the server you left off" },
-    { "Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)", "When you click Play, the launcher closes (or goes to the tray, if the option below is on)" },
-    { "Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos", "When you join a server, its card moves to the front of the favorites" },
-    { "Arquivo de backup inválido.", "Invalid backup file." },
-    { "Atualizar a galeria (F5)", "Refresh the gallery (F5)" },
-    { "Atualizar agora", "Update now" },
-    { "Atualizar os posts do blog", "Refresh the blog posts" },
-    { "Atualização", "Update" },
-    { "Atualização %s", "Update %s" },
-    { "Baixando a atualização...", "Downloading the update..." },
-    { "Baixando a atualização...  %d%%", "Downloading the update... %d%%" },
-    { "baixando a lista de servidores...", "downloading the server list..." },
-    { "BEM-VINDO AO TROK LAUNCHER", "WELCOME TO TROK LAUNCHER" },
-    { "Blog TrokMods", "TrokMods blog" },
-    { "bom jogo!", "have fun!" },
-    { "buscando os mais vistos do blog...", "fetching the blog's most viewed..." },
-    { "buscando posts do blog...", "fetching blog posts..." },
-    { "Buscar por nome, modo ou IP...", "Search by name, mode or IP..." },
-    { "C O M U N I D A D E", "C O M M U N I T Y" },
-    { "C O N T A   A O   J O G A R", "A C C O U N T   W H E N   P L A Y I N G" },
-    { "C O R   D E   D E S T A Q U E", "A C C E N T   C O L O R" },
-    { "Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.", "Each install is a copy of the game. Click one to choose which PLAY opens." },
-    { "Cancelar", "Cancel" },
-    { "Clique de novo para excluir", "Click again to delete" },
-    { "Clique de novo para remover", "Click again to remove" },
-    { "clique para usar", "click to use" },
-    { "Conectar", "Connect" },
-    { "CONFIGURAÇÕES", "SETTINGS" },
-    { "Configurações exportadas! Leve o arquivo pro outro PC.", "Settings exported! Take the file to the other PC." },
-    { "consultando servidor...   %s", "querying server... %s" },
-    { "Conta atual (não trocar)", "Current account (don't switch)" },
-    { "Copiado!", "Copied!" },
-    { "Copiar imagem", "Copy image" },
-    { "Copiar o IP", "Copy IP" },
-    { "Cor personalizada", "Custom color" },
-    { "D A T A   A O   J O G A R", "I N S T A L L   W H E N   P L A Y I N G" },
-    { "D E S C R I C A O", "D E S C R I P T I O N" },
-    { "Data em uso (não trocar)", "Install in use (don't switch)" },
-    { "DATAS", "INSTALLS" },
-    { "Depois", "Later" },
-    { "E N D E R E C O   D O   S E R V I D O R", "S E R V E R   A D D R E S S" },
-    { "Editar data", "Edit install" },
-    { "Editar servidor", "Edit server" },
-    { "EM USO", "IN USE" },
-    { "Endereço inválido. Use ip:porta, como 127.0.0.1:7777.", "Invalid address. Use ip:port, like 127.0.0.1:7777." },
-    { "Entrar no Discord", "Join the Discord" },
-    { "Escolha a pasta User Files desta data", "Choose this install's User Files folder" },
-    { "Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar.", "That folder has no samp.exe - install SA-MP there to play." },
-    { "Esse servidor já está nos favoritos.", "That server is already in your favorites." },
-    { "Excluir (vai para a Lixeira do Windows)", "Delete (goes to the Windows Recycle Bin)" },
-    { "Expandir menu", "Expand menu" },
-    { "Exportar configurações", "Export settings" },
-    { "     Exportar configurações...", "Export settings..." },
-    { "Favoritos (%d)", "Favorites (%d)" },
-    { "Fechar o launcher ao entrar no jogo", "Close the launcher when the game starts" },
-    { "Fechar para a bandeja em vez de sair", "Close to the tray instead of exiting" },
-    { "Filtros da lista", "List filters" },
-    { "Fundo aparece na Home; a logo troca o nome grande.", "The background shows on Home; the logo replaces the big name." },
-    { "GALERIA", "GALLERY" },
-    { "Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu", "Creates a single file with accounts, favorites, options and the images you added" },
-    { "Guia do launcher", "Launcher guide" },
-    { "Imagem 16:9 da data", "16:9 image for the install" },
-    { "Imagem de exibição do servidor", "Server display image" },
-    { "Importar configurações", "Import settings" },
-    { "     Importar configurações...", "Import settings..." },
-    { "INFORMAÇÕES", "ABOUT" },
-    { "Iniciar com o Windows", "Start with Windows" },
-    { "Iniciar minimizado na bandeja", "Start minimized to the tray" },
-    { "jogadores %d/%d   ping %d ms   %s", "players %d/%d ping %d ms %s" },
-    { "Jogar", "Play" },
-    { "Já está nos favoritos", "Already in favorites" },
-    { "L I N K S   O F I C I A I S", "O F F I C I A L   L I N K S" },
-    { "Lembrar o último servidor selecionado", "Remember the last selected server" },
-    { "Limite de favoritos atingido.", "Favorites limit reached." },
-    { "Logo do servidor (substitui o nome no card)", "Server logo (replaces the name on the card)" },
-    { "Melhorias e correções.", "Improvements and fixes." },
-    { "Mostra no seu perfil do Discord o servidor em que você está jogando", "Shows the server you're playing on in your Discord profile" },
-    { "Mover o último jogado para o início dos favoritos", "Move the last played server to the top of favorites" },
-    { "N O M E", "N A M E" },
-    { "N O M E   ( O P C I O N A L )", "N A M E   ( O P T I O N A L )" },
-    { "N O M E   D E   E X I B I C A O", "D I S P L A Y   N A M E" },
-    { "Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas.", "No SA-MP found - point to gta_sa.exe in the Installs tab." },
-    { "Nenhuma screenshot encontrada nesta data.", "No screenshots found for this install." },
-    { "NOVA ATUALIZAÇÃO", "NEW UPDATE" },
-    { "Nova data", "New install" },
-    { "Não consegui baixar sozinho.", "Couldn't download it by myself." },
-    { "Não consegui exportar as configurações.", "Couldn't export the settings." },
-    { "O blog ainda não tem um ranking de mais vistos.", "The blog doesn't have a most-viewed ranking yet." },
-    { "O blog TrokMods está chegando.", "The TrokMods blog is coming." },
-    { "O launcher abre já escondido, só o ícone perto do relógio", "The launcher opens hidden, only the icon near the clock" },
-    { "O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods.", "The launcher is free and always will be. Questions, ideas and bugs: on the TrokMods Discord." },
-    { "O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.", "The server goes to your favorites and the launcher fetches its name and mode by itself." },
-    { "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o samp.exe original da instalacao que voce escolher.", "Trok Launcher is a modern, free SA-MP launcher: accounts with avatars, several game installs, favorites with covers, a gallery of your screenshots and automatic updates. It does NOT replace any game file - it opens the original samp.exe of the install you choose." },
-    { "O Windows nao conseguiu abrir o samp.exe desta data.", "Windows couldn't open this install's samp.exe." },
-    { "O X esconde o launcher perto do relógio em vez de encerrar de vez", "The X hides the launcher near the clock instead of quitting" },
-    { "Ocultar cheios", "Hide full" },
-    { "Ocultar com senha", "Hide passworded" },
-    { "Ocultar sem resposta", "Hide unresponsive" },
-    { "Ocultar vazios", "Hide empty" },
-    { "online, com senha", "online, passworded" },
-    { "Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT", "SA-MP's own option: the typed password is stored (plain text) in USERDATA.DAT" },
-    { "Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original", "SA-MP's own option, used by the original browser's RCON tools" },
-    { "Principal", "Main" },
-    { "Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.", "When new posts come out, they show up here by themselves - with a notice in the sidebar." },
-    { "Recolher menu", "Collapse menu" },
-    { "Remover", "Remove" },
-    { "Remover conta", "Remove account" },
-    { "Remover dos favoritos", "Remove from favorites" },
-    { "Remover esta data", "Remove this install" },
-    { "Remover logo", "Remove logo" },
-    { "Restaura um backup exportado em outro PC (o launcher reabre sozinho)", "Restores a backup exported on another PC (the launcher restarts by itself)" },
-    { "Sair", "Quit" },
-    { "Salvar", "Save" },
-    { "Salvar senhas de RCON", "Save RCON passwords" },
-    { "Salvar senhas de servidor automaticamente", "Save server passwords automatically" },
-    { "samp.exe nao encontrado na data em uso - confira a pasta na aba de datas", "samp.exe not found in the install in use - check the folder in the Installs tab" },
-    { "Selecione o gta_sa.exe da instalacao", "Select the install's gta_sa.exe" },
-    { "Selecione o gta_sa.exe da nova data", "Select the new install's gta_sa.exe" },
-    { "sem resposta", "no response" },
-    { "Senha", "Password" },
-    { "SERVIDOR COM SENHA", "PASSWORDED SERVER" },
-    { "SERVIDORES", "SERVERS" },
-    { "Sortear outra capa", "Pick another random cover" },
-    { "Tire fotos no jogo com F8 e clique em Atualizar.", "Take screenshots in game with F8 and click Refresh." },
-    { "Trocar caminho...", "Change path..." },
-    { "Trocar imagem de fundo...", "Change background image..." },
-    { "Trocar imagem...", "Change image..." },
-    { "Trocar logo...", "Change logo..." },
-    { "Trocar User Files...", "Change User Files..." },
-    { "Trok Launcher %s  -  feito pela equipe TrokMods", "Trok Launcher %s  -  made by the TrokMods team" },
-    { "User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.", "Empty User Files = the default folder in Documents. The gallery reads its screenshots." },
-    { "vazio = nome que o servidor responder", "empty = the name the server reports" },
-    { "vazio = nome real do servidor", "empty = the server's real name" },
-    { "Visite nosso blog TrokMods. Clique num post para abrir no navegador.", "Visit our TrokMods blog. Click a post to open it in the browser." },
-    { "Voltar", "Back" },
+    { { "Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)", "Select several (or Ctrl+click; Ctrl+A selects all)", "Seleccionar varias (o Ctrl+clic; Ctrl+A marca todas)", "Выбрать несколько (или Ctrl+клик; Ctrl+A — все)", "Pilih beberapa (atau Ctrl+klik; Ctrl+A pilih semua)", "Birden çok seç (veya Ctrl+tık; Ctrl+A tümünü seçer)" } },
+    { { "%d selecionadas", "%d selected", "%d seleccionadas", "выбрано: %d", "%d dipilih", "%d seçildi" } },
+    { { "Excluir %d", "Delete %d", "Borrar %d", "Удалить %d", "Hapus %d", "%d öğeyi sil" } },
+    { { "Clique de novo para excluir %d", "Click again to delete %d", "Clic de nuevo para borrar %d", "Нажмите ещё раз, чтобы удалить %d", "Klik lagi untuk menghapus %d", "%d öğeyi silmek için tekrar tıklayın" } },
+    { { "Limpar seleção", "Clear selection", "Limpiar selección", "Снять выделение", "Bersihkan pilihan", "Seçimi temizle" } },
+    { { "C A P A S   D O   L A U N C H E R", "L A U N C H E R   C O V E R S", "P O R T A D A S   D E L   L A U N C H E R", "О Б Л О Ж К И   Л А У Н Ч Е Р А", "S A M P U L   L A U N C H E R", "L A U N C H E R   K A P A K L A R I" } },
+    { { "C O N E C T A N D O", "C O N N E C T I N G", "C O N E C T A N D O", "П О Д К Л Ю Ч Е Н И Е", "M E N G H U B U N G K A N", "B A Ğ L A N I Y O R" } },
+    { { "C O N T A S", "A C C O U N T S", "C U E N T A S", "А К К А У Н Т Ы", "A K U N", "H E S A P L A R" } },
+    { { "clique de novo para excluir", "click again to delete", "clic de nuevo para borrar", "нажмите ещё раз, чтобы удалить", "klik lagi untuk menghapus", "silmek için tekrar tıklayın" } },
+    { { "E D I T A R   C O N T A", "E D I T   A C C O U N T", "E D I T A R   C U E N T A", "И З М Е Н И Т Ь   А К К А У Н Т", "E D I T   A K U N", "H E S A B I   D Ü Z E N L E" } },
+    { { "EDITAR DATA", "EDIT INSTALL", "EDITAR INSTALACIÓN", "ИЗМЕНИТЬ УСТАНОВКУ", "EDIT INSTALASI", "KURULUMU DÜZENLE" } },
+    { { "EDITAR SERVIDOR", "EDIT SERVER", "EDITAR SERVIDOR", "ИЗМЕНИТЬ СЕРВЕР", "EDIT SERVER", "SUNUCUYU DÜZENLE" } },
+    { { "F A V O R I T O S", "F A V O R I T E S", "F A V O R I T O S", "И З Б Р А Н Н О Е", "F A V O R I T", "F A V O R İ L E R" } },
+    { { "F I L T R O S", "F I L T E R S", "F I L T R O S", "Ф И Л Ь Т Р Ы", "F I L T E R", "F İ L T R E L E R" } },
+    { { "N O V A   C O N T A", "N E W   A C C O U N T", "N U E V A   C U E N T A", "Н О В Ы Й   А К К А У Н Т", "A K U N   B A R U", "Y E N İ   H E S A P" } },
+    { { "N O V I D A D E S", "W H A T ' S   N E W", "N O V E D A D E S", "Ч Т О   Н О В О Г О", "Y A N G   B A R U", "Y E N İ L İ K L E R" } },
+    { { "Não encontrei o seu GTA San Andreas com SA-MP neste computador. Aponte o gta_sa.exe da sua instalacao e o resto o launcher resolve.", "Couldn't find your GTA San Andreas with SA-MP on this computer. Point to your install's gta_sa.exe and the launcher handles the rest.", "No encontré tu GTA San Andreas con SA-MP en este PC. Indica el gta_sa.exe de tu instalación y el launcher hace el resto.", "Не найден GTA San Andreas с SA-MP на этом компьютере. Укажите gta_sa.exe вашей установки — остальное лаунчер сделает сам.", "GTA San Andreas dengan SA-MP tidak ditemukan di komputer ini. Arahkan ke gta_sa.exe instalasi kamu, sisanya launcher yang urus.", "Bu bilgisayarda SA-MP'li GTA San Andreas bulunamadı. Kurulumunuzun gta_sa.exe'sini gösterin, gerisini launcher halleder." } },
+    { { "gravando seu nick...", "saving your nick...", "guardando tu nick...", "сохранение ника...", "menyimpan nick kamu...", "nick kaydediliyor..." } },
+    { { "abrindo o samp.exe...", "opening samp.exe...", "abriendo samp.exe...", "запуск samp.exe...", "membuka samp.exe...", "samp.exe açılıyor..." } },
+    { { "sem SA-MP", "no SA-MP", "sin SA-MP", "нет SA-MP", "tanpa SA-MP", "SA-MP yok" } },
+    { { "Mais vistos", "Most viewed", "Más vistos", "Популярные", "Paling dilihat", "En çok görüntülenen" } },
+    { { "Entrar na comunidade do Discord", "Join the Discord community", "Entrar a la comunidad de Discord", "Вступить в сообщество Discord", "Gabung komunitas Discord", "Discord topluluğuna katıl" } },
+    { { "Abrir o blog TrokMods", "Open the TrokMods blog", "Abrir el blog TrokMods", "Открыть блог TrokMods", "Buka blog TrokMods", "TrokMods blogunu aç" } },
+    { { "MODO", "MODE", "MODO", "РЕЖИМ", "MODE", "MOD" } },
+    { { "JOGADORES", "PLAYERS", "JUGADORES", "ИГРОКИ", "PEMAIN", "OYUNCULAR" } },
+    { { "Site", "Website", "Sitio", "Сайт", "Situs", "Site" } },
+    { { "Fórum", "Forum", "Foro", "Форум", "Forum", "Forum" } },
+    { { "Servidores", "Servers", "Servidores", "Серверы", "Server", "Sunucular" } },
+    { { "Datas", "Installs", "Instalaciones", "Установки", "Instalasi", "Kurulumlar" } },
+    { { "Configurações", "Settings", "Ajustes", "Настройки", "Pengaturan", "Ayarlar" } },
+    { { "Galeria", "Gallery", "Galería", "Галерея", "Galeri", "Galeri" } },
+    { { "Informações", "About", "Información", "О программе", "Tentang", "Hakkında" } },
+    { { "%s disponível  -  você está na %s", "%s available - you are on %s", "%s disponible  -  tienes la %s", "Доступна %s  -  у вас %s", "%s tersedia  -  versi kamu %s", "%s mevcut  -  sürümünüz %s" } },
+    { { "+  Adicionar conta", "+ Add account", "+  Añadir cuenta", "+  Добавить аккаунт", "+  Tambah akun", "+  Hesap ekle" } },
+    { { "+  Adicionar link", "+ Add link", "+  Añadir enlace", "+  Добавить ссылку", "+  Tambah tautan", "+  Bağlantı ekle" } },
+    { { "127.0.0.1:7777 ou servidor.com:7777", "127.0.0.1:7777 or server.com:7777", "127.0.0.1:7777 o servidor.com:7777", "127.0.0.1:7777 или server.com:7777", "127.0.0.1:7777 atau server.com:7777", "127.0.0.1:7777 veya sunucu.com:7777" } },
+    { { "A lista não veio. Tentar de novo", "The list didn't load. Try again", "La lista no cargó. Reintentar", "Список не загрузился. Повторить", "Daftar gagal dimuat. Coba lagi", "Liste yüklenemedi. Tekrar dene" } },
+    { { "A pasta do jogo n\u00e3o pode ficar dentro da pasta do launcher. Confira a data em uso.", "The game folder can't be inside the launcher folder. Check the install in use.", "La carpeta del juego no puede estar dentro de la carpeta del launcher. Revisa la instalación en uso.", "Папка игры не может находиться внутри папки лаунчера. Проверьте используемую установку.", "Folder game tidak boleh berada di dalam folder launcher. Periksa instalasi yang dipakai.", "Oyun klasörü launcher klasörünün içinde olamaz. Kullanılan kurulumu kontrol edin." } },
+    { { "Abre sozinho quando o computador liga", "Opens by itself when the computer starts", "Se abre solo al encender el PC", "Запускается сам при включении компьютера", "Terbuka otomatis saat komputer menyala", "Bilgisayar açılınca kendiliğinden açılır" } },
+    { { "Abrir a pasta da data no Explorer", "Open this install's folder in Explorer", "Abrir la carpeta de la instalación en el Explorador", "Открыть папку установки в Проводнике", "Buka folder instalasi di Explorer", "Kurulum klasörünü Gezgin'de aç" } },
+    { { "Abrir a pasta das screenshots", "Open the screenshots folder", "Abrir la carpeta de capturas", "Открыть папку скриншотов", "Buka folder tangkapan layar", "Ekran görüntüsü klasörünü aç" } },
+    { { "Abrir no navegador", "Open in the browser", "Abrir en el navegador", "Открыть в браузере", "Buka di browser", "Tarayıcıda aç" } },
+    { { "ABRIR O POST", "OPEN POST", "ABRIR EL POST", "ОТКРЫТЬ ПОСТ", "BUKA POSTINGAN", "GÖNDERİYİ AÇ" } },
+    { { "Abrir o Trok Launcher", "Open Trok Launcher", "Abrir Trok Launcher", "Открыть Trok Launcher", "Buka Trok Launcher", "Trok Launcher'ı aç" } },
+    { { "Abrir User Files", "Open User Files", "Abrir User Files", "Открыть User Files", "Buka User Files", "User Files'ı aç" } },
+    { { "Adicionar", "Add", "Añadir", "Добавить", "Tambah", "Ekle" } },
+    { { "Adicionar aos favoritos", "Add to favorites", "Añadir a favoritos", "Добавить в избранное", "Tambah ke favorit", "Favorilere ekle" } },
+    { { "Adicionar data", "Add install", "Añadir instalación", "Добавить установку", "Tambah instalasi", "Kurulum ekle" } },
+    { { "ADICIONAR PELO IP", "ADD BY IP", "AÑADIR POR IP", "ДОБАВИТЬ ПО IP", "TAMBAH VIA IP", "IP İLE EKLE" } },
+    { { "Adicionar servidor pelo IP", "Add server by IP", "Añadir servidor por IP", "Добавить сервер по IP", "Tambah server via IP", "IP ile sunucu ekle" } },
+    { { "Adicione servidores na aba Internet", "Add servers from the Internet tab", "Añade servidores en la pestaña Internet", "Добавьте серверы во вкладке Интернет", "Tambahkan server di tab Internet", "İnternet sekmesinden sunucu ekleyin" } },
+    { { "Adicione servidores no .ini", "Add servers in the .ini", "Añade servidores en el .ini", "Добавьте серверы в .ini", "Tambahkan server di .ini", ".ini dosyasına sunucu ekleyin" } },
+    { { "Ao abrir, a Home já vem no servidor em que você parou", "On startup, Home opens on the server you left off", "Al abrir, el Inicio muestra el servidor donde te quedaste", "При запуске на главной сразу тот сервер, где вы остановились", "Saat dibuka, Beranda langsung ke server terakhir kamu", "Açılışta Ana sayfa kaldığınız sunucuda başlar" } },
+    { { "Ao clicar em Jogar, o launcher fecha (ou vai pra bandeja, se a opção abaixo estiver ligada)", "When you click Play, the launcher closes (or goes to the tray, if the option below is on)", "Al pulsar Jugar, el launcher se cierra (o va a la bandeja si la opción de abajo está activa)", "При нажатии «Играть» лаунчер закрывается (или сворачивается в трей, если включена опция ниже)", "Saat klik Main, launcher menutup (atau ke tray jika opsi di bawah aktif)", "Oyna'ya basınca launcher kapanır (alttaki seçenek açıksa tepsiye iner)" } },
+    { { "Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos", "When you join a server, its card moves to the front of the favorites", "Al entrar a un servidor, su tarjeta pasa al frente de favoritos", "При входе на сервер его карточка встаёт первой в избранном", "Saat masuk server, kartunya pindah ke depan favorit", "Bir sunucuya girince kartı favorilerin başına geçer" } },
+    { { "Arquivo de backup inválido.", "Invalid backup file.", "Archivo de copia inválido.", "Недопустимый файл резервной копии.", "File cadangan tidak valid.", "Geçersiz yedek dosyası." } },
+    { { "Atualizar a galeria (F5)", "Refresh the gallery (F5)", "Actualizar la galería (F5)", "Обновить галерею (F5)", "Segarkan galeri (F5)", "Galeriyi yenile (F5)" } },
+    { { "Atualizar agora", "Update now", "Actualizar ahora", "Обновить сейчас", "Perbarui sekarang", "Şimdi güncelle" } },
+    { { "Atualizar os posts do blog", "Refresh the blog posts", "Actualizar los posts del blog", "Обновить посты блога", "Segarkan postingan blog", "Blog gönderilerini yenile" } },
+    { { "Atualização", "Update", "Actualización", "Обновление", "Pembaruan", "Güncelleme" } },
+    { { "Atualização %s", "Update %s", "Actualización %s", "Обновление %s", "Pembaruan %s", "Güncelleme %s" } },
+    { { "Baixando a atualização...", "Downloading the update...", "Descargando la actualización...", "Загрузка обновления...", "Mengunduh pembaruan...", "Güncelleme indiriliyor..." } },
+    { { "Baixando a atualização...  %d%%", "Downloading the update... %d%%", "Descargando la actualización...  %d%%", "Загрузка обновления...  %d%%", "Mengunduh pembaruan...  %d%%", "Güncelleme indiriliyor...  %d%%" } },
+    { { "baixando a lista de servidores...", "downloading the server list...", "descargando la lista de servidores...", "загрузка списка серверов...", "mengunduh daftar server...", "sunucu listesi indiriliyor..." } },
+    { { "BEM-VINDO AO TROK LAUNCHER", "WELCOME TO TROK LAUNCHER", "BIENVENIDO A TROK LAUNCHER", "ДОБРО ПОЖАЛОВАТЬ В TROK LAUNCHER", "SELAMAT DATANG DI TROK LAUNCHER", "TROK LAUNCHER'A HOŞ GELDİNİZ" } },
+    { { "Blog TrokMods", "TrokMods blog", "Blog TrokMods", "Блог TrokMods", "Blog TrokMods", "TrokMods blogu" } },
+    { { "bom jogo!", "have fun!", "¡buen juego!", "удачной игры!", "selamat bermain!", "iyi oyunlar!" } },
+    { { "buscando os mais vistos do blog...", "fetching the blog's most viewed...", "buscando los más vistos del blog...", "загрузка самых просматриваемых...", "mengambil yang paling banyak dilihat...", "en çok görüntülenenler alınıyor..." } },
+    { { "buscando posts do blog...", "fetching blog posts...", "buscando posts del blog...", "загрузка постов блога...", "mengambil postingan blog...", "blog gönderileri alınıyor..." } },
+    { { "Buscar por nome, modo ou IP...", "Search by name, mode or IP...", "Buscar por nombre, modo o IP...", "Поиск по названию, режиму или IP...", "Cari nama, mode, atau IP...", "Ad, mod veya IP ile ara..." } },
+    { { "C O M U N I D A D E", "C O M M U N I T Y", "C O M U N I D A D", "С О О Б Щ Е С Т В О", "K O M U N I T A S", "T O P L U L U K" } },
+    { { "C O N T A   A O   J O G A R", "A C C O U N T   W H E N   P L A Y I N G", "C U E N T A   A L   J U G A R", "А К К А У Н Т   П Р И   И Г Р Е", "A K U N   S A A T   M A I N", "O Y N A R K E N   H E S A P" } },
+    { { "C O R   D E   D E S T A Q U E", "A C C E N T   C O L O R", "C O L O R   D E   A C E N T O", "Ц В Е Т   А К Ц Е Н Т А", "W A R N A   A K S E N", "V U R G U   R E N G İ" } },
+    { { "Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR.", "Each install is a copy of the game. Click one to choose which PLAY opens.", "Cada instalación es una copia del juego. Haz clic para elegir cuál abre JUGAR.", "Каждая установка — отдельная копия игры. Нажмите, чтобы выбрать, какую откроет «ИГРАТЬ».", "Setiap instalasi adalah salinan game. Klik untuk memilih mana yang dibuka MAIN.", "Her kurulum oyunun bir kopyasıdır. OYNA'nın hangisini açacağını seçmek için tıklayın." } },
+    { { "Cancelar", "Cancel", "Cancelar", "Отмена", "Batal", "İptal" } },
+    { { "Clique de novo para excluir", "Click again to delete", "Clic de nuevo para borrar", "Нажмите ещё раз, чтобы удалить", "Klik lagi untuk menghapus", "Silmek için tekrar tıklayın" } },
+    { { "Clique de novo para remover", "Click again to remove", "Clic de nuevo para quitar", "Нажмите ещё раз, чтобы убрать", "Klik lagi untuk menghapus", "Kaldırmak için tekrar tıklayın" } },
+    { { "clique para usar", "click to use", "clic para usar", "нажмите, чтобы выбрать", "klik untuk memakai", "kullanmak için tıkla" } },
+    { { "Conectar", "Connect", "Conectar", "Подключиться", "Hubungkan", "Bağlan" } },
+    { { "CONFIGURAÇÕES", "SETTINGS", "AJUSTES", "НАСТРОЙКИ", "PENGATURAN", "AYARLAR" } },
+    { { "Configurações exportadas! Leve o arquivo pro outro PC.", "Settings exported! Take the file to the other PC.", "¡Ajustes exportados! Lleva el archivo al otro PC.", "Настройки экспортированы! Перенесите файл на другой ПК.", "Pengaturan diekspor! Bawa filenya ke PC lain.", "Ayarlar dışa aktarıldı! Dosyayı diğer PC'ye götürün." } },
+    { { "consultando servidor...   %s", "querying server... %s", "consultando servidor...   %s", "опрос сервера...   %s", "menghubungi server...   %s", "sunucu sorgulanıyor...   %s" } },
+    { { "Conta atual (não trocar)", "Current account (don't switch)", "Cuenta actual (no cambiar)", "Текущий аккаунт (не менять)", "Akun saat ini (jangan ganti)", "Mevcut hesap (değiştirme)" } },
+    { { "Copiado!", "Copied!", "¡Copiado!", "Скопировано!", "Disalin!", "Kopyalandı!" } },
+    { { "Copiar imagem", "Copy image", "Copiar imagen", "Копировать изображение", "Salin gambar", "Görseli kopyala" } },
+    { { "Copiar o IP", "Copy IP", "Copiar la IP", "Копировать IP", "Salin IP", "IP'yi kopyala" } },
+    { { "Cor personalizada", "Custom color", "Color personalizado", "Свой цвет", "Warna kustom", "Özel renk" } },
+    { { "D A T A   A O   J O G A R", "I N S T A L L   W H E N   P L A Y I N G", "I N S T A L A C I O N   A L   J U G A R", "У С Т А Н О В К А   П Р И   И Г Р Е", "I N S T A L A S I   S A A T   M A I N", "O Y N A R K E N   K U R U L U M" } },
+    { { "D E S C R I C A O", "D E S C R I P T I O N", "D E S C R I P C I O N", "О П И С А Н И Е", "D E S K R I P S I", "A Ç I K L A M A" } },
+    { { "Data em uso (não trocar)", "Install in use (don't switch)", "Instalación en uso (no cambiar)", "Текущая установка (не менять)", "Instalasi yang dipakai (jangan ganti)", "Kullanılan kurulum (değiştirme)" } },
+    { { "DATAS", "INSTALLS", "INSTALACIONES", "УСТАНОВКИ", "INSTALASI", "KURULUMLAR" } },
+    { { "Depois", "Later", "Después", "Позже", "Nanti", "Sonra" } },
+    { { "E N D E R E C O   D O   S E R V I D O R", "S E R V E R   A D D R E S S", "D I R E C C I O N   D E L   S E R V I D O R", "А Д Р Е С   С Е Р В Е Р А", "A L A M A T   S E R V E R", "S U N U C U   A D R E S İ" } },
+    { { "Editar data", "Edit install", "Editar instalación", "Изменить установку", "Edit instalasi", "Kurulumu düzenle" } },
+    { { "Editar servidor", "Edit server", "Editar servidor", "Изменить сервер", "Edit server", "Sunucuyu düzenle" } },
+    { { "EM USO", "IN USE", "EN USO", "ИСПОЛЬЗУЕТСЯ", "DIPAKAI", "KULLANIMDA" } },
+    { { "Endereço inválido. Use ip:porta, como 127.0.0.1:7777.", "Invalid address. Use ip:port, like 127.0.0.1:7777.", "Dirección inválida. Usa ip:puerto, como 127.0.0.1:7777.", "Неверный адрес. Используйте ip:порт, например 127.0.0.1:7777.", "Alamat tidak valid. Gunakan ip:port, contoh 127.0.0.1:7777.", "Geçersiz adres. ip:port kullanın, örn. 127.0.0.1:7777." } },
+    { { "Entrar no Discord", "Join the Discord", "Entrar al Discord", "Перейти в Discord", "Gabung Discord", "Discord'a katıl" } },
+    { { "Escolha a pasta User Files desta data", "Choose this install's User Files folder", "Elige la carpeta User Files de esta instalación", "Выберите папку User Files этой установки", "Pilih folder User Files instalasi ini", "Bu kurulumun User Files klasörünü seçin" } },
+    { { "Essa pasta nao tem samp.exe - instale o SA-MP nela para jogar.", "That folder has no samp.exe - install SA-MP there to play.", "Esa carpeta no tiene samp.exe - instala SA-MP ahí para jugar.", "В этой папке нет samp.exe — установите туда SA-MP, чтобы играть.", "Folder itu tidak punya samp.exe - pasang SA-MP di sana untuk main.", "Bu klasörde samp.exe yok - oynamak için SA-MP'yi oraya kurun." } },
+    { { "Esse servidor já está nos favoritos.", "That server is already in your favorites.", "Ese servidor ya está en favoritos.", "Этот сервер уже в избранном.", "Server itu sudah ada di favorit.", "Bu sunucu zaten favorilerde." } },
+    { { "Excluir (vai para a Lixeira do Windows)", "Delete (goes to the Windows Recycle Bin)", "Borrar (va a la Papelera de Windows)", "Удалить (в Корзину Windows)", "Hapus (masuk Recycle Bin Windows)", "Sil (Windows Geri Dönüşüm Kutusu'na gider)" } },
+    { { "Expandir menu", "Expand menu", "Expandir menú", "Развернуть меню", "Perluas menu", "Menüyü genişlet" } },
+    { { "Exportar configurações", "Export settings", "Exportar ajustes", "Экспорт настроек", "Ekspor pengaturan", "Ayarları dışa aktar" } },
+    { { "     Exportar configurações...", "Export settings...", "     Exportar ajustes...", "     Экспорт настроек...", "     Ekspor pengaturan...", "     Ayarları dışa aktar..." } },
+    { { "Favoritos (%d)", "Favorites (%d)", "Favoritos (%d)", "Избранное (%d)", "Favorit (%d)", "Favoriler (%d)" } },
+    { { "Fechar o launcher ao entrar no jogo", "Close the launcher when the game starts", "Cerrar el launcher al entrar al juego", "Закрывать лаунчер при запуске игры", "Tutup launcher saat masuk game", "Oyuna girince launcher'ı kapat" } },
+    { { "Fechar para a bandeja em vez de sair", "Close to the tray instead of exiting", "Cerrar a la bandeja en vez de salir", "Сворачивать в трей вместо выхода", "Tutup ke tray, bukan keluar", "Çıkmak yerine tepsiye küçült" } },
+    { { "Filtros da lista", "List filters", "Filtros de la lista", "Фильтры списка", "Filter daftar", "Liste filtreleri" } },
+    { { "Fundo aparece na Home; a logo troca o nome grande.", "The background shows on Home; the logo replaces the big name.", "El fondo aparece en Inicio; el logo reemplaza el nombre grande.", "Фон показывается на главной; логотип заменяет крупное название.", "Latar tampil di Beranda; logo menggantikan nama besar.", "Arka plan Ana sayfada görünür; logo büyük adın yerine geçer." } },
+    { { "GALERIA", "GALLERY", "GALERÍA", "ГАЛЕРЕЯ", "GALERI", "GALERİ" } },
+    { { "Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu", "Creates a single file with accounts, favorites, options and the images you added", "Crea un único archivo con cuentas, favoritos, opciones y las imágenes que subiste", "Создаёт один файл с аккаунтами, избранным, настройками и вашими изображениями", "Membuat satu file berisi akun, favorit, opsi, dan gambar yang kamu unggah", "Hesaplar, favoriler, seçenekler ve yüklediğiniz görsellerle tek dosya oluşturur" } },
+    { { "Guia do launcher", "Launcher guide", "Guía del launcher", "Руководство по лаунчеру", "Panduan launcher", "Launcher rehberi" } },
+    { { "Imagem 16:9 da data", "16:9 image for the install", "Imagen 16:9 de la instalación", "Изображение 16:9 для установки", "Gambar 16:9 untuk instalasi", "Kurulum için 16:9 görsel" } },
+    { { "Imagem de exibição do servidor", "Server display image", "Imagen del servidor", "Изображение сервера", "Gambar tampilan server", "Sunucu görseli" } },
+    { { "Importar configurações", "Import settings", "Importar ajustes", "Импорт настроек", "Impor pengaturan", "Ayarları içe aktar" } },
+    { { "     Importar configurações...", "Import settings...", "     Importar ajustes...", "     Импорт настроек...", "     Impor pengaturan...", "     Ayarları içe aktar..." } },
+    { { "INFORMAÇÕES", "ABOUT", "INFORMACIÓN", "О ПРОГРАММЕ", "TENTANG", "HAKKINDA" } },
+    { { "Iniciar com o Windows", "Start with Windows", "Iniciar con Windows", "Запускать вместе с Windows", "Mulai bersama Windows", "Windows ile başlat" } },
+    { { "Iniciar minimizado na bandeja", "Start minimized to the tray", "Iniciar minimizado en la bandeja", "Запускать свёрнутым в трей", "Mulai diminimalkan di tray", "Tepsiye küçültülmüş başlat" } },
+    { { "jogadores %d/%d   ping %d ms   %s", "players %d/%d ping %d ms %s", "jugadores %d/%d   ping %d ms   %s", "игроки %d/%d   пинг %d мс   %s", "pemain %d/%d   ping %d ms   %s", "oyuncu %d/%d   ping %d ms   %s" } },
+    { { "Jogar", "Play", "Jugar", "Играть", "Main", "Oyna" } },
+    { { "Já está nos favoritos", "Already in favorites", "Ya está en favoritos", "Уже в избранном", "Sudah di favorit", "Zaten favorilerde" } },
+    { { "L I N K S   O F I C I A I S", "O F F I C I A L   L I N K S", "E N L A C E S   O F I C I A L E S", "О Ф И Ц И А Л Ь Н Ы Е   С С Ы Л К И", "T A U T A N   R E S M I", "R E S M İ   B A Ğ L A N T I L A R" } },
+    { { "Lembrar o último servidor selecionado", "Remember the last selected server", "Recordar el último servidor seleccionado", "Запоминать последний выбранный сервер", "Ingat server terakhir yang dipilih", "Son seçilen sunucuyu hatırla" } },
+    { { "Limite de favoritos atingido.", "Favorites limit reached.", "Límite de favoritos alcanzado.", "Достигнут лимит избранного.", "Batas favorit tercapai.", "Favori sınırına ulaşıldı." } },
+    { { "Logo do servidor (substitui o nome no card)", "Server logo (replaces the name on the card)", "Logo del servidor (reemplaza el nombre en la tarjeta)", "Логотип сервера (вместо названия на карточке)", "Logo server (menggantikan nama di kartu)", "Sunucu logosu (karttaki adın yerine geçer)" } },
+    { { "Melhorias e correções.", "Improvements and fixes.", "Mejoras y correcciones.", "Улучшения и исправления.", "Peningkatan dan perbaikan.", "İyileştirmeler ve düzeltmeler." } },
+    { { "Mostra no seu perfil do Discord o servidor em que você está jogando", "Shows the server you're playing on in your Discord profile", "Muestra en tu perfil de Discord el servidor donde juegas", "Показывает в профиле Discord сервер, на котором вы играете", "Menampilkan server yang kamu mainkan di profil Discord", "Discord profilinizde oynadığınız sunucuyu gösterir" } },
+    { { "Mover o último jogado para o início dos favoritos", "Move the last played server to the top of favorites", "Mover el último jugado al inicio de favoritos", "Переносить последний сервер в начало избранного", "Pindahkan yang terakhir dimainkan ke awal favorit", "Son oynananı favorilerin başına taşı" } },
+    { { "N O M E", "N A M E", "N O M B R E", "И М Я", "N A M A", "A D" } },
+    { { "N O M E   ( O P C I O N A L )", "N A M E   ( O P T I O N A L )", "N O M B R E   ( O P C I O N A L )", "И М Я   ( Н Е О Б Я З А Т Е Л Ь Н О )", "N A M A   ( O P S I O N A L )", "A D   ( İ S T E Ğ E   B A Ğ L I )" } },
+    { { "N O M E   D E   E X I B I C A O", "D I S P L A Y   N A M E", "N O M B R E   V I S I B L E", "О Т О Б Р А Ж А Е М О Е   И М Я", "N A M A   T A M P I L A N", "G Ö R Ü N E N   A D" } },
+    { { "Nenhum SA-MP encontrado - aponte o gta_sa.exe na aba Datas.", "No SA-MP found - point to gta_sa.exe in the Installs tab.", "No se encontró SA-MP - indica el gta_sa.exe en la pestaña Instalaciones.", "SA-MP не найден — укажите gta_sa.exe во вкладке Установки.", "SA-MP tidak ditemukan - arahkan ke gta_sa.exe di tab Instalasi.", "SA-MP bulunamadı - Kurulumlar sekmesinde gta_sa.exe'yi gösterin." } },
+    { { "Nenhuma screenshot encontrada nesta data.", "No screenshots found for this install.", "No hay capturas en esta instalación.", "В этой установке нет скриншотов.", "Tidak ada tangkapan layar di instalasi ini.", "Bu kurulumda ekran görüntüsü yok." } },
+    { { "NOVA ATUALIZAÇÃO", "NEW UPDATE", "NUEVA ACTUALIZACIÓN", "НОВОЕ ОБНОВЛЕНИЕ", "PEMBARUAN BARU", "YENİ GÜNCELLEME" } },
+    { { "Nova data", "New install", "Nueva instalación", "Новая установка", "Instalasi baru", "Yeni kurulum" } },
+    { { "Não consegui baixar sozinho.", "Couldn't download it by myself.", "No pude descargarlo solo.", "Не удалось скачать автоматически.", "Tidak bisa mengunduh sendiri.", "Kendiliğinden indirilemedi." } },
+    { { "Não consegui exportar as configurações.", "Couldn't export the settings.", "No pude exportar los ajustes.", "Не удалось экспортировать настройки.", "Tidak bisa mengekspor pengaturan.", "Ayarlar dışa aktarılamadı." } },
+    { { "O blog ainda não tem um ranking de mais vistos.", "The blog doesn't have a most-viewed ranking yet.", "El blog aún no tiene ranking de más vistos.", "У блога пока нет рейтинга популярных постов.", "Blog belum punya peringkat paling dilihat.", "Blogun henüz en çok görüntülenen sıralaması yok." } },
+    { { "O blog TrokMods está chegando.", "The TrokMods blog is coming.", "El blog TrokMods está en camino.", "Блог TrokMods скоро появится.", "Blog TrokMods segera hadir.", "TrokMods blogu yakında." } },
+    { { "O launcher abre já escondido, só o ícone perto do relógio", "The launcher opens hidden, only the icon near the clock", "El launcher abre oculto, solo el icono junto al reloj", "Лаунчер запускается скрытым, только значок у часов", "Launcher terbuka tersembunyi, hanya ikon dekat jam", "Launcher gizli açılır, yalnızca saat yanında simge" } },
+    { { "O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods.", "The launcher is free and always will be. Questions, ideas and bugs: on the TrokMods Discord.", "El launcher es gratis y siempre lo será. Dudas, ideas y errores: en el Discord de TrokMods.", "Лаунчер бесплатный и останется таким. Вопросы, идеи и баги — в Discord TrokMods.", "Launcher ini gratis dan akan selalu gratis. Pertanyaan, saran, dan bug: di Discord TrokMods.", "Launcher ücretsizdir ve hep öyle kalacak. Sorular, öneriler ve hatalar: TrokMods Discord'unda." } },
+    { { "O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.", "The server goes to your favorites and the launcher fetches its name and mode by itself.", "El servidor entra a favoritos y el launcher obtiene solo el nombre y el modo.", "Сервер попадёт в избранное, а лаунчер сам получит название и режим.", "Server masuk ke favorit dan launcher mengambil nama dan mode sendiri.", "Sunucu favorilere eklenir; adı ve modu launcher kendi bulur." } },
+    { { "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o samp.exe original da instalacao que voce escolher.", "Trok Launcher is a modern, free SA-MP launcher: accounts with avatars, several game installs, favorites with covers, a gallery of your screenshots and automatic updates. It does NOT replace any game file - it opens the original samp.exe of the install you choose.", "Trok Launcher es un launcher de SA-MP moderno y gratis: cuentas con avatar, varias instalaciones del juego, favoritos con portada, galería de tus capturas y actualización automática. NO reemplaza ningún archivo del juego: abre el samp.exe original de la instalación que elijas.", "Trok Launcher — современный бесплатный лаунчер SA-MP: аккаунты с аватаром, несколько установок игры, избранное с обложками, галерея скриншотов и автообновление. Он НЕ заменяет файлы игры — запускает оригинальный samp.exe выбранной установки.", "Trok Launcher adalah launcher SA-MP modern dan gratis: akun dengan avatar, beberapa instalasi game, favorit dengan sampul, galeri tangkapan layar, dan pembaruan otomatis. TIDAK mengganti file game apa pun - membuka samp.exe asli dari instalasi yang kamu pilih.", "Trok Launcher modern ve ücretsiz bir SA-MP launcher'ıdır: avatarlı hesaplar, birden çok oyun kurulumu, kapaklı favoriler, ekran görüntüsü galerisi ve otomatik güncelleme. Hiçbir oyun dosyasını DEĞİŞTİRMEZ; seçtiğiniz kurulumun orijinal samp.exe'sini açar." } },
+    { { "O Windows nao conseguiu abrir o samp.exe desta data.", "Windows couldn't open this install's samp.exe.", "Windows no pudo abrir el samp.exe de esta instalación.", "Windows не смог открыть samp.exe этой установки.", "Windows tidak bisa membuka samp.exe instalasi ini.", "Windows bu kurulumun samp.exe dosyasını açamadı." } },
+    { { "O X esconde o launcher perto do relógio em vez de encerrar de vez", "The X hides the launcher near the clock instead of quitting", "La X oculta el launcher junto al reloj en vez de cerrarlo", "Крестик сворачивает лаунчер к часам вместо выхода", "Tombol X menyembunyikan launcher di dekat jam, bukan menutup", "X, kapatmak yerine launcher'ı saatin yanına gizler" } },
+    { { "Ocultar cheios", "Hide full", "Ocultar llenos", "Скрыть полные", "Sembunyikan penuh", "Doluları gizle" } },
+    { { "Ocultar com senha", "Hide passworded", "Ocultar con contraseña", "Скрыть с паролем", "Sembunyikan berkata sandi", "Şifrelileri gizle" } },
+    { { "Ocultar sem resposta", "Hide unresponsive", "Ocultar sin respuesta", "Скрыть без ответа", "Sembunyikan tak merespons", "Yanıt vermeyenleri gizle" } },
+    { { "Ocultar vazios", "Hide empty", "Ocultar vacíos", "Скрыть пустые", "Sembunyikan kosong", "Boşları gizle" } },
+    { { "online, com senha", "online, passworded", "en línea, con contraseña", "онлайн, с паролем", "online, berkata sandi", "çevrimiçi, şifreli" } },
+    { { "Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT", "SA-MP's own option: the typed password is stored (plain text) in USERDATA.DAT", "Opción del propio SA-MP: la contraseña queda guardada (texto plano) en USERDATA.DAT", "Опция самого SA-MP: введённый пароль хранится (открытым текстом) в USERDATA.DAT", "Opsi bawaan SA-MP: kata sandi disimpan (teks polos) di USERDATA.DAT", "SA-MP'nin kendi seçeneği: girilen şifre USERDATA.DAT'ta (düz metin) saklanır" } },
+    { { "Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original", "SA-MP's own option, used by the original browser's RCON tools", "Opción del propio SA-MP, usada por las herramientas RCON del browser original", "Опция самого SA-MP, используется RCON-инструментами оригинального браузера", "Opsi bawaan SA-MP, dipakai alat RCON browser asli", "SA-MP'nin kendi seçeneği, orijinal tarayıcının RCON araçları kullanır" } },
+    { { "Principal", "Main", "Principal", "Основная", "Utama", "Ana" } },
+    { { "Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral.", "When new posts come out, they show up here by themselves - with a notice in the sidebar.", "Cuando salgan posts nuevos, aparecen aquí solos, con aviso en la barra lateral.", "Новые посты появятся здесь сами — с уведомлением в боковой панели.", "Saat ada postingan baru, muncul di sini otomatis - dengan tanda di bilah samping.", "Yeni gönderiler burada kendiliğinden görünür; yan çubukta uyarı çıkar." } },
+    { { "Recolher menu", "Collapse menu", "Contraer menú", "Свернуть меню", "Ciutkan menu", "Menüyü daralt" } },
+    { { "Remover", "Remove", "Quitar", "Убрать", "Hapus", "Kaldır" } },
+    { { "Remover conta", "Remove account", "Quitar cuenta", "Удалить аккаунт", "Hapus akun", "Hesabı kaldır" } },
+    { { "Remover dos favoritos", "Remove from favorites", "Quitar de favoritos", "Убрать из избранного", "Hapus dari favorit", "Favorilerden kaldır" } },
+    { { "Remover esta data", "Remove this install", "Quitar esta instalación", "Удалить эту установку", "Hapus instalasi ini", "Bu kurulumu kaldır" } },
+    { { "Remover logo", "Remove logo", "Quitar logo", "Убрать логотип", "Hapus logo", "Logoyu kaldır" } },
+    { { "Restaura um backup exportado em outro PC (o launcher reabre sozinho)", "Restores a backup exported on another PC (the launcher restarts by itself)", "Restaura una copia exportada en otro PC (el launcher se reabre solo)", "Восстанавливает копию с другого ПК (лаунчер перезапустится сам)", "Memulihkan cadangan dari PC lain (launcher membuka ulang sendiri)", "Başka PC'de alınan yedeği geri yükler (launcher kendini yeniden açar)" } },
+    { { "Sair", "Quit", "Salir", "Выход", "Keluar", "Çık" } },
+    { { "Salvar", "Save", "Guardar", "Сохранить", "Simpan", "Kaydet" } },
+    { { "Salvar senhas de RCON", "Save RCON passwords", "Guardar contraseñas RCON", "Сохранять пароли RCON", "Simpan kata sandi RCON", "RCON şifrelerini kaydet" } },
+    { { "Salvar senhas de servidor automaticamente", "Save server passwords automatically", "Guardar contraseñas de servidor automáticamente", "Автоматически сохранять пароли серверов", "Simpan kata sandi server otomatis", "Sunucu şifrelerini otomatik kaydet" } },
+    { { "samp.exe nao encontrado na data em uso - confira a pasta na aba de datas", "samp.exe not found in the install in use - check the folder in the Installs tab", "samp.exe no encontrado en la instalación en uso - revisa la carpeta en Instalaciones", "samp.exe не найден в текущей установке — проверьте папку во вкладке Установки", "samp.exe tidak ditemukan di instalasi yang dipakai - periksa folder di tab Instalasi", "Kullanılan kurulumda samp.exe bulunamadı - Kurulumlar sekmesinde klasörü kontrol edin" } },
+    { { "Selecione o gta_sa.exe da instalacao", "Select the install's gta_sa.exe", "Selecciona el gta_sa.exe de la instalación", "Выберите gta_sa.exe установки", "Pilih gta_sa.exe instalasi", "Kurulumun gta_sa.exe'sini seçin" } },
+    { { "Selecione o gta_sa.exe da nova data", "Select the new install's gta_sa.exe", "Selecciona el gta_sa.exe de la nueva instalación", "Выберите gta_sa.exe новой установки", "Pilih gta_sa.exe instalasi baru", "Yeni kurulumun gta_sa.exe'sini seçin" } },
+    { { "sem resposta", "no response", "sin respuesta", "нет ответа", "tak merespons", "yanıt yok" } },
+    { { "Senha", "Password", "Contraseña", "Пароль", "Kata sandi", "Şifre" } },
+    { { "SERVIDOR COM SENHA", "PASSWORDED SERVER", "SERVIDOR CON CONTRASEÑA", "СЕРВЕР С ПАРОЛЕМ", "SERVER BERKATA SANDI", "ŞİFRELİ SUNUCU" } },
+    { { "SERVIDORES", "SERVERS", "SERVIDORES", "СЕРВЕРЫ", "SERVER", "SUNUCULAR" } },
+    { { "Sortear outra capa", "Pick another random cover", "Elegir otra portada al azar", "Другая случайная обложка", "Acak sampul lain", "Başka rastgele kapak" } },
+    { { "Tire fotos no jogo com F8 e clique em Atualizar.", "Take screenshots in game with F8 and click Refresh.", "Toma capturas en el juego con F8 y pulsa Actualizar.", "Делайте скриншоты в игре клавишей F8 и нажмите «Обновить».", "Ambil tangkapan layar di game dengan F8 lalu klik Segarkan.", "Oyunda F8 ile ekran görüntüsü alın ve Yenile'ye basın." } },
+    { { "Trocar caminho...", "Change path...", "Cambiar ruta...", "Изменить путь...", "Ubah lokasi...", "Yolu değiştir..." } },
+    { { "Trocar imagem de fundo...", "Change background image...", "Cambiar imagen de fondo...", "Изменить фон...", "Ubah gambar latar...", "Arka plan görselini değiştir..." } },
+    { { "Trocar imagem...", "Change image...", "Cambiar imagen...", "Изменить изображение...", "Ubah gambar...", "Görseli değiştir..." } },
+    { { "Trocar logo...", "Change logo...", "Cambiar logo...", "Изменить логотип...", "Ubah logo...", "Logoyu değiştir..." } },
+    { { "Trocar User Files...", "Change User Files...", "Cambiar User Files...", "Изменить User Files...", "Ubah User Files...", "User Files'ı değiştir..." } },
+    { { "Trok Launcher %s  -  feito pela equipe TrokMods", "Trok Launcher %s  -  made by the TrokMods team", "Trok Launcher %s  -  hecho por el equipo TrokMods", "Trok Launcher %s  -  сделано командой TrokMods", "Trok Launcher %s  -  dibuat oleh tim TrokMods", "Trok Launcher %s  -  TrokMods ekibi yaptı" } },
+    { { "User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.", "Empty User Files = the default folder in Documents. The gallery reads its screenshots.", "User Files vacío = la carpeta por defecto en Documentos. La galería lee sus capturas.", "Пустой User Files = папка по умолчанию в Документах. Галерея читает скриншоты оттуда.", "User Files kosong = folder bawaan di Documents. Galeri membaca tangkapan layar dari sana.", "Boş User Files = Belgeler'deki varsayılan klasör. Galeri görüntüleri oradan okur." } },
+    { { "vazio = nome que o servidor responder", "empty = the name the server reports", "vacío = el nombre que responda el servidor", "пусто = название, которое сообщит сервер", "kosong = nama yang dilaporkan server", "boş = sunucunun bildirdiği ad" } },
+    { { "vazio = nome real do servidor", "empty = the server's real name", "vacío = nombre real del servidor", "пусто = настоящее название сервера", "kosong = nama asli server", "boş = sunucunun gerçek adı" } },
+    { { "Visite nosso blog TrokMods. Clique num post para abrir no navegador.", "Visit our TrokMods blog. Click a post to open it in the browser.", "Visita nuestro blog TrokMods. Haz clic en un post para abrirlo en el navegador.", "Заходите в наш блог TrokMods. Нажмите на пост, чтобы открыть в браузере.", "Kunjungi blog TrokMods kami. Klik postingan untuk membukanya di browser.", "TrokMods blogumuzu ziyaret edin. Tarayıcıda açmak için bir gönderiye tıklayın." } },
+    { { "Voltar", "Back", "Volver", "Назад", "Kembali", "Geri" } },
 };
 static const char* T(const char* pt) {
     if (gLang == 0 || !pt) return pt;
     const char* suf = strstr(pt, "##");
     size_t L = suf ? (size_t)(suf - pt) : strlen(pt);
     for (size_t i = 0; i < sizeof(TRADUCOES) / sizeof(TRADUCOES[0]); i++) {
-        const char* p = TRADUCOES[i].pt;
+        const char* p = TRADUCOES[i].t[0];
         if (strncmp(p, pt, L) != 0 || p[L] != 0) continue;
-        if (!suf) return TRADUCOES[i].en;
+        const char* v = (gLang >= 1 && gLang <= 5) ? TRADUCOES[i].t[gLang] : NULL;
+        if (!v || !v[0]) v = TRADUCOES[i].t[1]; // sem traducao nesse idioma: ingles
+        if (!v || !v[0]) return pt;
+        if (!suf) return v;
         static char anel[8][256]; static int ai = 0; // sufixo ##id: monta numa das 8 vagas
         char* b = anel[ai]; ai = (ai + 1) & 7;
-        _snprintf(b, 255, "%s%s", TRADUCOES[i].en, suf); b[255] = 0;
+        _snprintf(b, 255, "%s%s", v, suf); b[255] = 0;
         return b;
     }
     return pt;
@@ -283,9 +286,15 @@ static void RodarThread(LPTHREAD_START_ROUTINE fn, LPVOID arg) {
 }
 
 static void DefinirIdioma() {
-    if (gIdiomaCfg == 1) gLang = 0;
-    else if (gIdiomaCfg == 2) gLang = 1;
-    else gLang = (PRIMARYLANGID(GetUserDefaultUILanguage()) == LANG_PORTUGUESE) ? 0 : 1;
+    if (gIdiomaCfg >= 1 && gIdiomaCfg <= 6) { gLang = gIdiomaCfg - 1; return; }
+    switch (PRIMARYLANGID(GetUserDefaultUILanguage())) { // automatico: segue o Windows
+        case LANG_PORTUGUESE: gLang = 0; break;
+        case LANG_SPANISH:    gLang = 2; break;
+        case LANG_RUSSIAN:    gLang = 3; break;
+        case LANG_INDONESIAN: gLang = 4; break;
+        case LANG_TURKISH:    gLang = 5; break;
+        default:              gLang = 1; break; // qualquer outro: ingles
+    }
 }
 
 struct Servidor {
@@ -824,7 +833,7 @@ static void LerConfig() {
     gOcOff    = GetPrivateProfileIntA("config", "ocultar_off", 0, gIniPath) != 0;
     gDiscordRP = GetPrivateProfileIntA("config", "discord_rp", 1, gIniPath) != 0;
     gIdiomaCfg = GetPrivateProfileIntA("config", "idioma", 0, gIniPath); // 0 auto (Windows), 1 pt, 2 en
-    if (gIdiomaCfg < 0 || gIdiomaCfg > 2) gIdiomaCfg = 0;
+    if (gIdiomaCfg < 0 || gIdiomaCfg > 6) gIdiomaCfg = 0;
     DefinirIdioma();
     gNumSrv = 0;
     for (int i = 0; i < MAX_SERVIDORES; i++) {
@@ -2322,8 +2331,17 @@ static DWORD WINAPI ThreadMods(LPVOID) {
             static const char* MES_EN[12] = { "January", "February", "March", "April", "May", "June",
                                               "July", "August", "September", "October", "November", "December" };
             static const char* DIA_EN[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
-            const char** MES = gLang ? MES_EN : MES_PT;
-            const char** DIA = gLang ? DIA_EN : DIA_PT;
+            static const char* MES_ES[12] = { "enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre" };
+            static const char* DIA_ES[7] = { "domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado" };
+            static const char* MES_RU[12] = { "января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря" };
+            static const char* DIA_RU[7] = { "воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота" };
+            static const char* MES_ID[12] = { "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember" };
+            static const char* DIA_ID[7] = { "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu" };
+            static const char* MES_TR[12] = { "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık" };
+            static const char* DIA_TR[7] = { "Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi" };
+            const char** MES = gLang == 1 ? MES_EN : gLang == 2 ? MES_ES : gLang == 3 ? MES_RU : gLang == 4 ? MES_ID : gLang == 5 ? MES_TR : MES_PT;
+            const char** DIA = gLang == 1 ? DIA_EN : gLang == 2 ? DIA_ES : gLang == 3 ? DIA_RU : gLang == 4 ? DIA_ID : gLang == 5 ? DIA_TR : DIA_PT;
+            bool comDe = (gLang == 0 || gLang == 2); // "3 de setembro de 2026" (pt/es) x "3 September 2026"
             static const char* ABR_M = "JanFebMarAprMayJunJulAugSepOctNovDec";
             char sm[4] = { 0 };
             int dia = atoi(v), ano = 0, hh = 0, mm = 0;
@@ -2351,11 +2369,11 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                     ft.dwLowDateTime = u.LowPart; ft.dwHighDateTime = u.HighPart;
                     if (FileTimeToSystemTime(&ft, &utc) &&
                         SystemTimeToTzSpecificLocalTime(NULL, &utc, &loc))
-                        sprintf(gModsTmp[n].data, gLang ? "%s, %d %s %d" : "%s, %d de %s de %d", DIA[loc.wDayOfWeek % 7],
+                        sprintf(gModsTmp[n].data, comDe ? "%s, %d de %s de %d" : "%s, %d %s %d", DIA[loc.wDayOfWeek % 7],
                                 loc.wDay, MES[(loc.wMonth - 1) % 12], loc.wYear);
                 }
                 if (!gModsTmp[n].data[0])
-                    sprintf(gModsTmp[n].data, gLang ? "%d %s %d" : "%d de %s de %d", dia, MES[mi], ano);
+                    sprintf(gModsTmp[n].data, comDe ? "%d de %s de %d" : "%d %s %d", dia, MES[mi], ano);
             }
             if (!gModsTmp[n].data[0]) { strncpy(gModsTmp[n].data, v, 11); gModsTmp[n].data[11] = 0; }
         }
@@ -5375,33 +5393,50 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::EndPopup();
             }
         }
-        { // IDIOMA ao lado das cores: automatico (segue o Windows) / portugues / english
+        { // IDIOMA ao lado das cores: capsula com o idioma atual; o clique abre a lista
             ImGui::PushFont(gFtMini);
             ImGui::SetCursorPos(ImVec2(520, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("I D I O M A"));
             ImGui::PopFont();
-            const char* OPI[3] = { "Automático", "Português", "English" };
-            float xi = 520.0f;
-            ImGui::PushFont(gFtBold);
-            for (int k = 0; k < 3; k++) {
-                const char* rot = (k == 0) ? T("Automático") : OPI[k];
-                ImVec2 tsz = ImGui::CalcTextSize(rot);
-                ImGui::SetCursorPos(ImVec2(xi, 92));
-                char idi[12]; sprintf(idi, "##idi%d", k);
-                bool cli = ImGui::InvisibleButton(idi, ImVec2(tsz.x + 28, 32));
-                ImVec2 ia = ImGui::GetItemRectMin(), ib = ImGui::GetItemRectMax();
-                bool sel = (gIdiomaCfg == k), hv = ImGui::IsItemHovered();
+            static const char* NOMES_IDIOMA[6] = { "Português", "English", "Español", "Русский", "Bahasa Indonesia", "Türkçe" };
+            char rotAtual[96];
+            if (gIdiomaCfg == 0) _snprintf(rotAtual, sizeof(rotAtual) - 1, "%s (%s)", T("Automático"), NOMES_IDIOMA[gLang]);
+            else strncpy(rotAtual, NOMES_IDIOMA[gIdiomaCfg - 1], sizeof(rotAtual) - 1);
+            rotAtual[sizeof(rotAtual) - 1] = 0;
+            ImGui::SetCursorPos(ImVec2(520, 90));
+            if (ImGui::InvisibleButton("##idiomacap", ImVec2(290, 36))) ImGui::OpenPopup("##popidioma");
+            Dica(T("Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher."));
+            {
+                ImVec2 ba = ImGui::GetItemRectMin(), bb = ImGui::GetItemRectMax();
+                bool bh = ImGui::IsItemHovered();
                 ImDrawList* wl = ImGui::GetWindowDrawList();
-                if (sel) wl->AddRectFilled(ia, ib, AC.cor, 16.0f);
-                else {
-                    wl->AddRectFilled(ia, ib, Cinza(hv ? 40 : 26), 16.0f);
-                    wl->AddRect(ia, ib, Cinza(hv ? 120 : 60), 16.0f, 0, 1.0f);
-                }
-                wl->AddText(ImVec2(ia.x + 14, ia.y + 7), sel ? TextoSobreAccent(AC.cor) : Cinza(hv ? 240 : 190), rot);
-                if (k == 0) Dica(T("Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher."));
-                if (cli && gIdiomaCfg != k) { gIdiomaCfg = k; DefinirIdioma(); SalvarConfig(); }
-                xi += tsz.x + 28 + 8;
+                if (bh) wl->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
+                wl->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
+                ImGui::PushFont(gFtBold);
+                ImVec2 tsz = ImGui::CalcTextSize(rotAtual);
+                wl->AddText(ImVec2(ba.x + 14, (ba.y + bb.y) * 0.5f - tsz.y * 0.5f), Cinza(bh ? 240 : 205), rotAtual);
+                ImGui::PopFont();
+                float cx = bb.x - 16, cy = (ba.y + bb.y) * 0.5f - 2; // seta pra baixo
+                wl->AddLine(ImVec2(cx - 5, cy), ImVec2(cx, cy + 5), Cinza(160), 1.8f);
+                wl->AddLine(ImVec2(cx, cy + 5), ImVec2(cx + 5, cy), Cinza(160), 1.8f);
             }
-            ImGui::PopFont();
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+            if (ImGui::BeginPopup("##popidioma")) {
+                ImDrawList* cl2 = ImGui::GetWindowDrawList();
+                for (int q = 0; q <= 6; q++) { // 0 = automatico, 1..6 = idiomas
+                    char idq[16]; sprintf(idq, "##pi%d", q);
+                    bool clq = ImGui::InvisibleButton(idq, ImVec2(270, 36));
+                    ImVec2 la2 = ImGui::GetItemRectMin(), lb2 = ImGui::GetItemRectMax();
+                    bool hv = ImGui::IsItemHovered(), selQ = (gIdiomaCfg == q);
+                    if (hv) cl2->AddRectFilled(la2, lb2, Cinza(255, 14), 9);
+                    if (selQ) cl2->AddRect(la2, lb2, ComAlpha(AC.cor, 0.85f), 9, 0, 1.5f);
+                    ImGui::PushFont(gFtBold);
+                    cl2->AddText(ImVec2(la2.x + 12, la2.y + 9), Cinza(238), q == 0 ? T("Automático") : NOMES_IDIOMA[q - 1]);
+                    ImGui::PopFont();
+                    if (clq) { gIdiomaCfg = q; DefinirIdioma(); SalvarConfig(); ImGui::CloseCurrentPopup(); }
+                }
+                ImGui::EndPopup();
+            }
+            ImGui::PopStyleVar();
         }
         // opcoes em LINHAS de lista (hover + divisoria), switch a direita no destaque
         {
@@ -7013,7 +7048,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     gLogoBlogger = CarregarImagemRecurso(gDev, 12, 64); // marca do Blogger (atalho do blog)
 
     // fontes do sistema, rasterizadas no tamanho FISICO (nitidas) e medidas no logico
-    static const ImWchar RANGO_TXT[] = { 0x0020, 0x00FF, 0x2013, 0x2014, 0x2018, 0x201D, 0x2022, 0x2022, 0x2026, 0x2026, 0 }; // latin + travessao/aspas curvas/reticencias (titulos do blog)
+    static const ImWchar RANGO_TXT[] = { 0x0020, 0x024F, 0x0400, 0x04FF, 0x2013, 0x2014, 0x2018, 0x201D, 0x2022, 0x2022, 0x2026, 0x2026, 0 }; // latim + estendido (turco) + cirilico (russo) + travessao/aspas/reticencias // latin + travessao/aspas curvas/reticencias (titulos do blog)
     gFtBody    = FonteDoWindows(io, "segoeui.ttf", 16.0f * gEscala, RANGO_TXT);
     gFtBold    = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
     gFtMono    = FonteDoWindows(io, "consola.ttf", 14.5f * gEscala, RANGO_TXT);

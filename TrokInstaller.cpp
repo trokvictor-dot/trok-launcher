@@ -53,47 +53,51 @@ static IDirect3DTexture9* gTexArte = NULL;
 static float gTexArteAR = 0.52f; // largura/altura
 
 // idioma (Rockstar-style): a primeira tela pergunta; o launcher nasce com a escolha gravada no ini
-static int gLangI = 0; // 0 pt-BR, 1 en
-struct Traducao { const char* pt; const char* en; };
+static int gLangI = 0; // 0 pt-BR, 1 en, 2 es, 3 ru, 4 id, 5 tr
+struct Traducao { const char* t[6]; }; // pt, en, es, ru, id, tr (coluna vazia cai pro ingles)
 static const Traducao TRADUCOES[] = {
-    { "O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo.", "Your SA-MP, modern. It doesn't replace any game file." },
-    { "P A S T A   D E   I N S T A L A C A O", "I N S T A L L   F O L D E R" },
-    { "Procurar...", "Browse..." },
-    { "Criar atalho na area de trabalho", "Create a desktop shortcut" },
-    { "Criar atalho no menu Iniciar", "Create a Start menu shortcut" },
-    { "Espaco necessario: %.1f MB", "Space needed: %.1f MB" },
-    { "INSTALAR", "INSTALL" },
-    { "Cancelar", "Cancel" },
-    { "O Trok Launcher esta aberto neste computador.", "Trok Launcher is open on this computer." },
-    { "Preciso fechar ele para atualizar os arquivos (suas configuracoes ficam).", "It needs to be closed to update the files (your settings stay)." },
-    { "FECHAR E INSTALAR", "CLOSE AND INSTALL" },
-    { "Voltar", "Back" },
-    { "Atualizando o Trok Launcher...", "Updating Trok Launcher..." },
-    { "Instalando...", "Installing..." },
-    { "Pronto! O Trok Launcher esta instalado.", "Done! Trok Launcher is installed." },
-    { "Na primeira abertura ele importa seu nick e seus favoritos do SA-MP.", "On first launch it imports your nick and favorites from SA-MP." },
-    { "ABRIR O LAUNCHER", "OPEN THE LAUNCHER" },
-    { "Fechar", "Close" },
-    { "Remover o Trok Launcher deste computador?", "Remove Trok Launcher from this computer?" },
-    { "Apagar tambem configuracoes, contas e imagens", "Also delete settings, accounts and images" },
-    { "(vai para a Lixeira do Windows, da para recuperar)", "(goes to the Windows Recycle Bin, can be recovered)" },
-    { "REMOVER", "REMOVE" },
-    { "Removendo...", "Removing..." },
-    { "Trok Launcher removido. Valeu por ter usado!", "Trok Launcher removed. Thanks for using it!" },
-    { "FECHAR", "CLOSE" },
-    { "Algo deu errado:", "Something went wrong:" },
-    { "TENTAR DE NOVO", "TRY AGAIN" },
-    { "Onde instalar o Trok Launcher", "Where to install Trok Launcher" },
-    { "Pasta de instalacao nao encontrada.", "Install folder not found." },
-    { "Instalador corrompido (payload ausente).", "Corrupted installer (payload missing)." },
-    { "Instalar Trok Launcher", "Install Trok Launcher" },
-    { "Escolha o idioma do launcher", "Choose the launcher language" },
-    { "Da para trocar depois nas Configuracoes.", "You can change it later in Settings." },
+    { { "O seu SA-MP, moderno. Nao substitui nenhum arquivo do jogo.", "Your SA-MP, modern. It doesn't replace any game file.", "Tu SA-MP, moderno. No reemplaza ningún archivo del juego.", "Ваш SA-MP, современный. Не заменяет файлы игры.", "SA-MP kamu, modern. Tidak mengganti file game apa pun.", "Modern SA-MP'niz. Hiçbir oyun dosyasını değiştirmez." } },
+    { { "P A S T A   D E   I N S T A L A C A O", "I N S T A L L   F O L D E R", "C A R P E T A   D E   I N S T A L A C I O N", "П А П К А   У С Т А Н О В К И", "F O L D E R   I N S T A L A S I", "K U R U L U M   K L A S Ö R Ü" } },
+    { { "Procurar...", "Browse...", "Buscar...", "Обзор...", "Cari...", "Gözat..." } },
+    { { "Criar atalho na area de trabalho", "Create a desktop shortcut", "Crear acceso directo en el escritorio", "Создать ярлык на рабочем столе", "Buat pintasan di desktop", "Masaüstüne kısayol oluştur" } },
+    { { "Criar atalho no menu Iniciar", "Create a Start menu shortcut", "Crear acceso directo en el menú Inicio", "Создать ярлык в меню «Пуск»", "Buat pintasan di menu Start", "Başlat menüsüne kısayol oluştur" } },
+    { { "Espaco necessario: %.1f MB", "Space needed: %.1f MB", "Espacio necesario: %.1f MB", "Требуется места: %.1f МБ", "Ruang dibutuhkan: %.1f MB", "Gereken alan: %.1f MB" } },
+    { { "INSTALAR", "INSTALL", "INSTALAR", "УСТАНОВИТЬ", "PASANG", "KUR" } },
+    { { "Cancelar", "Cancel", "Cancelar", "Отмена", "Batal", "İptal" } },
+    { { "O Trok Launcher esta aberto neste computador.", "Trok Launcher is open on this computer.", "Trok Launcher está abierto en este PC.", "Trok Launcher запущен на этом компьютере.", "Trok Launcher sedang terbuka di komputer ini.", "Trok Launcher bu bilgisayarda açık." } },
+    { { "Preciso fechar ele para atualizar os arquivos (suas configuracoes ficam).", "It needs to be closed to update the files (your settings stay).", "Hay que cerrarlo para actualizar los archivos (tus ajustes se conservan).", "Его нужно закрыть, чтобы обновить файлы (настройки сохранятся).", "Perlu ditutup untuk memperbarui file (pengaturan kamu tetap).", "Dosyaları güncellemek için kapatılmalı (ayarlarınız kalır)." } },
+    { { "FECHAR E INSTALAR", "CLOSE AND INSTALL", "CERRAR E INSTALAR", "ЗАКРЫТЬ И УСТАНОВИТЬ", "TUTUP DAN PASANG", "KAPAT VE KUR" } },
+    { { "Voltar", "Back", "Volver", "Назад", "Kembali", "Geri" } },
+    { { "Atualizando o Trok Launcher...", "Updating Trok Launcher...", "Actualizando Trok Launcher...", "Обновление Trok Launcher...", "Memperbarui Trok Launcher...", "Trok Launcher güncelleniyor..." } },
+    { { "Instalando...", "Installing...", "Instalando...", "Установка...", "Memasang...", "Kuruluyor..." } },
+    { { "Pronto! O Trok Launcher esta instalado.", "Done! Trok Launcher is installed.", "¡Listo! Trok Launcher está instalado.", "Готово! Trok Launcher установлен.", "Selesai! Trok Launcher terpasang.", "Hazır! Trok Launcher kuruldu." } },
+    { { "Na primeira abertura ele importa seu nick e seus favoritos do SA-MP.", "On first launch it imports your nick and favorites from SA-MP.", "Al abrir por primera vez importa tu nick y tus favoritos de SA-MP.", "При первом запуске он импортирует ник и избранное из SA-MP.", "Saat pertama dibuka, nick dan favorit SA-MP kamu diimpor.", "İlk açılışta SA-MP nick'inizi ve favorilerinizi içe aktarır." } },
+    { { "ABRIR O LAUNCHER", "OPEN THE LAUNCHER", "ABRIR EL LAUNCHER", "ОТКРЫТЬ ЛАУНЧЕР", "BUKA LAUNCHER", "LAUNCHER'I AÇ" } },
+    { { "Fechar", "Close", "Cerrar", "Закрыть", "Tutup", "Kapat" } },
+    { { "Remover o Trok Launcher deste computador?", "Remove Trok Launcher from this computer?", "¿Quitar Trok Launcher de este PC?", "Удалить Trok Launcher с этого компьютера?", "Hapus Trok Launcher dari komputer ini?", "Trok Launcher bu bilgisayardan kaldırılsın mı?" } },
+    { { "Apagar tambem configuracoes, contas e imagens", "Also delete settings, accounts and images", "Borrar también ajustes, cuentas e imágenes", "Удалить также настройки, аккаунты и изображения", "Hapus juga pengaturan, akun, dan gambar", "Ayarları, hesapları ve görselleri de sil" } },
+    { { "(vai para a Lixeira do Windows, da para recuperar)", "(goes to the Windows Recycle Bin, can be recovered)", "(va a la Papelera de Windows, se puede recuperar)", "(попадёт в Корзину Windows, можно восстановить)", "(masuk Recycle Bin Windows, bisa dipulihkan)", "(Windows Geri Dönüşüm Kutusu'na gider, geri alınabilir)" } },
+    { { "REMOVER", "REMOVE", "QUITAR", "УДАЛИТЬ", "HAPUS", "KALDIR" } },
+    { { "Removendo...", "Removing...", "Quitando...", "Удаление...", "Menghapus...", "Kaldırılıyor..." } },
+    { { "Trok Launcher removido. Valeu por ter usado!", "Trok Launcher removed. Thanks for using it!", "Trok Launcher quitado. ¡Gracias por usarlo!", "Trok Launcher удалён. Спасибо, что пользовались!", "Trok Launcher dihapus. Terima kasih sudah memakai!", "Trok Launcher kaldırıldı. Kullandığınız için teşekkürler!" } },
+    { { "FECHAR", "CLOSE", "CERRAR", "ЗАКРЫТЬ", "TUTUP", "KAPAT" } },
+    { { "Algo deu errado:", "Something went wrong:", "Algo salió mal:", "Что-то пошло не так:", "Ada yang salah:", "Bir şeyler ters gitti:" } },
+    { { "TENTAR DE NOVO", "TRY AGAIN", "REINTENTAR", "ПОВТОРИТЬ", "COBA LAGI", "TEKRAR DENE" } },
+    { { "Onde instalar o Trok Launcher", "Where to install Trok Launcher", "Dónde instalar Trok Launcher", "Куда установить Trok Launcher", "Di mana memasang Trok Launcher", "Trok Launcher nereye kurulsun" } },
+    { { "Pasta de instalacao nao encontrada.", "Install folder not found.", "Carpeta de instalación no encontrada.", "Папка установки не найдена.", "Folder instalasi tidak ditemukan.", "Kurulum klasörü bulunamadı." } },
+    { { "Instalador corrompido (payload ausente).", "Corrupted installer (payload missing).", "Instalador dañado (falta el contenido).", "Установщик повреждён (нет данных).", "Installer rusak (payload hilang).", "Kurulum dosyası bozuk (içerik yok)." } },
+    { { "Instalar Trok Launcher", "Install Trok Launcher", "Instalar Trok Launcher", "Установка Trok Launcher", "Pasang Trok Launcher", "Trok Launcher'ı kur" } },
+    { { "Escolha o idioma do launcher", "Choose the launcher language", "Elige el idioma del launcher", "Выберите язык лаунчера", "Pilih bahasa launcher", "Launcher dilini seçin" } },
+    { { "Da para trocar depois nas Configuracoes.", "You can change it later in Settings.", "Puedes cambiarlo después en Ajustes.", "Потом можно поменять в настройках.", "Bisa diubah nanti di Pengaturan.", "Sonradan Ayarlar'dan değiştirebilirsiniz." } },
 };
 static const char* T(const char* pt) {
     if (gLangI == 0 || !pt) return pt;
-    for (size_t i = 0; i < sizeof(TRADUCOES) / sizeof(TRADUCOES[0]); i++)
-        if (strcmp(TRADUCOES[i].pt, pt) == 0) return TRADUCOES[i].en;
+    for (size_t i = 0; i < sizeof(TRADUCOES) / sizeof(TRADUCOES[0]); i++) {
+        if (strcmp(TRADUCOES[i].t[0], pt) != 0) continue;
+        const char* v = (gLangI >= 1 && gLangI <= 5) ? TRADUCOES[i].t[gLangI] : NULL;
+        if (!v || !v[0]) v = TRADUCOES[i].t[1];
+        return (v && v[0]) ? v : pt;
+    }
     return pt;
 }
 static void GravarIdiomaNoIni() { // %LOCALAPPDATA%\Trok Launcher\Trok Launcher.ini, [config] idioma=1|2
@@ -102,7 +106,8 @@ static void GravarIdiomaNoIni() { // %LOCALAPPDATA%\Trok Launcher\Trok Launcher.
     _snprintf(ini, MAX_PATH - 1, "%s\\Trok Launcher", base); ini[MAX_PATH - 1] = 0;
     CreateDirectoryA(ini, NULL);
     _snprintf(ini, MAX_PATH - 1, "%s\\Trok Launcher\\Trok Launcher.ini", base); ini[MAX_PATH - 1] = 0;
-    WritePrivateProfileStringA("config", "idioma", gLangI ? "2" : "1", ini);
+    char vi[4]; _snprintf(vi, sizeof(vi) - 1, "%d", gLangI + 1); vi[sizeof(vi) - 1] = 0; // 1 pt, 2 en, 3 es, 4 ru, 5 id, 6 tr
+    WritePrivateProfileStringA("config", "idioma", vi, ini);
 }
 
 // etapas
@@ -512,11 +517,12 @@ static void DesenhaUI(HWND hwnd) {
         dl->AddText(ImVec2(px, S(146)), Cinza(130), "Choose the launcher language");
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
-        const char* OPI[2] = { "Portugu\u00eas (Brasil)", "English" };
-        for (int k = 0; k < 2; k++) {
-            ImGui::SetCursorScreenPos(ImVec2(px, S(196) + k * S(58)));
+        const char* OPI[6] = { "Portugu\u00eas (Brasil)", "English", "Espa\u00f1ol", "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", "Bahasa Indonesia", "T\u00fcrk\u00e7e" };
+        float wOp = (wCampo - S(10)) * 0.5f; // duas colunas de tres
+        for (int k = 0; k < 6; k++) {
+            ImGui::SetCursorScreenPos(ImVec2(px + (k % 2) * (wOp + S(10)), S(184) + (k / 2) * S(54)));
             char idi[12]; sprintf(idi, "##idi%d", k);
-            bool cli = ImGui::InvisibleButton(idi, ImVec2(wCampo, S(48)));
+            bool cli = ImGui::InvisibleButton(idi, ImVec2(wOp, S(46)));
             ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
             bool sel = (gLangI == k), hov = ImGui::IsItemHovered();
             dl->AddRectFilled(a, b, sel ? Cinza(30) : Cinza(hov ? 24 : 18), S(10));
@@ -528,11 +534,12 @@ static void DesenhaUI(HWND hwnd) {
         }
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px, S(334)), Cinza(110), T("Da para trocar depois nas Configuracoes."));
+        dl->AddText(ImVec2(px, S(352)), Cinza(110), T("Da para trocar depois nas Configuracoes."));
         ImGui::PopFont();
         ImGui::PushFont(gFtBold);
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
-        if (BotaoPrimario(gLangI ? "CONTINUE" : "CONTINUAR", ImVec2(S(216), S(52)))) gEtapa = ET_CONFIG;
+        static const char* CONT[6] = { "CONTINUAR", "CONTINUE", "CONTINUAR", "\u041f\u0420\u041e\u0414\u041e\u041b\u0416\u0418\u0422\u042c", "LANJUT", "DEVAM" };
+        if (BotaoPrimario(CONT[gLangI], ImVec2(S(216), S(52)))) gEtapa = ET_CONFIG;
         ImGui::SetCursorScreenPos(ImVec2(px + S(228), ds.y - S(96)));
         if (BotaoSec(T("Cancelar"), ImVec2(S(120), S(52)))) gRodando = false;
         ImGui::PopFont();
@@ -791,7 +798,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
             _snprintf(gPastaDestino, MAX_PATH - 1, "%s\\Trok Launcher", base);
         else strcpy(gPastaDestino, "C:\\Trok Launcher");
     }
-    gLangI = (PRIMARYLANGID(GetUserDefaultUILanguage()) == LANG_PORTUGUESE) ? 0 : 1; // sugestao inicial
+    switch (PRIMARYLANGID(GetUserDefaultUILanguage())) { // sugestao inicial: idioma do Windows
+        case LANG_PORTUGUESE: gLangI = 0; break;
+        case LANG_SPANISH:    gLangI = 2; break;
+        case LANG_RUSSIAN:    gLangI = 3; break;
+        case LANG_INDONESIAN: gLangI = 4; break;
+        case LANG_TURKISH:    gLangI = 5; break;
+        default:              gLangI = 1; break;
+    }
     if (gEtapa == ET_IDIOMA && strstr(linha, "--atualizar")) { // atualizacao silenciosa
         gModoAtt = true;
         Sleep(500); // o launcher que nos chamou esta fechando
@@ -840,10 +854,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     io.IniFilename = NULL;
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX9_Init(gDev);
-    gFtBody   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", S(16.0f));
-    gFtBold   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", S(17.0f));
-    gFtMini   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", S(13.5f)); // piso ~13.5
-    gFtTitulo = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\seguibl.ttf", S(40.0f));
+    static const ImWchar RANGO_I[] = { 0x0020, 0x024F, 0x0400, 0x04FF, 0 }; // latim estendido + cirilico
+    gFtBody   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeui.ttf", S(16.0f), NULL, RANGO_I);
+    gFtBold   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", S(17.0f), NULL, RANGO_I);
+    gFtMini   = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\segoeuib.ttf", S(13.5f), NULL, RANGO_I); // piso ~13.5
+    gFtTitulo = io.Fonts->AddFontFromFileTTF("C:\\Windows\\Fonts\\seguibl.ttf", S(40.0f), NULL, RANGO_I);
     if (!gFtBody) { gFtBody = gFtBold = gFtMini = gFtTitulo = io.Fonts->AddFontDefault(); }
     CarregarArte(gDev);
 
