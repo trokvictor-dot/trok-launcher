@@ -7149,6 +7149,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
                 ultimoFeed = GetTickCount();
                 RodarThread(ThreadMods, NULL);
             }
+            // versao nova: rechecada a cada 3h (quem vive na bandeja e nunca reabre tambem recebe)
+            static DWORD ultimaVersao = GetTickCount();
+            if (gAttEstado == 0 && gAttBaixa == 0 && (GetTickCount() - ultimaVersao) > 3u * 60u * 60u * 1000u) {
+                ultimaVersao = GetTickCount();
+                RodarThread(ThreadAtualizacao, NULL);
+            }
         }
         if (!IsWindowVisible(hwnd)) { Sleep(60); continue; } // escondido na bandeja: nao renderiza
         // render preguicoso: parado (sem input ha 1,5s e sem animacao correndo), cai p/ ~12 fps
