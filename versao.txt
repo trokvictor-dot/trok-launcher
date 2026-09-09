@@ -1,8 +1,7 @@
-v1.1
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.1/TrokLauncher-Setup.exe
-Aba TrokMods com Recentes e Mais vistos.
-Adicionar servidor pelo IP e data padrão por favorito.
-Versão do SA-MP em cada data.
-Idioma: português e inglês (segue o Windows).
-Correções de segurança e desempenho.
-sha256=c20cc30ca764f05719896e1fec29a5997df4735d5e36e9abda2db7b2f69c31e9
+v1.2
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.2/TrokLauncher-Setup.exe
+Galeria: selecione várias fotos (ícone de check ou Ctrl+clique) e exclua em lote.
+Versão do SA-MP também no seletor de data do servidor.
+Card da data ajustado quando não há descrição.
+Aba TrokMods com Recentes e Mais vistos, favorito por IP, data por favorito e idioma (desde a v1.1).
+sha256=fe46bc66076c28e83fb5a353e30627afbbcabadf716fb1e1d35bbb9f3b4b9932

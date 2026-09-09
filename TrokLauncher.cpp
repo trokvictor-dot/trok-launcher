@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.1"
+#define VERSAO "v1.2"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -73,6 +73,11 @@ static int gIdiomaCfg = 0;
 static int gLang = 0; // efetivo: 0 pt-BR, 1 en
 struct Traducao { const char* pt; const char* en; };
 static const Traducao TRADUCOES[] = {
+    { "Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)", "Select several (or Ctrl+click; Ctrl+A selects all)" },
+    { "%d selecionadas", "%d selected" },
+    { "Excluir %d", "Delete %d" },
+    { "Clique de novo para excluir %d", "Click again to delete %d" },
+    { "Limpar seleção", "Clear selection" },
     { "C A P A S   D O   L A U N C H E R", "L A U N C H E R   C O V E R S" },
     { "C O N E C T A N D O", "C O N N E C T I N G" },
     { "C O N T A S", "A C C O U N T S" },
@@ -411,11 +416,13 @@ static char  gPendNome[96], gPendIp[64];
 
 // galeria (screenshots do User Files da data em uso)
 #define MAX_FOTOS 1000  // guarda as 1000 MAIS RECENTES; texturas so das visiveis (streaming)
-struct Foto { char caminho[MAX_PATH]; FILETIME quando; IDirect3DTexture9* tex; bool falhou; }; // falhou = cache negativo (arquivo corrompido nao re-decodifica em loop)
+struct Foto { char caminho[MAX_PATH]; FILETIME quando; IDirect3DTexture9* tex; bool falhou; bool sel; }; // falhou = cache negativo (arquivo corrompido nao re-decodifica em loop)
 static Foto gFotos[MAX_FOTOS];
 static int  gNumFotos = 0;
 static char gFotosDir[MAX_PATH] = "";
 static int  gFotoVista = -1;         // visualizador aberto na foto N
+static bool gGalSelecao = false;     // modo de selecao: clique marca/desmarca em vez de abrir
+static float gGalConfT = 0;          // 2 cliques para excluir em lote (janela de 3s)
 static int  gGalData = -1;           // qual DATA a galeria mostra (-1 = comeca na data em uso)
 #define N_FG 3 // full-res em memoria: a foto aberta + as 2 vizinhas (setas ficam instantaneas)
 struct FGSlot { char caminho[MAX_PATH]; IDirect3DTexture9* tex; bool pedida; char falhas; };
@@ -4874,6 +4881,7 @@ static void DesenhaUI(HWND hwnd) {
         sprintf(subt, T("%d screenshots  -  %s"), gNumFotos, tabs[gGalData].rotulo);
         ImGui::TextColored(ImColor(Cinza(140)), "%s", subt); // "%s": nome de data pode ter %
         ImGui::PopFont();
+        int nSelG = 0; // fotos marcadas: a barra de acoes ganha uma linha propria e a grade desce
         {
             // icones no canto direito: abrir pasta + atualizar
             float bxI = pb.x - pa.x - 24 - 40;
@@ -4900,10 +4908,57 @@ static void DesenhaUI(HWND hwnd) {
                   Cinza(rHov ? 250 : 175), 17.0f);
             Dica(T("Atualizar a galeria (F5)"));
             if (attCl) EscanearFotos();
+            // selecionar varias: icone de check (aceso no accent quando o modo esta ligado)
+            ImGui::SetCursorPos(ImVec2(bxI - 96, 22));
+            bool selCl = ImGui::InvisibleButton("##galsel", ImVec2(40, 34));
+            ImVec2 sa2 = ImGui::GetItemRectMin(), sb2 = ImGui::GetItemRectMax();
+            bool sHov = ImGui::IsItemHovered();
+            if (sHov || gGalSelecao) pl->AddRectFilled(sa2, sb2, gGalSelecao ? ComAlpha(AC.cor, 0.18f) : Cinza(255, 18), 9);
+            Icone(pl, ImVec2((sa2.x + sb2.x) * 0.5f, (sa2.y + sb2.y) * 0.5f), I_CHECK,
+                  gGalSelecao ? AC.cor : Cinza(sHov ? 250 : 175), 17.0f);
+            Dica(T("Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)"));
+            if (selCl) {
+                gGalSelecao = !gGalSelecao;
+                if (!gGalSelecao) for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = false;
+            }
+            int nSel = 0;
+            for (int k = 0; k < gNumFotos; k++) if (gFotos[k].sel) nSel++;
+            if (gGalConfT > 0) gGalConfT -= dt;
+            nSelG = nSel;
+            if (nSel > 0) { // acoes em lote numa linha propria (y=82), abaixo do subtitulo
+                char rotSel[64], rotEx[64];
+                sprintf(rotSel, T("%d selecionadas"), nSel);
+                sprintf(rotEx, gGalConfT > 0 ? T("Clique de novo para excluir %d") : T("Excluir %d"), nSel);
+                ImGui::PushFont(gFtMini);
+                ImVec2 ssz = ImGui::CalcTextSize(rotSel);
+                ImGui::PopFont();
+                ImGui::PushFont(gFtBold);
+                ImVec2 esz = ImGui::CalcTextSize(rotEx);
+                float wEx = esz.x + 26, wLp = ImGui::CalcTextSize(T("Limpar seleção")).x + 26;
+                float xAc = pb.x - pa.x - 24 - wLp - 8 - wEx;
+                ImGui::SetCursorPos(ImVec2(xAc, 82));
+                bool exCl = BotaoSec(rotEx, ImVec2(wEx, 30), IM_COL32(240, 120, 116, 255));
+                ImGui::SameLine(0, 8);
+                bool lpCl = BotaoSec(T("Limpar seleção"), ImVec2(wLp, 30));
+                ImGui::PopFont();
+                pl->AddText(ImVec2(pa.x + 24, pa.y + 90), Cinza(200), rotSel);
+                if (lpCl) { for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = false; gGalConfT = 0; }
+                if (exCl && gGalConfT <= 0) gGalConfT = 3.0f;
+                else if (exCl) { // confirmou: tudo pra Lixeira e a lista e relida
+                    gGalConfT = 0;
+                    for (int k = 0; k < gNumFotos; k++) if (gFotos[k].sel) ExcluirParaLixeira(gFotos[k].caminho);
+                    EscanearFotos();
+                }
+            }
+            if (gFotoVista < 0 && !ImGui::IsAnyItemActive()) { // atalhos: Ctrl+A marca todas, Esc limpa
+                if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_A)) for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = true;
+                if (ImGui::IsKeyPressed(ImGuiKey_Escape) && nSel > 0) for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = false;
+            }
         }
-        ImGui::SetCursorPos(ImVec2(24, 82));
+        float yGrid = nSelG > 0 ? 122.0f : 82.0f; // com a barra de selecao a grade comeca mais baixo
+        ImGui::SetCursorPos(ImVec2(24, yGrid));
         ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
-        ImGui::BeginChild("##galgrid", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 102), false);
+        ImGui::BeginChild("##galgrid", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 20 - yGrid), false);
         if (gNumFotos == 0) {
             ImGui::SetCursorPos(ImVec2(6, 16));
             ImGui::PushFont(gFtBody);
@@ -4946,8 +5001,18 @@ static void DesenhaUI(HWND hwnd) {
                 } else {
                     gl2->AddRectFilled(ca, cb, Cinza(20), 10); // skeleton limpo, sem texto
                 }
-                gl2->AddRect(ca, cb, chF ? Cinza(150) : Cinza(44), 10, 0, chF ? 1.6f : 1.0f);
-                if (clF) gFotoVista = i;
+                if (f.sel) { // marcada: borda no accent + bolinha com check no canto
+                    gl2->AddRect(ca, cb, AC.cor, 10, 0, 2.2f);
+                    gl2->AddCircleFilled(ImVec2(ca.x + 18, ca.y + 18), 11.0f, AC.cor, 20);
+                    Icone(gl2, ImVec2(ca.x + 18, ca.y + 18), I_CHECK, TextoSobreAccent(AC.cor), 13.0f);
+                } else {
+                    gl2->AddRect(ca, cb, chF ? Cinza(150) : Cinza(44), 10, 0, chF ? 1.6f : 1.0f);
+                    if (gGalSelecao) gl2->AddCircle(ImVec2(ca.x + 18, ca.y + 18), 11.0f, Cinza(chF ? 240 : 170), 20, 1.6f);
+                }
+                if (clF) {
+                    if (gGalSelecao || io.KeyCtrl) f.sel = !f.sel;
+                    else gFotoVista = i;
+                }
             }
             int linTot = (gNumFotos + porL - 1) / porL;
             ImGui::SetCursorPos(ImVec2(0, linTot * (CH2 + GAP2)));

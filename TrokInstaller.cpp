@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JAN_W 880
 #define JAN_H 540
-#define VERSAO_INST "1.1"
+#define VERSAO_INST "1.2"
 
 static const ImU32 COR_ACCENT = IM_COL32(242, 97, 29, 255);
 static const ImU32 COR_ACCENT_HI = IM_COL32(255, 138, 77, 255);
