@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.0"
+#define VERSAO "v1.1"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -4741,7 +4741,7 @@ static void DesenhaUI(HWND hwnd) {
             // versao do SA-MP (lida do samp.dll) no canto direito da linha do nome
             const char* vs = d.versao[0] ? d.versao : T("sem SA-MP");
             // sem descricao o bloco desce (senao sobra um vao no pe do card); nome e descricao longos ganham "..."
-            float yNome = d.desc[0] ? cb.y - 52 : cb.y - 40;
+            float yNome = d.desc[0] ? cb.y - 52 : cb.y - 34; // sem descricao: mesma margem de baixo que a lateral
             ImGui::PushFont(gFtMini);
             ImVec2 vsz = ImGui::CalcTextSize(vs);
             wl->AddText(ImVec2(cb.x - 14 - vsz.x, yNome + 3), d.versao[0] ? Cinza(200) : IM_COL32(240, 120, 116, 255), vs);

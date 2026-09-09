@@ -1,4 +1,8 @@
-v1.0
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.0/TrokLauncher-Setup.exe
-Primeira versão pública do Trok Launcher.
-Contas com nick e avatar, datas, galeria de screenshots, favoritos com capa e logo.
+v1.1
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.1/TrokLauncher-Setup.exe
+Aba TrokMods com Recentes e Mais vistos.
+Adicionar servidor pelo IP e data padrão por favorito.
+Versão do SA-MP em cada data.
+Idioma: português e inglês (segue o Windows).
+Correções de segurança e desempenho.
+sha256=c20cc30ca764f05719896e1fec29a5997df4735d5e36e9abda2db7b2f69c31e9

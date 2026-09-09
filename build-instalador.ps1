@@ -49,8 +49,8 @@ $rc = @"
 2 RCDATA "$($pak -replace '\\','\\\\')"
 $(if ($temArte) { "3 RCDATA `"$($arte -replace '\\','\\\\')`"" })
 1 VERSIONINFO
-FILEVERSION     1,0,0,0
-PRODUCTVERSION  1,0,0,0
+FILEVERSION     1,1,0,0
+PRODUCTVERSION  1,1,0,0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -60,9 +60,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "TrokMods"
       VALUE "FileDescription",  "Instalador do Trok Launcher"
-      VALUE "FileVersion",      "1.0.0.0"
+      VALUE "FileVersion",      "1.1.0.0"
       VALUE "ProductName",      "Trok Launcher"
-      VALUE "ProductVersion",   "1.0"
+      VALUE "ProductVersion",   "1.1"
       VALUE "LegalCopyright",   "TrokMods"
       VALUE "OriginalFilename", "TrokLauncher-Setup.exe"
     END
