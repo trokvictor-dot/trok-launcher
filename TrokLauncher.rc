@@ -7,8 +7,8 @@
 12 RCDATA "artes\\blogger-logo.png"
 
 1 VERSIONINFO
-FILEVERSION     1,2,0,0
-PRODUCTVERSION  1,2,0,0
+FILEVERSION     1,3,0,0
+PRODUCTVERSION  1,3,0,0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -18,9 +18,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "TrokMods"
       VALUE "FileDescription",  "Trok Launcher - launcher moderno de SA-MP"
-      VALUE "FileVersion",      "1.2.0.0"
+      VALUE "FileVersion",      "1.3.0.0"
       VALUE "ProductName",      "Trok Launcher"
-      VALUE "ProductVersion",   "1.2"
+      VALUE "ProductVersion",   "1.3"
       VALUE "LegalCopyright",   "TrokMods"
       VALUE "OriginalFilename", "Trok Launcher.exe"
     END

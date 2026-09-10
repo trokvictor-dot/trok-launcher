@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JAN_W 880
 #define JAN_H 540
-#define VERSAO_INST "1.2"
+#define VERSAO_INST "1.3"
 
 static const ImU32 COR_ACCENT = IM_COL32(242, 97, 29, 255);
 static const ImU32 COR_ACCENT_HI = IM_COL32(255, 138, 77, 255);
@@ -201,10 +201,35 @@ static bool LauncherRodandoEm(const char* pasta) {
     return false;
 }
 
+// Mesma mensagem que o launcher escuta para sair de verdade (nao vale a opcao "fechar
+// para a bandeja"). Precisa bater com o WM_TROK_SAIR do TrokLauncher.cpp.
+#define WM_TROK_SAIR (WM_USER + 9)
+
+// MessageBox ANSI leria o UTF-8 do fonte pela pagina de codigo do Windows e estragaria
+// os acentos (e o russo nem cabe em ANSI): converte e usa a versao wide.
+static void AvisoJanela(const char* txt, UINT icone) {
+    wchar_t w[512];
+    MultiByteToWideChar(CP_UTF8, 0, txt ? txt : "", -1, w, 512);
+    MessageBoxW(NULL, w, L"Trok Launcher", icone);
+}
+
+static BOOL CALLBACK PedirSaidaDoLauncher(HWND h, LPARAM) {
+    char cls[64];
+    if (GetClassNameA(h, cls, sizeof(cls)) && strcmp(cls, "TrokLauncher") == 0)
+        PostMessageA(h, WM_TROK_SAIR, 0, 0);
+    return TRUE;
+}
+
 static void FecharLauncherEm(const char* pasta) { // fecha SO o launcher que roda desta pasta
     char alvo[MAX_PATH];
     _snprintf(alvo, MAX_PATH - 1, "%s\\Trok Launcher.exe", pasta);
     alvo[MAX_PATH - 1] = 0;
+    // Primeiro PEDE pra sair, e so depois mata. Assim o launcher chega no fim do WinMain
+    // e apaga o proprio icone da bandeja (NIM_DELETE). Antes disso, o TerminateProcess
+    // abaixo matava o processo sem esse passo e o Windows deixava um icone FANTASMA no
+    // relogio; depois de varias atualizacoes a bandeja enchia de copias do icone.
+    EnumWindows(PedirSaidaDoLauncher, 0);
+    for (int i = 0; i < 30 && FindWindowA("TrokLauncher", NULL); i++) Sleep(100); // ate 3s
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snap == INVALID_HANDLE_VALUE) return;
     PROCESSENTRY32 pe;
@@ -768,7 +793,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
             }
         }
         if (!pastaOk) {
-            MessageBoxA(NULL, T("Pasta de instalacao nao encontrada."), "Trok Launcher", MB_ICONERROR);
+            AvisoJanela(T("Pasta de instalacao nao encontrada."), MB_ICONERROR);
             CoUninitialize();
             return 1;
         }
@@ -789,7 +814,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     }
 
     if (gEtapa != ET_REMOVER && !LerPayload()) {
-        MessageBoxA(NULL, T("Instalador corrompido (payload ausente)."), "Trok Launcher", MB_ICONERROR);
+        AvisoJanela(T("Instalador corrompido (payload ausente)."), MB_ICONERROR);
         return 1;
     }
     {

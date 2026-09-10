@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.2"
+#define VERSAO "v1.3"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -95,6 +95,8 @@ static const Traducao TRADUCOES[] = {
     { { "sem SA-MP", "no SA-MP", "sin SA-MP", "нет SA-MP", "tanpa SA-MP", "SA-MP yok" } },
     { { "Mais vistos", "Most viewed", "Más vistos", "Популярные", "Paling dilihat", "En çok görüntülenen" } },
     { { "Entrar na comunidade do Discord", "Join the Discord community", "Entrar a la comunidad de Discord", "Вступить в сообщество Discord", "Gabung komunitas Discord", "Discord topluluğuna katıl" } },
+    { { "O Trok Launcher já está aberto.", "Trok Launcher is already running.", "Trok Launcher ya está abierto.", "Trok Launcher уже запущен.", "Trok Launcher sudah berjalan.", "Trok Launcher zaten açık." } },
+    { { "Ele foi trazido para a frente. Se você não o vir, procure o ícone dele ao lado do relógio.", "It has been brought to the front. If you cannot see it, look for its icon next to the clock.", "Se ha traído al frente. Si no lo ves, busca su icono junto al reloj.", "Окно вынесено на передний план. Если вы его не видите, найдите значок рядом с часами.", "Jendelanya sudah dibawa ke depan. Jika tidak terlihat, cari ikonnya di dekat jam.", "Pencere öne getirildi. Göremiyorsanız saatin yanındaki simgesini arayın." } },
     { { "Abrir o blog TrokMods", "Open the TrokMods blog", "Abrir el blog TrokMods", "Открыть блог TrokMods", "Buka blog TrokMods", "TrokMods blogunu aç" } },
     { { "MODO", "MODE", "MODO", "РЕЖИМ", "MODE", "MOD" } },
     { { "JOGADORES", "PLAYERS", "JUGADORES", "ИГРОКИ", "PEMAIN", "OYUNCULAR" } },
@@ -3179,7 +3181,7 @@ static void ProcessarPedidosDatas() {
                 gPulaSalvarSaida = true; // senao o SalvarConfig da saida desfaz o que acabou de entrar
                 char eu[MAX_PATH];
                 GetModuleFileNameA(NULL, eu, MAX_PATH);
-                ShellExecuteA(NULL, "open", eu, NULL, NULL, SW_SHOWNORMAL);
+                ShellExecuteA(NULL, "open", eu, "--reabrir", NULL, SW_SHOWNORMAL); // avisa a trava de copia unica
                 gRodando = false;
             } else Avisar(T("Arquivo de backup inválido."));
         }
@@ -6878,6 +6880,9 @@ static D3DPRESENT_PARAMETERS gPP;
 
 // icone na bandeja (relogio): clique abre, botao direito da Abrir/Sair
 #define WM_TROK_TRAY (WM_USER + 7)
+#define WM_TROK_MOSTRAR (WM_USER + 8) // outra copia foi aberta e pediu pra esta aparecer
+#define WM_TROK_SAIR    (WM_USER + 9) // o instalador pede pra sair DE VERDADE (nao vale a bandeja),
+                                      // pra dar tempo de apagar o icone do relogio antes de morrer
 static NOTIFYICONDATAA gNid;
 static void CriarTray(HWND h) {
     memset(&gNid, 0, sizeof(gNid));
@@ -6942,12 +6947,22 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
             else if (cmd == 2) gRodando = false;
         }
         return 0;
+    case WM_TROK_SAIR: // atualizacao chegando: sai limpo pra tirar o icone da bandeja
+        gRodando = false;
+        return 0;
+    case WM_TROK_MOSTRAR: // alguem clicou no atalho de novo: mostra esta janela em vez de abrir outra
+        ShowWindow(h, SW_SHOW);
+        if (IsIconic(h)) ShowWindow(h, SW_RESTORE);
+        SetWindowPos(h, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        SetForegroundWindow(h);
+        gUltimaAtividade = GetTickCount();
+        return 0;
     case WM_DESTROY: gRodando = false; PostQuitMessage(0); return 0;
     }
     return DefWindowProcA(h, m, w, l);
 }
 
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     WSADATA wsa; WSAStartup(MAKEWORD(2, 2), &wsa);
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // WIC (imagens das datas)
     InitializeCriticalSection(&gLock);
@@ -6963,6 +6978,46 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
 #endif
     LerConfig();
     if (gTela == 6) gTela = 0; // a aba Informacoes saiu da barra
+
+    // ---- uma copia so -----------------------------------------------------------
+    // O X manda o launcher pra bandeja. Quem nao encontra a janela clica no atalho de
+    // novo, e antes disso abria outra copia: a barra de tarefas enchia de icones e cada
+    // copia mexia no mesmo .ini. Um mutex nomeado barra a segunda; a que ja esta aberta
+    // vem pra frente (funciona ate escondida na bandeja, o pump roda antes do render).
+    // Vem depois do LerConfig de proposito: e ele que define o idioma do aviso.
+#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE)
+    {
+        bool reabrindo = (cmdLinha && strstr(cmdLinha, "--reabrir") != NULL);
+        HANDLE mtxUnica = CreateMutexA(NULL, FALSE, "Local\\TrokLauncher-instancia-unica");
+        if (mtxUnica && GetLastError() == ERROR_ALREADY_EXISTS) {
+            if (reabrindo) {
+                // veio do "importar configuracoes", que reabre de proposito: espera a
+                // copia velha sair (ate 10s) em vez de recusar
+                for (int i = 0; i < 100 && FindWindowA("TrokLauncher", NULL); i++) Sleep(100);
+            } else {
+                HWND velho = FindWindowA("TrokLauncher", NULL);
+                if (velho) {
+                    DWORD pidVelho = 0;
+                    GetWindowThreadProcessId(velho, &pidVelho);
+                    AllowSetForegroundWindow(pidVelho); // sem isso o Windows barra o foco
+                    PostMessageA(velho, WM_TROK_MOSTRAR, 0, 0);
+                }
+                char aviso[512];
+                _snprintf(aviso, sizeof(aviso) - 1, "%s\n\n%s",
+                          T("O Trok Launcher já está aberto."),
+                          T("Ele foi trazido para a frente. Se você não o vir, procure o ícone dele ao lado do relógio."));
+                aviso[sizeof(aviso) - 1] = 0;
+                // O fonte e UTF-8 (/utf-8). O MessageBox ANSI leria esses bytes pela pagina
+                // de codigo do Windows e estragaria os acentos - e o russo nem cabe em ANSI.
+                // Converte e usa a versao wide.
+                wchar_t avisoW[512];
+                MultiByteToWideChar(CP_UTF8, 0, aviso, -1, avisoW, 512);
+                MessageBoxW(NULL, avisoW, L"Trok Launcher", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND);
+                return 0;
+            }
+        }
+    }
+#endif
 #if defined(TROK_TESTE_SEM_SAMP) || defined(TROK_TESTE_UPDATE)
     gFecharBandeja = false; // exe de amostra fecha DE VERDADE no X (sem pegadinha da bandeja)
     gIniciarMin = false;

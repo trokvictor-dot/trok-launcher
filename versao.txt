@@ -1,7 +1,7 @@
-v1.2
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.2/TrokLauncher-Setup.exe
-Galeria: selecione várias fotos (ícone de check ou Ctrl+clique) e exclua em lote.
-Versão do SA-MP também no seletor de data do servidor.
-Card da data ajustado quando não há descrição.
-Aba TrokMods com Recentes e Mais vistos, favorito por IP, data por favorito e idioma (desde a v1.1).
-sha256=fe46bc66076c28e83fb5a353e30627afbbcabadf716fb1e1d35bbb9f3b4b9932
+v1.3
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.3/TrokLauncher-Setup.exe
+Agora só abre uma cópia: clicar no atalho de novo traz a janela que já está aberta em vez de abrir outra.
+A atualização não deixa mais ícone fantasma ao lado do relógio.
+Novos idiomas: espanhol, russo, indonésio e turco, além de português e inglês.
+O launcher que fica na bandeja passou a procurar atualização a cada 3 horas.
+sha256=f91706755bc9b2aed37e4eb0c97c3c63542a5bffab908558ccc5ac55cb104450
