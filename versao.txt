@@ -1,7 +1,8 @@
-v1.3
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.3/TrokLauncher-Setup.exe
-Agora só abre uma cópia: clicar no atalho de novo traz a janela que já está aberta em vez de abrir outra.
-A atualização não deixa mais ícone fantasma ao lado do relógio.
-Novos idiomas: espanhol, russo, indonésio e turco, além de português e inglês.
-O launcher que fica na bandeja passou a procurar atualização a cada 3 horas.
-sha256=f91706755bc9b2aed37e4eb0c97c3c63542a5bffab908558ccc5ac55cb104450
+v1.4
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.4/TrokLauncher-Setup.exe
+Localiza suas instalações do GTA/SA-MP e o User Files de cada data sozinho (botão na aba Datas).
+Arraste os cards de data pra reordenar; as datas não somem mais (gravação conferida, com backup).
+Jogo em tela cheia: o launcher se recupera sozinho (fim do "só o contorno") e espera em silêncio se for aberto durante o jogo.
+Menu de contas correto fora da Home, capas do blog fora de 16:9 cortadas certo e aviso de post novo só quando há post novo.
+Galeria mostra só as pastas que têm prints; registro de falhas (crash.log) pra diagnóstico.
+sha256=4a0c05ce4c2383f069bf00dc5c7f9b479c80f40aa2bcb3feaa25fe6b688bb98e

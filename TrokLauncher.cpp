@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.3"
+#define VERSAO "v1.4"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -95,8 +95,12 @@ static const Traducao TRADUCOES[] = {
     { { "sem SA-MP", "no SA-MP", "sin SA-MP", "нет SA-MP", "tanpa SA-MP", "SA-MP yok" } },
     { { "Mais vistos", "Most viewed", "Más vistos", "Популярные", "Paling dilihat", "En çok görüntülenen" } },
     { { "Entrar na comunidade do Discord", "Join the Discord community", "Entrar a la comunidad de Discord", "Вступить в сообщество Discord", "Gabung komunitas Discord", "Discord topluluğuna katıl" } },
-    { { "O Trok Launcher já está aberto.", "Trok Launcher is already running.", "Trok Launcher ya está abierto.", "Trok Launcher уже запущен.", "Trok Launcher sudah berjalan.", "Trok Launcher zaten açık." } },
-    { { "Ele foi trazido para a frente. Se você não o vir, procure o ícone dele ao lado do relógio.", "It has been brought to the front. If you cannot see it, look for its icon next to the clock.", "Se ha traído al frente. Si no lo ves, busca su icono junto al reloj.", "Окно вынесено на передний план. Если вы его не видите, найдите значок рядом с часами.", "Jendelanya sudah dibawa ke depan. Jika tidak terlihat, cari ikonnya di dekat jam.", "Pencere öne getirildi. Göremiyorsanız saatin yanındaki simgesini arayın." } },
+    { { "Localizar datas no PC", "Find installs on this PC", "Buscar instalaciones en el PC", "Найти установки на ПК", "Cari instalasi di PC ini", "Bu PC'de kurulumları bul" } },
+    { { "Procura pastas com gta_sa.exe e samp.exe nos discos, na Área de Trabalho, em Documentos e no registro", "Looks for folders with gta_sa.exe and samp.exe on your drives, Desktop, Documents and the registry", "Busca carpetas con gta_sa.exe y samp.exe en los discos, el Escritorio, Documentos y el registro", "Ищет папки с gta_sa.exe и samp.exe на дисках, рабочем столе, в документах и реестре", "Mencari folder berisi gta_sa.exe dan samp.exe di drive, Desktop, Dokumen, dan registry", "Sürücülerde, Masaüstünde, Belgelerde ve kayıt defterinde gta_sa.exe ve samp.exe olan klasörleri arar" } },
+    { { "%d data(s) encontrada(s) e adicionada(s).", "%d install(s) found and added.", "%d instalación(es) encontrada(s) y añadida(s).", "Найдено и добавлено установок: %d.", "%d instalasi ditemukan dan ditambahkan.", "%d kurulum bulundu ve eklendi." } },
+    { { "Não consegui iniciar o Direct3D 9. Se houver um jogo em tela cheia aberto, feche-o e abra o launcher de novo. Se continuar acontecendo, atualize o driver de vídeo.", "Could not start Direct3D 9. If a full-screen game is open, close it and open the launcher again. If it keeps happening, update your video driver.", "No pude iniciar Direct3D 9. Si hay un juego en pantalla completa abierto, ciérralo y abre el launcher de nuevo. Si sigue pasando, actualiza el driver de vídeo.", "Не удалось запустить Direct3D 9. Если открыта полноэкранная игра, закройте её и запустите лаунчер снова. Если это повторяется, обновите видеодрайвер.", "Tidak bisa memulai Direct3D 9. Jika ada game layar penuh yang terbuka, tutup dan buka launcher lagi. Jika terus terjadi, perbarui driver video.", "Direct3D 9 başlatılamadı. Tam ekran bir oyun açıksa kapatıp launcher'ı yeniden açın. Devam ederse ekran kartı sürücüsünü güncelleyin." } },
+    { { "Nenhuma data nova encontrada.", "No new install found.", "No se encontró ninguna instalación nueva.", "Новых установок не найдено.", "Tidak ada instalasi baru yang ditemukan.", "Yeni kurulum bulunamadı." } },
+    { { "Não consegui gravar as datas no arquivo de configuração. Confira se ele não está aberto em outro programa.", "Could not save the installs to the config file. Check that it is not open in another program.", "No pude guardar las instalaciones en el archivo de configuración. Comprueba que no esté abierto en otro programa.", "Не удалось сохранить установки в файл настроек. Проверьте, не открыт ли он в другой программе.", "Tidak bisa menyimpan instalasi ke file konfigurasi. Pastikan file tidak dibuka di program lain.", "Kurulumlar yapılandırma dosyasına kaydedilemedi. Başka bir programda açık olmadığından emin olun." } },
     { { "Abrir o blog TrokMods", "Open the TrokMods blog", "Abrir el blog TrokMods", "Открыть блог TrokMods", "Buka blog TrokMods", "TrokMods blogunu aç" } },
     { { "MODO", "MODE", "MODO", "РЕЖИМ", "MODE", "MOD" } },
     { { "JOGADORES", "PLAYERS", "JUGADORES", "ИГРОКИ", "PEMAIN", "OYUNCULAR" } },
@@ -256,6 +260,11 @@ static const Traducao TRADUCOES[] = {
     { { "Trocar imagem...", "Change image...", "Cambiar imagen...", "Изменить изображение...", "Ubah gambar...", "Görseli değiştir..." } },
     { { "Trocar logo...", "Change logo...", "Cambiar logo...", "Изменить логотип...", "Ubah logo...", "Logoyu değiştir..." } },
     { { "Trocar User Files...", "Change User Files...", "Cambiar User Files...", "Изменить User Files...", "Ubah User Files...", "User Files'ı değiştir..." } },
+    { { "Vazio = o launcher procura sozinho; se não achar, usa a pasta padrão em Documentos.", "Empty = the launcher finds it on its own; if not found, the default folder in Documents is used.", "Vacío = el launcher la busca solo; si no la encuentra, usa la carpeta predeterminada en Documentos.", "Пусто = лаунчер ищет сам; если не найдёт, используется папка по умолчанию в Документах.", "Kosong = launcher mencari sendiri; jika tidak ketemu, dipakai folder default di Documents.", "Boş = launcher kendisi arar; bulamazsa Belgeler'deki varsayılan klasör kullanılır." } },
+    { { "User Files em uso:", "User Files in use:", "User Files en uso:", "Используемые User Files:", "User Files yang dipakai:", "Kullanılan User Files:" } },
+    { { "(automático)", "(automatic)", "(automático)", "(автоматически)", "(otomatis)", "(otomatik)" } },
+    { { "(padrão)", "(default)", "(predeterminado)", "(по умолчанию)", "(default)", "(varsayılan)" } },
+    { { "(manual)", "(manual)", "(manual)", "(вручную)", "(manual)", "(elle)" } },
     { { "Trok Launcher %s  -  feito pela equipe TrokMods", "Trok Launcher %s  -  made by the TrokMods team", "Trok Launcher %s  -  hecho por el equipo TrokMods", "Trok Launcher %s  -  сделано командой TrokMods", "Trok Launcher %s  -  dibuat oleh tim TrokMods", "Trok Launcher %s  -  TrokMods ekibi yaptı" } },
     { { "User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela.", "Empty User Files = the default folder in Documents. The gallery reads its screenshots.", "User Files vacío = la carpeta por defecto en Documentos. La galería lee sus capturas.", "Пустой User Files = папка по умолчанию в Документах. Галерея читает скриншоты оттуда.", "User Files kosong = folder bawaan di Documents. Galeri membaca tangkapan layar dari sana.", "Boş User Files = Belgeler'deki varsayılan klasör. Galeri görüntüleri oradan okur." } },
     { { "vazio = nome que o servidor responder", "empty = the name the server reports", "vacío = el nombre que responda el servidor", "пусто = название, которое сообщит сервер", "kosong = nama yang dilaporkan server", "boş = sunucunun bildirdiği ad" } },
@@ -342,9 +351,40 @@ struct DataGta {
     char desc[160];
     char img[MAX_PATH];             // imagem 16:9 (png/jpg); vazio = card com inicial
     char userfiles[MAX_PATH];       // User Files desta data; vazio = Documentos\GTA San Andreas User Files
-    char versao[24];                // "0.3.7-R1", "0.3.DL-R1"... lida do samp.dll; vazio = sem SA-MP
+    char userfilesAuto[MAX_PATH];   // achado SOZINHO (GTASA_ em Documentos ou dentro da data); nao vai pro ini
+    char versao[24];               // "0.3.7-R1", "0.3.DL-R1"... lida do samp.dll; vazio = sem SA-MP
     IDirect3DTexture9* tex;
 };
+
+// User Files desta data achado SOZINHO. Nao vai pro ini: e recalculado a cada abertura, entao
+// nunca fica apontando pra pasta que sumiu. Duas pistas: (1) o redirecionador por instalacao cria
+// Documentos\GTASA_<caminho da data sem a letra do disco, com "\" virando "_">; (2) instalacao
+// portatil com "GTA San Andreas User Files" ou "userfiles" dentro da propria pasta do jogo.
+// O campo manual (userfiles) sempre vence; sem nada, vale a pasta padrao dos Documentos.
+static bool PastaExisteUF(const char* p) {
+    DWORD a = GetFileAttributesA(p);
+    return a != INVALID_FILE_ATTRIBUTES && (a & FILE_ATTRIBUTE_DIRECTORY);
+}
+static void LocalizarUserFilesAuto(DataGta& d) {
+    d.userfilesAuto[0] = 0;
+    if (!d.caminho[0]) return;
+    char cand[MAX_PATH];
+    char doc[MAX_PATH] = "";
+    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PERSONAL, NULL, 0, doc)) && doc[0]) {
+        const char* semDisco = d.caminho;
+        if (semDisco[0] && semDisco[1] == ':' && (semDisco[2] == '\\' || semDisco[2] == '/')) semDisco += 3;
+        char nome[MAX_PATH];
+        _snprintf(nome, sizeof(nome) - 1, "GTASA_%s", semDisco); nome[sizeof(nome) - 1] = 0;
+        for (char* c = nome; *c; c++) if (*c == '\\' || *c == '/') *c = '_';
+        _snprintf(cand, sizeof(cand) - 1, "%s\\%s", doc, nome); cand[sizeof(cand) - 1] = 0;
+        if (PastaExisteUF(cand)) { strncpy(d.userfilesAuto, cand, MAX_PATH - 1); return; }
+    }
+    static const char* DENTRO[3] = { "GTA San Andreas User Files", "userfiles", "User Files" };
+    for (int k = 0; k < 3; k++) {
+        _snprintf(cand, sizeof(cand) - 1, "%s\\%s", d.caminho, DENTRO[k]); cand[sizeof(cand) - 1] = 0;
+        if (PastaExisteUF(cand)) { strncpy(d.userfilesAuto, cand, MAX_PATH - 1); return; }
+    }
+}
 
 // versao do SA-MP de uma instalacao: o samp.dll nao traz a revisao em texto, mas cada build
 // tem um entry point diferente no cabecalho PE (tabela usada por SAMPFUNCS, RakHook, RakLua...)
@@ -466,6 +506,7 @@ struct ModPost {
     char imgCache[MAX_PATH]; // primeira imagem do post, baixada pra pasta de cache
     char imgUrl[300];        // de onde baixar a capa (so quando o card aparece na tela)
     char guid[96];           // id estavel do post no Blogger (a URL muda se o titulo mudar)
+    unsigned long long ordem; // AAAAMMDDhhmm da publicacao (UTC): "mais novo" sem depender da ordem da lista
 };
 static ModPost gMods[MAX_MODS];
 static IDirect3DTexture9* gModsTex[MAX_MODS]; // capas dos cards (chegam pela fila de imagens)
@@ -476,8 +517,11 @@ static volatile int gNumMods = 0;
 static volatile int gModsEstado = 0; // 0 nunca buscou, 1 buscando, 2 ok, 3 sem posts/falhou
 static bool gModsNovo = false;       // tem post que o usuario ainda nao viu
 static char gModsFeed[300] = URL_BLOG "/feeds/posts/summary?alt=rss"; // resumo: 10x menor que o feed completo
-static char gModsUltimo[300] = "";   // url do post mais recente ja visto (persistido no ini)
-static char gModsVistoAte[300] = ""; // marco da visita ATUAL: cards acima dele ganham bolinha
+static char gModsUltimo[300] = "";   // guid do post mais recente (legado; a bolinha usa a data abaixo)
+// Bolinha de post novo por DATA DE PUBLICACAO. Antes comparava o guid do primeiro item da
+// lista: bastava a ordem mudar (Mais vistos, post editado) pra bolinha acender de novo.
+static unsigned long long gModsUltimoOrdem = 0;   // publicacao mais nova que o usuario JA VIU (persistido)
+static unsigned long long gModsVistoAteOrdem = 0; // marco da visita ATUAL: posts mais novos que isso ganham bolinha
 // "Mais vistos": ordem do widget de posts populares do blog (o Blogger conta as visualizacoes;
 // o launcher so copia a ordem e casa com os posts do feed pela url)
 #define MAX_POP 10
@@ -820,6 +864,7 @@ static void LerConfig() {
     if (gAccent < 0 || gAccent > N_ACCENTS) gAccent = 2; // N_ACCENTS = personalizada, e valido
     GetPrivateProfileStringA("config", "mods_feed", gModsFeed, gModsFeed, sizeof(gModsFeed), gIniPath);
     GetPrivateProfileStringA("config", "mods_ultimo", gModsUltimo, gModsUltimo, sizeof(gModsUltimo), gIniPath);
+    { char vo[32] = "0"; GetPrivateProfileStringA("config", "mods_ultimo_ordem", "0", vo, sizeof(vo), gIniPath); gModsUltimoOrdem = _strtoui64(vo, NULL, 10); }
     {
         int cc = GetPrivateProfileIntA("config", "accent_custom", 0x3A5EFC, gIniPath); // 0xBBGGRR (#FC5E3A)
         int r = cc & 255, g = (cc >> 8) & 255, b = (cc >> 16) & 255;
@@ -885,7 +930,7 @@ static void LerConfig() {
     // datas (instalacoes)
     gNumDatas = 0;
     for (int i = 0; i < MAX_DATAS; i++) {
-        char chave[16], linha[512] = "";
+        char chave[16], linha[1200] = ""; // mesmo tamanho que o SalvarDatas escreve (512 cortava linha longa)
         sprintf(chave, "data%d", i);
         GetPrivateProfileStringA("datas", chave, "", linha, sizeof(linha), gIniPath);
         if (!linha[0]) continue;
@@ -915,8 +960,10 @@ static void LerConfig() {
         d.desc[0] = 0;
         gNumDatas = 1;
     }
-    for (int i = 0; i < gNumDatas; i++) // versao do SA-MP de cada data (mostrada no card)
+    for (int i = 0; i < gNumDatas; i++) { // versao do SA-MP de cada data (card) + User Files achado sozinho
         DetectarVersaoSamp(gDatas[i].caminho, gDatas[i].versao, sizeof(gDatas[i].versao));
+        LocalizarUserFilesAuto(gDatas[i]);
+    }
     gAvatarCor = GetPrivateProfileIntA("config", "avatar_cor", 0, gIniPath) % N_ACCENTS;
     gDataSel = GetPrivateProfileIntA("config", "data_sel", 0, gIniPath);
     if (gDataSel < 0 || gDataSel >= gNumDatas) gDataSel = 0;
@@ -987,6 +1034,7 @@ static void SalvarConfig() {
     WritePrivateProfileStringA("config", "ultimo_primeiro", gUltimoPrimeiro ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "mods_feed", gModsFeed, gIniPath);
     WritePrivateProfileStringA("config", "mods_ultimo", gModsUltimo, gIniPath);
+    { char vo[32]; _snprintf(vo, sizeof(vo) - 1, "%I64u", gModsUltimoOrdem); vo[sizeof(vo) - 1] = 0; WritePrivateProfileStringA("config", "mods_ultimo_ordem", vo, gIniPath); }
 }
 
 // ===================== imagens das datas (WIC - decodificador nativo do Windows) =====================
@@ -2170,6 +2218,13 @@ static void ExtrairResumoHtml(const char* html, char* out, int outsz) { // tira 
 // (".../s1280-c/foto.jpg", ".../w1280/foto.jpg"). Dependendo do que o post usou, vem
 // quadrado - e ai a capa do card aparece ampliada. Troca sempre por um 16:9 exato.
 static void CapaBlogger16x9(char* url, int cap) {
+    // forma nova do Blogger, sem nome de arquivo: ".../img/a/AVvX...=s72-c". O tamanho vem depois
+    // do "=", as vezes com "-rw" (webp, que o decodificador do Windows nao abre sem codec).
+    char* ig = strrchr(url, '=');
+    if (ig && !strchr(ig, '/') && (ig[1] == 's' || ig[1] == 'w') && ig[2] >= '0' && ig[2] <= '9') {
+        if ((int)(ig - url) + 13 < cap) strcpy(ig, "=w640-h360-c");
+        return;
+    }
     char* barra = strrchr(url, '/');
     if (!barra || barra == url) return;
     *barra = 0;
@@ -2358,6 +2413,10 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                 offMin = (hz * 60 + mz) * (z[1] == '-' ? -1 : 1);
             }
             gModsTmp[n].data[0] = 0;
+            gModsTmp[n].ordem = (dia > 0 && mi >= 0 && ano > 1900)
+                ? (unsigned long long)ano * 100000000ULL + (unsigned long long)(mi + 1) * 1000000ULL
+                  + (unsigned long long)dia * 10000ULL + (unsigned long long)hh * 100ULL + (unsigned long long)mm
+                : 0ULL;
             if (dia > 0 && mi >= 0 && ano > 1900) {
                 SYSTEMTIME st = { 0 };
                 st.wYear = (WORD)ano; st.wMonth = (WORD)(mi + 1); st.wDay = (WORD)dia;
@@ -2442,10 +2501,13 @@ static DWORD WINAPI ThreadMods(LPVOID) {
     gModsGen++;
     gModsEstado = (n > 0) ? 2 : 3;
     if (n > 0) {
-        if (strstr(gModsUltimo, "://")) { // valor antigo (era a URL): migra pro guid sem apitar
-            strncpy(gModsUltimo, gMods[0].guid, sizeof(gModsUltimo) - 1);
-            gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
-        } else if (_stricmp(gMods[0].guid, gModsUltimo) != 0) gModsNovo = true; // post novo!
+        // "post novo" = existe post publicado DEPOIS do mais novo que o usuario ja viu. Compara
+        // a data de publicacao, nao a posicao na lista: editar um post antigo ou trocar a ordem
+        // (Mais vistos) nao acende a bolinha de novo. Com a aba aberta, a UI marca como visto
+        // no proximo quadro e salva no ini.
+        unsigned long long maisNovo = 0;
+        for (int k = 0; k < n; k++) if (gMods[k].ordem > maisNovo) maisNovo = gMods[k].ordem;
+        if (maisNovo > gModsUltimoOrdem && gTela != 5) gModsNovo = true;
     }
     BuscarMaisVistos(); // depois dos recentes: a aba "Mais vistos" chega logo em seguida
     return 0;
@@ -2524,18 +2586,173 @@ static DWORD WINAPI ThreadDiscord(LPVOID) {
 
 // ===================== edicao de datas =====================
 
+// Grava as datas no ini. Antes de reescrever a secao, guarda uma copia do ini (.bak): se algo
+// der errado no meio (OneDrive ou antivirus segurando o arquivo), nada se perde. Cada escrita e
+// conferida e repetida ate 5x; se mesmo assim falhar, o usuario e avisado na hora, em vez de
+// descobrir no dia seguinte que a data "nao salvou".
+static bool GravarIniComRetentativa(const char* sec, const char* chave, const char* valor) {
+    for (int t = 0; t < 5; t++) {
+        if (WritePrivateProfileStringA(sec, chave, valor, gIniPath)) return true;
+        Sleep(40);
+    }
+    return false;
+}
 static void SalvarDatas() {
+    {
+        char bak[MAX_PATH + 8];
+        _snprintf(bak, sizeof(bak) - 1, "%s.bak", gIniPath); bak[sizeof(bak) - 1] = 0;
+        if (GetFileAttributesA(gIniPath) != INVALID_FILE_ATTRIBUTES) CopyFileA(gIniPath, bak, FALSE);
+    }
     char chave[16], linha[1200];
+    bool ok = true;
     for (int i = 0; i < MAX_DATAS; i++) {
         sprintf(chave, "data%d", i);
         if (i < gNumDatas) {
             DataGta& d = gDatas[i];
             sprintf(linha, "%s|%s|%s|%s|%s", d.nome, d.caminho, d.desc, d.img, d.userfiles);
-            WritePrivateProfileStringA("datas", chave, linha, gIniPath);
+            if (!GravarIniComRetentativa("datas", chave, linha)) ok = false;
         } else {
-            WritePrivateProfileStringA("datas", chave, NULL, gIniPath); // apaga sobras
+            if (!GravarIniComRetentativa("datas", chave, NULL)) ok = false; // apaga sobras
         }
     }
+    if (!ok) Avisar(T("Não consegui gravar as datas no arquivo de configuração. Confira se ele não está aberto em outro programa."));
+}
+
+// muda a posicao de uma data (arrastar e soltar na aba Datas); persiste no ini
+static void MoverData(int de, int para) {
+    if (de == para || de < 0 || para < 0 || de >= gNumDatas || para >= gNumDatas) return;
+    DataGta tmp = gDatas[de];
+    if (de < para) for (int j = de; j < para; j++) gDatas[j] = gDatas[j + 1];
+    else for (int j = de; j > para; j--) gDatas[j] = gDatas[j - 1];
+    gDatas[para] = tmp;
+    if (gDataSel == de) gDataSel = para;
+    else if (de < para && gDataSel > de && gDataSel <= para) gDataSel--;
+    else if (para < de && gDataSel >= para && gDataSel < de) gDataSel++;
+    SalvarDatas();
+    SalvarConfig(); // data_sel acompanha a nova posicao
+}
+
+// ---- localizar datas: procura instalacoes do GTA que ainda nao estao na lista ----
+static bool DataJaCadastrada(const char* pasta) {
+    for (int i = 0; i < gNumDatas; i++) if (_stricmp(gDatas[i].caminho, pasta) == 0) return true;
+    return false;
+}
+static bool PastaTemGta(const char* pasta) { // data = gta_sa.exe E samp.exe na mesma pasta
+    // (so o GTA nao basta: pegaria a versao da Steam, que nem roda SA-MP; e muita gente nem usa
+    //  instalador, entao o registro nao serve como unica fonte - a varredura de pastas e a principal)
+    char exe[MAX_PATH];
+    _snprintf(exe, MAX_PATH - 1, "%s\\gta_sa.exe", pasta); exe[MAX_PATH - 1] = 0;
+    if (GetFileAttributesA(exe) == INVALID_FILE_ATTRIBUTES) return false;
+    _snprintf(exe, MAX_PATH - 1, "%s\\samp.exe", pasta); exe[MAX_PATH - 1] = 0;
+    return GetFileAttributesA(exe) != INVALID_FILE_ATTRIBUTES;
+}
+static int AdicionarDataAchada(const char* pasta) { // 1 = entrou na lista
+    char limpa[MAX_PATH];
+    strncpy(limpa, pasta, MAX_PATH - 1); limpa[MAX_PATH - 1] = 0;
+    size_t L = strlen(limpa);
+    while (L > 3 && (limpa[L - 1] == '\\' || limpa[L - 1] == '/')) limpa[--L] = 0;
+    if (gNumDatas >= MAX_DATAS || !PastaTemGta(limpa) || DataJaCadastrada(limpa)) return 0;
+    DataGta& d = gDatas[gNumDatas];
+    memset(&d, 0, sizeof(d));
+    strncpy(d.caminho, limpa, sizeof(d.caminho) - 1);
+    DetectarVersaoSamp(limpa, d.versao, sizeof(d.versao));
+    LocalizarUserFilesAuto(d);
+    const char* nomePasta = strrchr(limpa, '\\');
+    strncpy(d.nome, (nomePasta && nomePasta[1]) ? nomePasta + 1 : limpa, sizeof(d.nome) - 1);
+    SortearCapaPadrao(d.img, sizeof(d.img));
+    if (d.img[0]) {
+        d.tex = CarregarImagemMax(gDev, d.img, 800);
+        if (strstr(d.img, "\\capas\\")) EscurecerMonocromatico(d.tex);
+    }
+    gNumDatas++;
+    return 1;
+}
+static int gVarrTeto = 0; // limite de pastas visitadas por varredura (nao trava em disco enorme)
+static int VarrerSubpastas(const char* raiz, int prof) { // raiz\* com gta_sa.exe dentro, ate 'prof' niveis
+    int n = 0;
+    char busca[MAX_PATH];
+    _snprintf(busca, MAX_PATH - 1, "%s\\*", raiz); busca[MAX_PATH - 1] = 0;
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(busca, &fd);
+    if (h == INVALID_HANDLE_VALUE) return 0;
+    do {
+        if (gVarrTeto <= 0 || gNumDatas >= MAX_DATAS) break;
+        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
+        if (fd.cFileName[0] == '.' || (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_REPARSE_POINT))) continue;
+        if (_stricmp(fd.cFileName, "Windows") == 0 || _stricmp(fd.cFileName, "$Recycle.Bin") == 0) continue;
+        gVarrTeto--;
+        char sub[MAX_PATH];
+        _snprintf(sub, MAX_PATH - 1, "%s\\%s", raiz, fd.cFileName); sub[MAX_PATH - 1] = 0;
+        n += AdicionarDataAchada(sub);
+        if (prof > 1) n += VarrerSubpastas(sub, prof - 1);
+    } while (FindNextFileA(h, &fd));
+    FindClose(h);
+    return n;
+}
+static int LocalizarDatas() {
+    int n = 0;
+    char v[MAX_PATH];
+    DWORD tam, tipo;
+    HKEY k;
+    gVarrTeto = 4000;
+    // registro do SA-MP (gta_sa_exe = caminho completo do exe): o mais confiavel
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, KEY_READ, &k) == ERROR_SUCCESS) {
+        tam = sizeof(v) - 1;
+        if (RegQueryValueExA(k, "gta_sa_exe", NULL, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && tipo == REG_SZ) {
+            v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
+            char* b = strrchr(v, '\\'); if (b) { *b = 0; n += AdicionarDataAchada(v); }
+        }
+        RegCloseKey(k);
+    }
+    // registro da Rockstar (instalador do DVD) e Steam
+    static const char* CHAVES_RS[2] = { "SOFTWARE\\WOW6432Node\\Rockstar Games\\GTA San Andreas\\Installation",
+                                        "SOFTWARE\\Rockstar Games\\GTA San Andreas\\Installation" };
+    for (int c = 0; c < 2; c++) {
+        if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, CHAVES_RS[c], 0, KEY_READ, &k) != ERROR_SUCCESS) continue;
+        tam = sizeof(v) - 1;
+        if (RegQueryValueExA(k, "ExePath", NULL, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && tipo == REG_SZ) {
+            v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
+            char* b = strrchr(v, '\\'); if (b) { *b = 0; n += AdicionarDataAchada(v); }
+        }
+        RegCloseKey(k);
+    }
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\Valve\\Steam", 0, KEY_READ, &k) == ERROR_SUCCESS) {
+        tam = sizeof(v) - 1;
+        if (RegQueryValueExA(k, "InstallPath", NULL, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && tipo == REG_SZ) {
+            v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
+            char st[MAX_PATH];
+            _snprintf(st, MAX_PATH - 1, "%s\\steamapps\\common\\Grand Theft Auto San Andreas", v); st[MAX_PATH - 1] = 0;
+            n += AdicionarDataAchada(st);
+        }
+        RegCloseKey(k);
+    }
+    // Area de Trabalho, Documentos e Downloads (dois niveis: "Documentos\GTA\SAMP tal")
+    static const int PASTAS_SHELL[3] = { CSIDL_DESKTOPDIRECTORY, CSIDL_PERSONAL, CSIDL_PROFILE };
+    for (int c = 0; c < 3; c++) {
+        if (FAILED(SHGetFolderPathA(NULL, PASTAS_SHELL[c], NULL, 0, v))) continue;
+        if (c == 2) { strncat(v, "\\Downloads", MAX_PATH - 1 - strlen(v)); }
+        n += AdicionarDataAchada(v);
+        n += VarrerSubpastas(v, 2);
+    }
+    // raiz de cada disco fixo (um nivel) e as pastas classicas de jogos (dois niveis)
+    static const char* SUFIXOS[5] = { "\\Games", "\\Jogos", "\\Rockstar Games",
+                                      "\\Program Files (x86)\\Rockstar Games", "\\Program Files\\Rockstar Games" };
+    DWORD drives = GetLogicalDrives();
+    for (int L = 0; L < 26 && gNumDatas < MAX_DATAS; L++) {
+        if (!(drives & (1u << L))) continue;
+        char raiz[4] = { (char)('A' + L), ':', '\\', 0 };
+        if (GetDriveTypeA(raiz) != DRIVE_FIXED) continue;
+        char semBarra[4] = { (char)('A' + L), ':', 0 };
+        n += VarrerSubpastas(semBarra, 1);
+        for (int sfx = 0; sfx < 5; sfx++) {
+            char p[MAX_PATH];
+            _snprintf(p, MAX_PATH - 1, "%s%s", semBarra, SUFIXOS[sfx]); p[MAX_PATH - 1] = 0;
+            n += AdicionarDataAchada(p);
+            n += VarrerSubpastas(p, 2);
+        }
+    }
+    if (n > 0) SalvarDatas();
+    return n;
 }
 
 // links oficiais: cada slot guarda "rotulo>url"; legado (so url) ganha o rotulo padrao do slot
@@ -2877,6 +3094,7 @@ static bool EscolherPasta(const char* titulo, char* out, int outsz) {
 // User Files da data: o campo dela, ou o padrao em Documentos
 static void UserFilesDaData(const DataGta& d, char* out, int outsz) {
     if (d.userfiles[0]) { strncpy(out, d.userfiles, outsz - 1); out[outsz - 1] = 0; return; }
+    if (d.userfilesAuto[0]) { strncpy(out, d.userfilesAuto, outsz - 1); out[outsz - 1] = 0; return; } // achado sozinho
     char doc[MAX_PATH] = "";
     SHGetFolderPathA(NULL, CSIDL_PERSONAL, NULL, 0, doc);
     _snprintf(out, outsz - 1, "%s\\GTA San Andreas User Files", doc);
@@ -2884,6 +3102,38 @@ static void UserFilesDaData(const DataGta& d, char* out, int outsz) {
 }
 
 // ===================== galeria (screenshots) =====================
+
+// tem ao menos uma screenshot em <uf>\SAMP\screens? (pasta sem print nao ganha aba na galeria)
+static bool TemImagemEm(const char* uf) {
+    static const char* EXT[3] = { "png", "jpg", "jpeg" }; // as mesmas que o EscanearFotos le
+    for (int e = 0; e < 3; e++) {
+        char padrao[MAX_PATH];
+        _snprintf(padrao, MAX_PATH - 1, "%s\\SAMP\\screens\\*.%s", uf, EXT[e]); padrao[MAX_PATH - 1] = 0;
+        WIN32_FIND_DATAA fd;
+        HANDLE h = FindFirstFileA(padrao, &fd);
+        if (h != INVALID_HANDLE_VALUE) { FindClose(h); return true; }
+    }
+    return false;
+}
+// cache de 10 s por pasta: a lista de abas e montada a cada quadro, listar diretorio por quadro seria caro
+static bool PastaTemScreens(const char* uf) {
+    struct CacheScreens { char pasta[MAX_PATH]; bool tem; DWORD quando; };
+    static CacheScreens cache[MAX_DATAS + 2];
+    static int nCache = 0;
+    DWORD agora = GetTickCount();
+    for (int i = 0; i < nCache; i++) {
+        if (_stricmp(cache[i].pasta, uf) != 0) continue;
+        if (agora - cache[i].quando >= 10000) { cache[i].quando = agora; cache[i].tem = TemImagemEm(uf); }
+        return cache[i].tem;
+    }
+    bool tem = TemImagemEm(uf);
+    if (nCache < MAX_DATAS + 2) {
+        CacheScreens& c = cache[nCache++];
+        strncpy(c.pasta, uf, MAX_PATH - 1); c.pasta[MAX_PATH - 1] = 0;
+        c.tem = tem; c.quando = agora;
+    }
+    return tem;
+}
 
 static int CmpFoto(const void* A, const void* B) {
     return CompareFileTime(&((const Foto*)B)->quando, &((const Foto*)A)->quando); // recentes primeiro
@@ -3107,6 +3357,8 @@ static void ProcessarPedidosDatas() {
             if (b) *b = 0;
             strncpy(gDatas[i].caminho, arq, sizeof(gDatas[i].caminho) - 1);
             DetectarVersaoSamp(arq, gDatas[i].versao, sizeof(gDatas[i].versao));
+            LocalizarUserFilesAuto(gDatas[i]);
+            gFotosDir[0] = 0; // caminho novo: o User Files achado pode mudar junto (a galeria reescaneia)
             if (i == gDataSel) { strncpy(gPastaGta, arq, sizeof(gPastaGta) - 1); SalvarConfig(); }
             SalvarDatas();
             char sampChk[MAX_PATH]; // pasta valida mas sem SA-MP? avisa na hora
@@ -3197,6 +3449,7 @@ static void ProcessarPedidosDatas() {
                 memset(&d, 0, sizeof(d));
                 strncpy(d.caminho, arq, sizeof(d.caminho) - 1);
                 DetectarVersaoSamp(arq, d.versao, sizeof(d.versao));
+                LocalizarUserFilesAuto(d);
                 const char* nomePasta = strrchr(arq, '\\');
                 strncpy(d.nome, nomePasta ? nomePasta + 1 : T("Nova data"), sizeof(d.nome) - 1);
                 strcpy(d.desc, "");
@@ -4708,6 +4961,22 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::SetCursorPos(ImVec2(24, 48));
         ImGui::TextColored(ImColor(Cinza(140)), T("Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR."));
         ImGui::PopFont();
+        { // "Localizar datas no PC": registro do SA-MP e da Rockstar, Steam e pastas comuns
+            ImGui::PushFont(gFtBold);
+            const float wLoc = 212.0f;
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wLoc, 22));
+            if (BotaoSec(T("Localizar datas no PC"), ImVec2(wLoc, 34))) {
+                int ach = LocalizarDatas();
+                if (ach > 0) {
+                    char msg[160];
+                    _snprintf(msg, sizeof(msg) - 1, T("%d data(s) encontrada(s) e adicionada(s)."), ach);
+                    msg[sizeof(msg) - 1] = 0;
+                    Avisar(msg);
+                } else Avisar(T("Nenhuma data nova encontrada."));
+            }
+            ImGui::PopFont();
+            Dica(T("Procura pastas com gta_sa.exe e samp.exe nos discos, na Área de Trabalho, em Documentos e no registro"));
+        }
         ImGui::SetCursorPos(ImVec2(24, 76));
         ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 96), false);
         // cards 16:9 esticados para fechar exatamente na borda direita da grade
@@ -4727,6 +4996,25 @@ static void DesenhaUI(HWND hwnd) {
             ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
             bool ch = ImGui::IsItemHovered();
             ImDrawList* wl = ImGui::GetWindowDrawList();
+            // arrastar e soltar para reordenar (igual aos favoritos da Home; o fantasma e global)
+            if (!ehAdd && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip)) {
+                ImGui::SetDragDropPayload("TROK_DATA", &i, sizeof(int));
+                ImGui::EndDragDropSource();
+            }
+            const ImGuiPayload* payD = ImGui::GetDragDropPayload();
+            bool arrastandoData = payD && payD->IsDataType("TROK_DATA");
+            bool euArrastadoD = arrastandoData && *(const int*)payD->Data == i;
+            if (!ehAdd && ImGui::BeginDragDropTarget()) {
+                if (const ImGuiPayload* pay = ImGui::AcceptDragDropPayload("TROK_DATA",
+                        ImGuiDragDropFlags_AcceptBeforeDelivery | ImGuiDragDropFlags_AcceptNoDrawDefaultRect)) {
+                    if (pay->IsDelivery()) MoverData(*(const int*)pay->Data, i);
+                    else if (*(const int*)pay->Data != i) { // faixa pulsando na borda esquerda do destino
+                        float pulso = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 7.0f);
+                        wl->AddRectFilled(ImVec2(ca.x - 10, ca.y + 8), ImVec2(ca.x - 5, cb.y - 8), ComAlpha(AC.cor, pulso), 2);
+                    }
+                }
+                ImGui::EndDragDropTarget();
+            }
             if (ehAdd) {
                 // card "+" para adicionar data
                 wl->AddRectFilled(ca, cb, Cinza(16, ch ? 235 : 190), 13);
@@ -4743,6 +5031,11 @@ static void DesenhaUI(HWND hwnd) {
                 continue;
             }
             DataGta& d = gDatas[i];
+            if (euArrastadoD) { // o card sai daqui: o fantasma completo segue o mouse
+                wl->AddRectFilled(ca, cb, Cinza(16, 170), 13);
+                wl->AddRect(ca, cb, ComAlpha(AC.cor, 0.55f), 13, 0, 1.5f);
+                continue;
+            }
             // imagem 16:9 ocupa o card todo
             if (d.tex) {
                 wl->AddImageRounded((ImTextureID)d.tex, ca, cb, ImVec2(0, 0), ImVec2(1, 1),
@@ -4806,11 +5099,11 @@ static void DesenhaUI(HWND hwnd) {
                 wl->AddCircleFilled(ImVec2(fcx2, fcy2), 8.5f, IM_COL32(0, 0, 0, 26), 16); // sombra sutil
                 Icone(wl, ImVec2(fcx2, fcy2), I_PASTA_ABRIR, fcc, 16.0f);
             }
-            if (fh2 && !gMouseNoDrop && ImGui::IsMouseClicked(0))
+            if (fh2 && !gMouseNoDrop && !arrastandoData && ImGui::IsMouseClicked(0))
                 ShellExecuteA(NULL, "open", d.caminho, NULL, NULL, SW_SHOWNORMAL);
-            if (mh && !gMouseNoDrop) ImGui::SetTooltip(T("Editar data"));
-            if (fh2 && !gMouseNoDrop) ImGui::SetTooltip(T("Abrir a pasta da data no Explorer"));
-            if (mh && !gMouseNoDrop && ImGui::IsMouseClicked(0)) {
+            if (mh && !gMouseNoDrop && !arrastandoData) ImGui::SetTooltip(T("Editar data"));
+            if (fh2 && !gMouseNoDrop && !arrastandoData) ImGui::SetTooltip(T("Abrir a pasta da data no Explorer"));
+            if (mh && !gMouseNoDrop && !arrastandoData && ImGui::IsMouseClicked(0)) {
                 gRenomear = i; // abre o painel de edicao (desenhado no nivel raiz)
                 strncpy(gEditNome, d.nome, sizeof(gEditNome) - 1);
                 strncpy(gEditDesc, d.desc, sizeof(gEditDesc) - 1);
@@ -4846,13 +5139,21 @@ static void DesenhaUI(HWND hwnd) {
             bool repetida = false;
             for (int t2 = 0; t2 < nTabs; t2++) if (_stricmp(tabs[t2].pasta, uf) == 0) { repetida = true; break; }
             if (repetida) continue;
+            if (!PastaTemScreens(uf)) continue; // pasta sem print nenhum nao vira aba (pedido dele)
             GalTab& g2 = tabs[nTabs++];
             strncpy(g2.pasta, uf, MAX_PATH - 1);
             g2.pasta[MAX_PATH - 1] = 0;
             if (_stricmp(uf, ufPadrao) == 0) strcpy(g2.rotulo, "User Files");
             else { strncpy(g2.rotulo, gDatas[i2].nome, sizeof(g2.rotulo) - 1); g2.rotulo[sizeof(g2.rotulo) - 1] = 0; }
         }
-        if (nTabs == 0) { strcpy(tabs[0].rotulo, "User Files"); strncpy(tabs[0].pasta, ufPadrao, MAX_PATH - 1); nTabs = 1; }
+        if (nTabs == 0) { // nenhuma pasta tem print: fica a da data em uso (vazia), pra "abrir pasta" apontar certo
+            char ufSel0[MAX_PATH];
+            UserFilesDaData(gDatas[gDataSel], ufSel0, sizeof(ufSel0));
+            strncpy(tabs[0].pasta, ufSel0, MAX_PATH - 1); tabs[0].pasta[MAX_PATH - 1] = 0;
+            if (_stricmp(ufSel0, ufPadrao) == 0) strcpy(tabs[0].rotulo, "User Files");
+            else { strncpy(tabs[0].rotulo, gDatas[gDataSel].nome, sizeof(tabs[0].rotulo) - 1); tabs[0].rotulo[sizeof(tabs[0].rotulo) - 1] = 0; }
+            nTabs = 1;
+        }
         if (gGalData < 0 || gGalData >= nTabs) {
             char ufSel[MAX_PATH];
             UserFilesDaData(gDatas[gDataSel], ufSel, sizeof(ufSel));
@@ -5159,9 +5460,11 @@ static void DesenhaUI(HWND hwnd) {
             float yDesc = yImg + imgH + 15.0f;            // resumo em UMA linha
             float yBot = yDesc + 27.0f;
             float CHM = yBot + HBOT + PADM;
-            int idxVisto = -1; // cards acima do marco da visita ganham bolinha de NOVO
-            for (int k = 0; k < gNumMods; k++)
-                if (gModsVistoAte[0] && _stricmp(gMods[k].guid, gModsVistoAte) == 0) { idxVisto = k; break; }
+            { // com a aba aberta, tudo que esta na lista conta como visto (persiste no ini)
+                unsigned long long maisNovo = 0;
+                for (int k = 0; k < gNumMods; k++) if (gMods[k].ordem > maisNovo) maisNovo = gMods[k].ordem;
+                if (maisNovo > gModsUltimoOrdem) { gModsUltimoOrdem = maisNovo; SalvarConfig(); }
+            }
             // ordem dos cards: recentes (feed) ou mais vistos (widget do blog, casado pela url)
             int ordem[MAX_MODS], nOrd = 0;
             if (gModsAba == 1) {
@@ -5188,7 +5491,7 @@ static void DesenhaUI(HWND hwnd) {
                 // fundo BRANCO como no blog; no hover so ganha uma sombra por baixo
                 if (hovP) SombraSuave(ml, ImVec2(ca.x + 5, ca.y + 8), ImVec2(cb2.x - 5, cb2.y + 5), 16.0f, 40);
                 ml->AddRectFilled(ca, cb2, IM_COL32(255, 255, 255, 255), 14.0f);
-                bool novoP = gModsVistoAte[0] && (idxVisto < 0 || i < idxVisto);
+                bool novoP = gModsVistoAteOrdem > 0 && gMods[i].ordem > gModsVistoAteOrdem; // publicado depois da ultima visita
                 float recuo = novoP ? 22.0f : 0.0f; // abre espaco pra bolinha de post novo
                 { // titulo encostado na data; a data fica sempre na mesma altura em todos os cards
                     char t1[224], t2[224];
@@ -5555,7 +5858,17 @@ static void DesenhaUI(HWND hwnd) {
                 ShellExecuteA(NULL, "open", uf, NULL, NULL, SW_SHOWNORMAL);
             }
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(133)), T("User Files vazio = a pasta padrão em Documentos. A galeria lê as screens dela."));
+            ImGui::TextColored(ImColor(Cinza(133)), T("Vazio = o launcher procura sozinho; se não achar, usa a pasta padrão em Documentos."));
+            { // qual User Files vale pra esta data: escolhido na mao, achado sozinho ou o padrao
+                char ufAtual[MAX_PATH];
+                UserFilesDaData(gDatas[i], ufAtual, sizeof(ufAtual));
+                const char* origemUf = gDatas[i].userfiles[0] ? T("(manual)")
+                                     : (gDatas[i].userfilesAuto[0] ? T("(automático)") : T("(padrão)"));
+                ImGui::TextColored(ImColor(Cinza(156)), "%s %s", T("User Files em uso:"), origemUf);
+                ImVec2 pUf = ImGui::GetCursorScreenPos();
+                TextoTruncado(ImGui::GetWindowDrawList(), pUf, 384.0f, Cinza(120), ufAtual);
+                ImGui::Dummy(ImVec2(384, ImGui::GetTextLineHeight()));
+            }
             ImGui::PopFont();
             // fileira de capas PRONTAS - previa ja em monocromatico, como fica no card de data
             GarantirCapasUI();
@@ -6076,15 +6389,9 @@ static void DesenhaUI(HWND hwnd) {
             char id[8]; sprintf(id, "##nav%d", i);
             if (ImGui::InvisibleButton(id, ImVec2(wSide - 28.0f, 46))) {
                 gTela = i;
-                if (i == 5) { // abriu a aba mods: a bolinha do icone some; os cards NOVOS
-                    gModsNovo = false; // desta visita ainda mostram a bolinha deles
-                    strncpy(gModsVistoAte, gModsUltimo, sizeof(gModsVistoAte) - 1);
-                    gModsVistoAte[sizeof(gModsVistoAte) - 1] = 0;
-                    if (gNumMods > 0 && _stricmp(gModsUltimo, gMods[0].guid) != 0) {
-                        strncpy(gModsUltimo, gMods[0].guid, sizeof(gModsUltimo) - 1);
-                        gModsUltimo[sizeof(gModsUltimo) - 1] = 0;
-                        SalvarConfig();
-                    }
+                if (i == 5) { // abriu a aba mods: a bolinha do icone some; os cards publicados
+                    gModsNovo = false; // depois da ultima visita ainda mostram a bolinha deles
+                    gModsVistoAteOrdem = gModsUltimoOrdem;
                     if (gModsEstado == 0) RodarThread(ThreadMods, NULL);
                 }
             }
@@ -6587,12 +6894,21 @@ static void DesenhaUI(HWND hwnd) {
             gContasA = ImVec2(ds.x - 34.0f - PW, 60.0f);
             gContasB = ImVec2(gContasA.x + PW, 60.0f + PH);
             ImGui::SetCursorScreenPos(gContasA);
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
+            // fundo TRANSPARENTE no estilo: o imgui desenha a decoracao (fundo) de um child na lista
+            // do PAI quando o irmao anterior nao sobrepoe (otimizacao) - e a lista do pai fica por
+            // baixo dos paineis das abas. Fora da Home o menu aparecia "transparente" (o botao
+            // Localizar datas e os icones dos cards vazavam por cima). Fundo e borda vao na lista
+            // do proprio dropdown, que renderiza por ultimo.
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0, 0, 0, 0));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 14.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
             ImGuiWindowFlags fDrop = (gContasAnim < 0.999f) ? (ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse) : 0;
             ImGui::BeginChild("##dropcontas", ImVec2(PW, PH), false, fDrop);
             ImDrawList* ml = ImGui::GetWindowDrawList();
+            ml->PushClipRect(gContasA, gContasB, false); // o clip do child tem recuo: a borda precisa do retangulo cheio
+            ml->AddRectFilled(gContasA, gContasB, IM_COL32(14, 14, 14, 252), 14.0f);
+            ml->AddRect(gContasA, gContasB, Cinza(58), 14.0f, 0, 1.0f);
+            ml->PopClipRect();
             if (gContaEdit == -1) {
                 // ---- lista de contas ----
                 ImGui::SetCursorPos(ImVec2(16, 12));
@@ -6756,7 +7072,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::EndChild();
             ImGui::PopStyleVar(2);
             ImGui::PopStyleColor();
-            dl->AddRect(gContasA, gContasB, Cinza(58), 14, 0, 1.0f);
+            // (a borda e desenhada junto com o fundo, dentro do child - ver acima)
             // clique fora recolhe (clicar no controle do topo ja alterna sozinho)
             if (gEscolherAvatar && ImGui::IsMouseClicked(0) &&
                 !ImGui::IsMouseHoveringRect(gContasA, gContasB) &&
@@ -6810,6 +7126,31 @@ static void DesenhaUI(HWND hwnd) {
                 ImVec2 gsz2 = ImGui::CalcTextSize(gpt);
                 fg->AddText(ImVec2(gb2.x - 15 - gsz2.x, gb2.y - 28), CorPing(sg.ping), gpt);
                 ImGui::PopFont();
+            }
+        }
+    }
+
+    // ===== fantasma da DATA arrastada (aba Datas): card 16:9 com a capa e o nome =====
+    {
+        const ImGuiPayload* payG = ImGui::GetDragDropPayload();
+        if (payG && payG->IsDataType("TROK_DATA")) {
+            int gi = *(const int*)payG->Data;
+            if (gi >= 0 && gi < gNumDatas) {
+                const DataGta& dg = gDatas[gi];
+                ImDrawList* fg = ImGui::GetForegroundDrawList();
+                ImVec2 ga(io.MousePos.x - 60, io.MousePos.y - 24);
+                ImVec2 gb2(ga.x + 256, ga.y + 144);
+                fg->AddRectFilled(ImVec2(ga.x + 5, ga.y + 9), ImVec2(gb2.x + 5, gb2.y + 9), IM_COL32(0, 0, 0, 130), 13);
+                fg->AddRectFilled(ga, gb2, IM_COL32(22, 22, 22, 250), 13);
+                if (dg.tex) ImagemCapa(fg, dg.tex, ga, gb2, 13.0f, 90);
+                fg->AddRectFilledMultiColor(ImVec2(ga.x + 2, gb2.y - 64), ImVec2(gb2.x - 2, gb2.y - 2),
+                                            Cinza(8, 0), Cinza(8, 0), Cinza(8, 225), Cinza(8, 225));
+                fg->AddRect(ga, gb2, AC.cor, 13, 0, 2.0f);
+                fg->PushClipRect(ImVec2(ga.x + 12, ga.y), ImVec2(gb2.x - 12, gb2.y), true);
+                ImGui::PushFont(gFtBold);
+                fg->AddText(ImVec2(ga.x + 14, gb2.y - 32), Cinza(248), dg.nome);
+                ImGui::PopFont();
+                fg->PopClipRect();
             }
         }
     }
@@ -6924,11 +7265,14 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
     if (ImGui_ImplWin32_WndProcHandler(h, m, w, l)) return 1;
     switch (m) {
     case WM_SIZE:
-        if (gDev && w != SIZE_MINIMIZED) {
+        if (gDev && w != SIZE_MINIMIZED && LOWORD(l) && HIWORD(l)) {
             gPP.BackBufferWidth = LOWORD(l); gPP.BackBufferHeight = HIWORD(l);
-            ImGui_ImplDX9_InvalidateDeviceObjects();
-            gDev->Reset(&gPP);
-            ImGui_ImplDX9_CreateDeviceObjects();
+            // so reseta com o device sao; perdido, quem cuida e o loop principal (o ShowWindow
+            // vindo da bandeja manda WM_SIZE, e um Reset em device perdido so piorava as coisas)
+            if (gDev->TestCooperativeLevel() == D3D_OK) {
+                ImGui_ImplDX9_InvalidateDeviceObjects();
+                if (SUCCEEDED(gDev->Reset(&gPP))) ImGui_ImplDX9_CreateDeviceObjects();
+            }
         }
         return 0;
     case WM_TROK_TRAY:
@@ -6962,6 +7306,83 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
     return DefWindowProcA(h, m, w, l);
 }
 
+// ===================== registro de crash (crash.log ao lado do ini) =====================
+// Se o launcher morrer por excecao, grava codigo, endereco (modulo+offset) e a pilha de retorno.
+// Sem simbolos embutidos: os offsets sao cruzados com o .map do build. E o arquivo que se pede
+// pro usuario mandar quando "fechou sozinho".
+#include <dbghelp.h>
+typedef BOOL (WINAPI* FnStackWalk64)(DWORD, HANDLE, HANDLE, LPSTACKFRAME64, PVOID, PREAD_PROCESS_MEMORY_ROUTINE64,
+                                     PFUNCTION_TABLE_ACCESS_ROUTINE64, PGET_MODULE_BASE_ROUTINE64, PTRANSLATE_ADDRESS_ROUTINE64);
+typedef PVOID (WINAPI* FnFunctionTableAccess64)(HANDLE, DWORD64);
+typedef DWORD64 (WINAPI* FnGetModuleBase64)(HANDLE, DWORD64);
+typedef BOOL (WINAPI* FnSymInitialize)(HANDLE, PCSTR, BOOL);
+
+static void ModuloMaisOffset(DWORD64 addr, char* out, int sz) {
+    HMODULE m = NULL;
+    char nome[MAX_PATH] = "?";
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           (LPCSTR)(UINT_PTR)addr, &m) && m) {
+        GetModuleFileNameA(m, nome, MAX_PATH);
+        const char* b = strrchr(nome, '\\');
+        if (b) memmove(nome, b + 1, strlen(b));
+        _snprintf(out, sz - 1, "%s+0x%08X", nome, (unsigned)(addr - (DWORD64)(UINT_PTR)m));
+    } else _snprintf(out, sz - 1, "0x%08X", (unsigned)addr);
+    out[sz - 1] = 0;
+}
+static FILE* AbrirCrashLog() { // crash.log ao lado do ini (mesma pasta do exe)
+    char cam[MAX_PATH];
+    strncpy(cam, gIniPath, MAX_PATH - 1); cam[MAX_PATH - 1] = 0;
+    char* b = strrchr(cam, '\\');
+    if (b) strcpy(b + 1, "crash.log"); else strcpy(cam, "crash.log");
+    return fopen(cam, "a");
+}
+// linha avulsa no crash.log (avisos que nao derrubam o launcher, mas que vale ter quando alguem
+// mandar o arquivo: "Direct3D so iniciou na 3a tentativa", etc.)
+static void RegistrarNoLog(const char* linha) {
+    FILE* f = AbrirCrashLog();
+    if (!f) return;
+    SYSTEMTIME st; GetLocalTime(&st);
+    fprintf(f, "[%04d-%02d-%02d %02d:%02d:%02d] Trok Launcher %s  %s\n",
+            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, VERSAO, linha);
+    fclose(f);
+}
+static LONG WINAPI FiltroCrash(EXCEPTION_POINTERS* ep) {
+    FILE* f = AbrirCrashLog();
+    if (!f) return EXCEPTION_CONTINUE_SEARCH;
+    SYSTEMTIME st; GetLocalTime(&st);
+    char mo[160];
+    ModuloMaisOffset((DWORD64)(UINT_PTR)ep->ExceptionRecord->ExceptionAddress, mo, sizeof(mo));
+    fprintf(f, "\n[%04d-%02d-%02d %02d:%02d:%02d] Trok Launcher %s  excecao 0x%08X em %s\n",
+            st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond, VERSAO,
+            (unsigned)ep->ExceptionRecord->ExceptionCode, mo);
+    if (ep->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && ep->ExceptionRecord->NumberParameters >= 2)
+        fprintf(f, "  acesso %s em 0x%08X\n", ep->ExceptionRecord->ExceptionInformation[0] ? "de escrita" : "de leitura",
+                (unsigned)ep->ExceptionRecord->ExceptionInformation[1]);
+    HMODULE dbg = LoadLibraryA("dbghelp.dll");
+    if (dbg) {
+        FnSymInitialize symInit = (FnSymInitialize)GetProcAddress(dbg, "SymInitialize");
+        FnStackWalk64 walk = (FnStackWalk64)GetProcAddress(dbg, "StackWalk64");
+        FnFunctionTableAccess64 fta = (FnFunctionTableAccess64)GetProcAddress(dbg, "SymFunctionTableAccess64");
+        FnGetModuleBase64 gmb = (FnGetModuleBase64)GetProcAddress(dbg, "SymGetModuleBase64");
+        if (symInit && walk && fta && gmb) {
+            symInit(GetCurrentProcess(), NULL, TRUE);
+            CONTEXT ctx = *ep->ContextRecord;
+            STACKFRAME64 sf; memset(&sf, 0, sizeof(sf));
+            sf.AddrPC.Offset = ctx.Eip;    sf.AddrPC.Mode = AddrModeFlat;
+            sf.AddrFrame.Offset = ctx.Ebp; sf.AddrFrame.Mode = AddrModeFlat;
+            sf.AddrStack.Offset = ctx.Esp; sf.AddrStack.Mode = AddrModeFlat;
+            for (int i = 0; i < 40; i++) {
+                if (!walk(IMAGE_FILE_MACHINE_I386, GetCurrentProcess(), GetCurrentThread(), &sf, &ctx, NULL, fta, gmb, NULL)) break;
+                if (!sf.AddrPC.Offset) break;
+                ModuloMaisOffset(sf.AddrPC.Offset, mo, sizeof(mo));
+                fprintf(f, "  %2d  %s\n", i, mo);
+            }
+        }
+    }
+    fclose(f);
+    return EXCEPTION_CONTINUE_SEARCH; // o Windows ainda registra o evento dele
+}
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     WSADATA wsa; WSAStartup(MAKEWORD(2, 2), &wsa);
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // WIC (imagens das datas)
@@ -6978,6 +7399,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
 #endif
     LerConfig();
     if (gTela == 6) gTela = 0; // a aba Informacoes saiu da barra
+    SetUnhandledExceptionFilter(FiltroCrash); // depois do LerConfig: o crash.log mora ao lado do ini
 
     // ---- uma copia so -----------------------------------------------------------
     // O X manda o launcher pra bandeja. Quem nao encontra a janela clica no atalho de
@@ -7002,18 +7424,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                     AllowSetForegroundWindow(pidVelho); // sem isso o Windows barra o foco
                     PostMessageA(velho, WM_TROK_MOSTRAR, 0, 0);
                 }
-                char aviso[512];
-                _snprintf(aviso, sizeof(aviso) - 1, "%s\n\n%s",
-                          T("O Trok Launcher já está aberto."),
-                          T("Ele foi trazido para a frente. Se você não o vir, procure o ícone dele ao lado do relógio."));
-                aviso[sizeof(aviso) - 1] = 0;
-                // O fonte e UTF-8 (/utf-8). O MessageBox ANSI leria esses bytes pela pagina
-                // de codigo do Windows e estragaria os acentos - e o russo nem cabe em ANSI.
-                // Converte e usa a versao wide.
-                wchar_t avisoW[512];
-                MultiByteToWideChar(CP_UTF8, 0, aviso, -1, avisoW, 512);
-                MessageBoxW(NULL, avisoW, L"Trok Launcher", MB_OK | MB_ICONINFORMATION | MB_SETFOREGROUND);
-                return 0;
+                return 0; // sem aviso (pedido dele): a copia aberta vem pra frente e esta sai em silencio
             }
         }
     }
@@ -7086,10 +7497,60 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     gPP.AutoDepthStencilFormat = D3DFMT_D16;
     gPP.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
     // MULTITHREADED: a thread de imagens cria texturas direto (custo minusculo no nosso caso)
-    if (FAILED(gD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
-        D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &gPP, &gDev))) {
-        gD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd,
-            D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED, &gPP, &gDev);
+    // Criacao com tolerancia. O CreateDevice falha de forma intermitente quando outro programa
+    // esta em tela cheia exclusiva (o proprio jogo aberto) ou o driver ainda esta acordando.
+    // Antes, se HW e SW falhassem, o codigo seguia com gDev NULO e o ImGui_ImplDX9_Init caia
+    // lendo o endereco 0 - o launcher "abria e fechava sozinho". Agora tenta 3 modos, repete
+    // por uns 4 segundos e, se nada der, explica o motivo em vez de morrer calado.
+    {
+        HRESULT hrUlt = E_FAIL;
+        int tentUsada = 0;
+        static const DWORD MODOS[3] = { D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
+                                        D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED,
+                                        D3DCREATE_MIXED_VERTEXPROCESSING | D3DCREATE_MULTITHREADED };
+        // Jogo em tela cheia EXCLUSIVA segurando a placa (Valorant, GTA em fullscreen...): o
+        // CreateDevice devolve D3DERR_DEVICELOST. Isso NAO e defeito: o launcher espera em
+        // silencio (janela ainda escondida, sem aviso) e aparece sozinho quando o jogo solta a
+        // tela. So erros DIFERENTES (driver, DX ausente) viram aviso depois das 12 tentativas.
+        bool esperandoJogo = false;
+        for (int tent = 0; (tent < 12 || esperandoJogo) && !gDev && gD3D && gRodando; tent++) {
+            for (int m = 0; m < 3 && !gDev; m++) {
+                HRESULT hr = gD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hwnd, MODOS[m], &gPP, &gDev);
+                if (FAILED(hr)) { gDev = NULL; hrUlt = hr; } // guarda o ultimo ERRO (nao o S_OK final)
+            }
+            tentUsada = tent + 1;
+            if (gDev) break;
+            esperandoJogo = (hrUlt == D3DERR_DEVICELOST);
+            if (esperandoJogo && tent == 11) RegistrarNoLog("aviso: jogo em tela cheia segurando o Direct3D; esperando pra abrir");
+            MSG msgE; // a janela ja existe: o instalador (WM_TROK_SAIR) e a 2a copia falam com ela
+            while (PeekMessageA(&msgE, NULL, 0, 0, PM_REMOVE)) {
+                TranslateMessage(&msgE); DispatchMessageA(&msgE);
+                if (msgE.message == WM_QUIT) gRodando = false;
+            }
+            Sleep(esperandoJogo ? 500 : 350);
+        }
+        if (!gDev && !gRodando) { DestroyWindow(hwnd); return 0; } // pediram pra sair enquanto esperava
+        char diag[200];
+        if (gDev && tentUsada > 1) { // funcionou, mas nao de primeira: fica registrado pra investigar
+            _snprintf(diag, sizeof(diag) - 1, "aviso: Direct3D so iniciou na tentativa %d (ultimo erro 0x%08X)", tentUsada, (unsigned)hrUlt);
+            diag[sizeof(diag) - 1] = 0;
+            RegistrarNoLog(diag);
+        }
+        if (!gDev) {
+            _snprintf(diag, sizeof(diag) - 1, "erro: Direct3D nao iniciou (Direct3DCreate9=%s, CreateDevice=0x%08X)", gD3D ? "ok" : "NULO", (unsigned)hrUlt);
+            diag[sizeof(diag) - 1] = 0;
+            RegistrarNoLog(diag);
+            char m[640];
+            _snprintf(m, sizeof(m) - 1, "%s\n\n(0x%08X)",
+                      T("Não consegui iniciar o Direct3D 9. Se houver um jogo em tela cheia aberto, feche-o e abra o launcher de novo. Se continuar acontecendo, atualize o driver de vídeo."),
+                      (unsigned)hrUlt);
+            m[sizeof(m) - 1] = 0;
+            wchar_t w[640];
+            MultiByteToWideChar(CP_UTF8, 0, m, -1, w, 640);
+            MessageBoxW(NULL, w, L"Trok Launcher", MB_OK | MB_ICONERROR | MB_SETFOREGROUND);
+            DestroyWindow(hwnd);
+            return 1;
+        }
     }
 
     ImGui::CreateContext();
@@ -7224,6 +7685,35 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                             fabsf(gSideAnim - (gSideAberta ? 1.0f : 0.0f)) > 0.001f; // menu expandindo
             if (!animando && (GetTickCount() - gUltimaAtividade) > 1500) Sleep(70);
         }
+        // ---- device perdido (jogo em tela cheia, monitor dormindo, troca de resolucao) ----
+        // Padrao do D3D9: enquanto TestCooperativeLevel diz DEVICELOST nao adianta desenhar nem
+        // resetar; quando diz DEVICENOTRESET, solta o que e D3DPOOL_DEFAULT (buffers e fonte do
+        // ImGui) e chama Reset. Antes isso era feito DEPOIS do Present e sem checar o Reset: um
+        // Reset falho seguido de CreateDeviceObjects deixava o launcher com a janela vazia
+        // ("so o contorno") ate fechar na bandeja e reabrir.
+        {
+            static bool avisouPerda = false;
+            HRESULT coop = gDev->TestCooperativeLevel();
+            if (coop == D3DERR_DEVICELOST) {
+                if (!avisouPerda) { RegistrarNoLog("aviso: device Direct3D perdido; esperando pra recuperar"); avisouPerda = true; }
+                Sleep(100);
+                continue; // o pump de mensagens la em cima continua rodando (bandeja, fechar)
+            }
+            if (coop == D3DERR_DEVICENOTRESET) {
+                ImGui_ImplDX9_InvalidateDeviceObjects();
+                HRESULT hr = gDev->Reset(&gPP);
+                if (FAILED(hr)) {
+                    char d[120]; _snprintf(d, sizeof(d) - 1, "aviso: Reset do Direct3D falhou (0x%08X), tentando de novo", (unsigned)hr); d[sizeof(d) - 1] = 0;
+                    RegistrarNoLog(d);
+                    Sleep(200);
+                    continue;
+                }
+                ImGui_ImplDX9_CreateDeviceObjects();
+                for (int k = 0; k < MAX_MODS; k++) if (gModsPedida[k] == 2) gModsPedida[k] = 0; // capa que falhou no sumico: tenta de novo
+                gUltimaAtividade = GetTickCount(); // acorda o render
+                if (avisouPerda) { RegistrarNoLog("device Direct3D recuperado"); avisouPerda = false; }
+            }
+        }
         ImGui_ImplDX9_NewFrame();
         ImGui_ImplWin32_NewFrame();
         io.DisplaySize = ImVec2(jw / gEscala, jh / gEscala); // a UI enxerga o tamanho LOGICO
@@ -7254,12 +7744,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
             ImGui_ImplDX9_RenderDrawData(dd);
             gDev->EndScene();
         }
-        if (gDev->Present(NULL, NULL, NULL, NULL) == D3DERR_DEVICELOST &&
-            gDev->TestCooperativeLevel() == D3DERR_DEVICENOTRESET) {
-            ImGui_ImplDX9_InvalidateDeviceObjects();
-            gDev->Reset(&gPP);
-            ImGui_ImplDX9_CreateDeviceObjects();
-        }
+        gDev->Present(NULL, NULL, NULL, NULL); // DEVICELOST aqui e tratado no comeco do proximo quadro
         ProcessarPedidosDatas(); // dialogos nativos (trocar imagem/caminho, nova data) fora do frame
         for (int li = 0; li < gNumLixo; li++) gLixoTex[li]->Release(); // texturas removidas na UI
         gNumLixo = 0;
