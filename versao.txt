@@ -1,8 +1,6 @@
-v1.4
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.4/TrokLauncher-Setup.exe
-Localiza suas instalações do GTA/SA-MP e o User Files de cada data sozinho (botão na aba Datas).
-Arraste os cards de data pra reordenar; as datas não somem mais (gravação conferida, com backup).
-Jogo em tela cheia: o launcher se recupera sozinho (fim do "só o contorno") e espera em silêncio se for aberto durante o jogo.
-Menu de contas correto fora da Home, capas do blog fora de 16:9 cortadas certo e aviso de post novo só quando há post novo.
-Galeria mostra só as pastas que têm prints; registro de falhas (crash.log) pra diagnóstico.
-sha256=4a0c05ce4c2383f069bf00dc5c7f9b479c80f40aa2bcb3feaa25fe6b688bb98e
+v1.5
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.5/TrokLauncher-Setup.exe
+Localiza datas em qualquer disco (3 níveis), HD externo, Program Files e na pasta do usuário - em segundo plano, sem travar.
+Limite de datas subiu de 8 para 24, e o launcher avisa quando bate no limite em vez de dizer que não achou.
+Primeira abertura sem SA-MP: procura as datas sozinho e já deixa uma pronta pra jogar.
+sha256=37c75c0def667f4258b57c1b3366157bff32ca85359f24866a2f2d6592362429
