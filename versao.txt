@@ -1,6 +1,6 @@
-v1.5
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.5/TrokLauncher-Setup.exe
+v1.6
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.6/TrokLauncher-Setup.exe
 Localiza datas em qualquer disco (até 9 níveis de pasta quando o nome sugere jogo), HD externo, Program Files e na pasta do usuário - em segundo plano, sem travar.
 Limite de datas subiu de 8 para 24, e o launcher avisa quando bate no limite em vez de dizer que não achou.
 Primeira abertura sem SA-MP: procura as datas sozinho e já deixa uma pronta pra jogar.
-sha256=50de50895837bc36df26a158f0354f36d17421f44c5cc99ce77c8c1690334853
+sha256=06a4b7fd902d8acbc13df44f50b0ce23160d6be2de00bb395875323301a8e399
