@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.4"
+#define VERSAO "v1.5"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -260,6 +260,12 @@ static const Traducao TRADUCOES[] = {
     { { "Trocar imagem...", "Change image...", "Cambiar imagen...", "Изменить изображение...", "Ubah gambar...", "Görseli değiştir..." } },
     { { "Trocar logo...", "Change logo...", "Cambiar logo...", "Изменить логотип...", "Ubah logo...", "Logoyu değiştir..." } },
     { { "Trocar User Files...", "Change User Files...", "Cambiar User Files...", "Изменить User Files...", "Ubah User Files...", "User Files'ı değiştir..." } },
+    { { "Procurando datas... (%d pastas)", "Searching for installs... (%d folders)", "Buscando instalaciones... (%d carpetas)", "Поиск установок... (%d папок)", "Mencari instalasi... (%d folder)", "Kurulumlar aranıyor... (%d klasör)" } },
+    { { "Localizar automaticamente", "Find automatically", "Buscar automáticamente", "Найти автоматически", "Cari otomatis", "Otomatik bul" } },
+    { { "Limite de %d datas atingido: %d encontrada(s) ficaram de fora. Remova uma data para adicionar outras.", "Limit of %d installs reached: %d found were left out. Remove one to add others.", "Límite de %d instalaciones alcanzado: %d encontradas quedaron fuera. Elimina una para añadir otras.", "Достигнут лимит в %d установок: %d найденных не добавлены. Удалите одну, чтобы добавить другие.", "Batas %d instalasi tercapai: %d yang ditemukan tidak dimasukkan. Hapus satu untuk menambah yang lain.", "%d kurulum sınırına ulaşıldı: bulunan %d tanesi dışarıda kaldı. Başka eklemek için birini kaldırın." } },
+    { { "Limite de %d datas atingido. Remova uma para adicionar outra.", "Limit of %d installs reached. Remove one to add another.", "Límite de %d instalaciones alcanzado. Elimina una para añadir otra.", "Достигнут лимит в %d установок. Удалите одну, чтобы добавить другую.", "Batas %d instalasi tercapai. Hapus satu untuk menambah lagi.", "%d kurulum sınırına ulaşıldı. Başka eklemek için birini kaldırın." } },
+    { { "Busca parcial: alguma pasta era grande demais. Se faltou uma data, use Adicionar data.", "Partial search: a folder was too big. If an install is missing, use Add install.", "Búsqueda parcial: una carpeta era demasiado grande. Si falta una instalación, usa Añadir.", "Поиск неполный: одна из папок слишком большая. Если установки нет, добавьте её вручную.", "Pencarian sebagian: ada folder yang terlalu besar. Jika instalasi kurang, pakai Tambah.", "Kısmi arama: bir klasör çok büyüktü. Eksik kurulum varsa Ekle'yi kullanın." } },
+    { { "Escolher o gta_sa.exe...", "Choose gta_sa.exe...", "Elegir el gta_sa.exe...", "Выбрать gta_sa.exe...", "Pilih gta_sa.exe...", "gta_sa.exe seç..." } },
     { { "Vazio = o launcher procura sozinho; se não achar, usa a pasta padrão em Documentos.", "Empty = the launcher finds it on its own; if not found, the default folder in Documents is used.", "Vacío = el launcher la busca solo; si no la encuentra, usa la carpeta predeterminada en Documentos.", "Пусто = лаунчер ищет сам; если не найдёт, используется папка по умолчанию в Документах.", "Kosong = launcher mencari sendiri; jika tidak ketemu, dipakai folder default di Documents.", "Boş = launcher kendisi arar; bulamazsa Belgeler'deki varsayılan klasör kullanılır." } },
     { { "User Files em uso:", "User Files in use:", "User Files en uso:", "Используемые User Files:", "User Files yang dipakai:", "Kullanılan User Files:" } },
     { { "(automático)", "(automatic)", "(automático)", "(автоматически)", "(otomatis)", "(otomatik)" } },
@@ -344,7 +350,7 @@ static const Accent ACCENTS[] = { // paleta escolhida por ele (referencia de ima
 static Accent gAccentCustom = { "Custom", IM_COL32(252, 94, 58, 255), IM_COL32(255, 128, 85, 255) };
 
 // "datas" = instalacoes diferentes do GTA/SA-MP (costume da comunidade)
-#define MAX_DATAS 8
+#define MAX_DATAS 24 // era 8: quem coleciona datas batia no teto em silencio (a varredura parava de adicionar)
 struct DataGta {
     char nome[64];
     char caminho[MAX_PATH];
@@ -548,7 +554,7 @@ static bool gSalvarSenhaServ = false; // opcoes do SA-MP original (HKCU\Software
 static bool gSalvarSenhaRcon = false;
 
 // aviso na tela (toast): unico feedback de erro que o usuario ve (ex: samp.exe sumiu)
-static char gAviso[200] = "";
+static char gAviso[320] = ""; // avisos longos (limite de datas em russo) nao podem ser cortados no meio
 static float gAvisoT = 0;
 static void Avisar(const char* msg) {
     strncpy(gAviso, msg, sizeof(gAviso) - 1);
@@ -2667,40 +2673,93 @@ static int AdicionarDataAchada(const char* pasta) { // 1 = entrou na lista
     gNumDatas++;
     return 1;
 }
-static int gVarrTeto = 0; // limite de pastas visitadas por varredura (nao trava em disco enorme)
-static int VarrerSubpastas(const char* raiz, int prof) { // raiz\* com gta_sa.exe dentro, ate 'prof' niveis
-    int n = 0;
+// A varredura roda numa THREAD: ela so junta uma lista de pastas candidatas; quem poe na lista de
+// datas e a thread principal (ConcluirLocalizarDatas, chamada fora do quadro do imgui). Cada raiz
+// tem o PROPRIO teto de pastas - antes o teto era global (4000) e gasto primeiro em Documentos, entao
+// um Documentos grande deixava o D: sem ser visitado. Cobertura: registro (SA-MP, Rockstar, Steam),
+// pasta do usuario (3 niveis), Area de Trabalho/Documentos/Downloads (3 niveis - ficam fora do perfil
+// quando o OneDrive redireciona), raiz de cada disco fixo OU removivel (3 niveis: D:\GTA\Datas\RP)
+// e Program Files / Program Files (x86) (2 niveis). Criterio de data: gta_sa.exe E samp.exe.
+static volatile LONG gLocEstado = 0;       // 0 parado, 1 procurando, 2 terminou (resultado a consumir)
+static volatile LONG gLocPastas = 0;       // pastas visitadas (vai pro rotulo do botao)
+static bool gLocTetoBateu = false;         // alguma raiz estourou o teto: cobertura parcial
+static bool gLocPrimeiroAcesso = false;    // disparada sozinha na 1a abertura sem SA-MP
+static char gLocCand[MAX_DATAS][MAX_PATH]; // candidatas achadas pela thread
+static int gLocNumCand = 0;
+static int gLocSobraram = 0;               // datas de verdade que nao couberam no limite (o aviso diz o motivo)
+static int gVarrTeto = 0;                  // orcamento da raiz atual (uma pasta visitada = -1)
+
+static bool PastaIgnorada(const char* nome) { // sistema e arvores enormes onde nunca tem data
+    static const char* IGN[] = { "Windows", "Windows.old", "ProgramData", "$Recycle.Bin", "System Volume Information",
+                                 "AppData", "node_modules", ".git", "WindowsApps", "Common Files", "Recovery",
+                                 "PerfLogs", "MSOCache", "Microsoft", "Intel", "NVIDIA", "AMD" };
+    for (int i = 0; i < (int)(sizeof(IGN) / sizeof(IGN[0])); i++) if (_stricmp(nome, IGN[i]) == 0) return true;
+    return false;
+}
+static void CandidataAchada(const char* pasta) { // so registra; a thread principal adiciona depois
+    char limpa[MAX_PATH];
+    strncpy(limpa, pasta, MAX_PATH - 1); limpa[MAX_PATH - 1] = 0;
+    size_t L = strlen(limpa);
+    while (L > 3 && (limpa[L - 1] == '\\' || limpa[L - 1] == '/')) limpa[--L] = 0;
+    if (!PastaTemGta(limpa) || DataJaCadastrada(limpa)) return;
+    for (int i = 0; i < gLocNumCand; i++) if (_stricmp(gLocCand[i], limpa) == 0) return;
+    if (gLocNumCand + gNumDatas >= MAX_DATAS) { gLocSobraram++; return; } // e data, mas nao cabe: contado pro aviso
+    strncpy(gLocCand[gLocNumCand], limpa, MAX_PATH - 1); gLocCand[gLocNumCand][MAX_PATH - 1] = 0;
+    gLocNumCand++;
+}
+static void VarrerSubpastas(const char* raiz, int prof, bool raizDeDisco) { // raiz\* ate 'prof' niveis
     char busca[MAX_PATH];
     _snprintf(busca, MAX_PATH - 1, "%s\\*", raiz); busca[MAX_PATH - 1] = 0;
     WIN32_FIND_DATAA fd;
     HANDLE h = FindFirstFileA(busca, &fd);
-    if (h == INVALID_HANDLE_VALUE) return 0;
+    if (h == INVALID_HANDLE_VALUE) return;
     do {
-        if (gVarrTeto <= 0 || gNumDatas >= MAX_DATAS) break;
+        if (gVarrTeto <= 0) { gLocTetoBateu = true; break; }
         if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
-        if (fd.cFileName[0] == '.' || (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_REPARSE_POINT))) continue;
-        if (_stricmp(fd.cFileName, "Windows") == 0 || _stricmp(fd.cFileName, "$Recycle.Bin") == 0) continue;
+        // ocultas/sistema fora (juncoes antigas do Windows sao assim); reparse point NAO e pulado -
+        // pasta do OneDrive pode ser um, e a profundidade limitada ja impede loop
+        if (fd.cFileName[0] == '.' || (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM))) continue;
+        if (PastaIgnorada(fd.cFileName)) continue;
+        // na raiz do disco, Program Files e Users tem varredura propria (regras e profundidade diferentes)
+        if (raizDeDisco && (_strnicmp(fd.cFileName, "Program Files", 13) == 0 || _stricmp(fd.cFileName, "Users") == 0)) continue;
         gVarrTeto--;
+        InterlockedIncrement(&gLocPastas);
         char sub[MAX_PATH];
         _snprintf(sub, MAX_PATH - 1, "%s\\%s", raiz, fd.cFileName); sub[MAX_PATH - 1] = 0;
-        n += AdicionarDataAchada(sub);
-        if (prof > 1) n += VarrerSubpastas(sub, prof - 1);
+        CandidataAchada(sub);
+        if (prof > 1) VarrerSubpastas(sub, prof - 1, false);
     } while (FindNextFileA(h, &fd));
     FindClose(h);
-    return n;
 }
-static int LocalizarDatas() {
-    int n = 0;
+static void VarrerRaiz(const char* raiz, int prof, int teto, bool raizDeDisco) {
+    if (!raiz[0]) return;
+    gVarrTeto = teto;
+    CandidataAchada(raiz);
+    VarrerSubpastas(raiz, prof, raizDeDisco);
+}
+static void PastaConhecida(const GUID& id, char* out, int outsz) { // Downloads movido pra outro disco, etc.
+    out[0] = 0;
+    typedef HRESULT(WINAPI* FnKF)(const GUID&, DWORD, HANDLE, PWSTR*);
+    HMODULE sh = GetModuleHandleA("shell32.dll");
+    FnKF fn = sh ? (FnKF)GetProcAddress(sh, "SHGetKnownFolderPath") : NULL;
+    PWSTR w = NULL;
+    if (fn && SUCCEEDED(fn(id, 0, NULL, &w)) && w) {
+        WideCharToMultiByte(CP_ACP, 0, w, -1, out, outsz, NULL, NULL);
+        out[outsz - 1] = 0;
+        CoTaskMemFree(w);
+    }
+}
+static DWORD WINAPI ThreadLocalizarDatas(LPVOID) {
+    UINT modoErro = SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX); // leitor de cartao vazio nao abre caixa
     char v[MAX_PATH];
     DWORD tam, tipo;
     HKEY k;
-    gVarrTeto = 4000;
     // registro do SA-MP (gta_sa_exe = caminho completo do exe): o mais confiavel
     if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, KEY_READ, &k) == ERROR_SUCCESS) {
         tam = sizeof(v) - 1;
         if (RegQueryValueExA(k, "gta_sa_exe", NULL, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && tipo == REG_SZ) {
             v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
-            char* b = strrchr(v, '\\'); if (b) { *b = 0; n += AdicionarDataAchada(v); }
+            char* b = strrchr(v, '\\'); if (b) { *b = 0; CandidataAchada(v); }
         }
         RegCloseKey(k);
     }
@@ -2712,7 +2771,7 @@ static int LocalizarDatas() {
         tam = sizeof(v) - 1;
         if (RegQueryValueExA(k, "ExePath", NULL, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && tipo == REG_SZ) {
             v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
-            char* b = strrchr(v, '\\'); if (b) { *b = 0; n += AdicionarDataAchada(v); }
+            char* b = strrchr(v, '\\'); if (b) { *b = 0; CandidataAchada(v); }
         }
         RegCloseKey(k);
     }
@@ -2722,37 +2781,73 @@ static int LocalizarDatas() {
             v[tam < sizeof(v) ? tam : sizeof(v) - 1] = 0;
             char st[MAX_PATH];
             _snprintf(st, MAX_PATH - 1, "%s\\steamapps\\common\\Grand Theft Auto San Andreas", v); st[MAX_PATH - 1] = 0;
-            n += AdicionarDataAchada(st);
+            CandidataAchada(st);
         }
         RegCloseKey(k);
     }
-    // Area de Trabalho, Documentos e Downloads (dois niveis: "Documentos\GTA\SAMP tal")
-    static const int PASTAS_SHELL[3] = { CSIDL_DESKTOPDIRECTORY, CSIDL_PERSONAL, CSIDL_PROFILE };
-    for (int c = 0; c < 3; c++) {
-        if (FAILED(SHGetFolderPathA(NULL, PASTAS_SHELL[c], NULL, 0, v))) continue;
-        if (c == 2) { strncat(v, "\\Downloads", MAX_PATH - 1 - strlen(v)); }
-        n += AdicionarDataAchada(v);
-        n += VarrerSubpastas(v, 2);
-    }
-    // raiz de cada disco fixo (um nivel) e as pastas classicas de jogos (dois niveis)
-    static const char* SUFIXOS[5] = { "\\Games", "\\Jogos", "\\Rockstar Games",
-                                      "\\Program Files (x86)\\Rockstar Games", "\\Program Files\\Rockstar Games" };
+    // pasta do usuario inteira (Users\Fulano\Jogos\GTA\SAMP) + Area de Trabalho, Documentos e Downloads
+    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, v))) VarrerRaiz(v, 3, 8000, false);
+    static const int PASTAS_SHELL[2] = { CSIDL_DESKTOPDIRECTORY, CSIDL_PERSONAL };
+    for (int c = 0; c < 2; c++)
+        if (SUCCEEDED(SHGetFolderPathA(NULL, PASTAS_SHELL[c], NULL, 0, v))) VarrerRaiz(v, 3, 4000, false);
+    static const GUID ID_DOWNLOADS = { 0x374DE290, 0x123F, 0x4565, { 0x91, 0x64, 0x39, 0xC4, 0x92, 0x5E, 0x46, 0x7B } };
+    PastaConhecida(ID_DOWNLOADS, v, sizeof(v)); // o caminho REAL (Downloads movido pra outro disco)
+    if (!v[0] && SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, v))) strncat(v, "\\Downloads", MAX_PATH - 1 - strlen(v));
+    VarrerRaiz(v, 3, 4000, false);
+    // cada disco fixo ou removivel (HD externo): raiz com 3 niveis; Program Files com 2
     DWORD drives = GetLogicalDrives();
-    for (int L = 0; L < 26 && gNumDatas < MAX_DATAS; L++) {
+    for (int L = 2; L < 26; L++) { // A: e B: (disquete) fora
         if (!(drives & (1u << L))) continue;
         char raiz[4] = { (char)('A' + L), ':', '\\', 0 };
-        if (GetDriveTypeA(raiz) != DRIVE_FIXED) continue;
+        UINT tipoD = GetDriveTypeA(raiz);
+        if (tipoD != DRIVE_FIXED && tipoD != DRIVE_REMOVABLE) continue;
+        if (!GetVolumeInformationA(raiz, NULL, 0, NULL, NULL, NULL, NULL, 0)) continue; // sem midia
         char semBarra[4] = { (char)('A' + L), ':', 0 };
-        n += VarrerSubpastas(semBarra, 1);
-        for (int sfx = 0; sfx < 5; sfx++) {
-            char p[MAX_PATH];
-            _snprintf(p, MAX_PATH - 1, "%s%s", semBarra, SUFIXOS[sfx]); p[MAX_PATH - 1] = 0;
-            n += AdicionarDataAchada(p);
-            n += VarrerSubpastas(p, 2);
+        VarrerRaiz(semBarra, 3, 12000, true);
+        static const char* PF[2] = { "\\Program Files", "\\Program Files (x86)" };
+        for (int p = 0; p < 2; p++) {
+            char pf[MAX_PATH];
+            _snprintf(pf, MAX_PATH - 1, "%s%s", semBarra, PF[p]); pf[MAX_PATH - 1] = 0;
+            VarrerRaiz(pf, 2, 3000, false);
         }
     }
+    SetErrorMode(modoErro);
+    InterlockedExchange(&gLocEstado, 2);
+    return 0;
+}
+static void IniciarLocalizarDatas(bool primeiroAcesso) {
+    if (InterlockedCompareExchange(&gLocEstado, 1, 0) != 0) return; // ja esta procurando
+    gLocNumCand = 0; gLocSobraram = 0; gLocTetoBateu = false; gLocPastas = 0; gLocPrimeiroAcesso = primeiroAcesso;
+    RodarThread(ThreadLocalizarDatas, NULL);
+}
+// thread principal, fora do quadro do imgui: poe as candidatas na lista, salva e avisa
+static void ConcluirLocalizarDatas() {
+    if (gLocEstado != 2) return;
+    int n = 0, primeiraNova = -1;
+    for (int i = 0; i < gLocNumCand; i++)
+        if (AdicionarDataAchada(gLocCand[i])) { n++; if (primeiraNova < 0) primeiraNova = gNumDatas - 1; }
     if (n > 0) SalvarDatas();
-    return n;
+    if (gLocPrimeiroAcesso && primeiraNova >= 0 && !SampValido()) { // 1a abertura sem SA-MP: a achada vira a data em uso
+        gDataSel = primeiraNova;
+        strncpy(gPastaGta, gDatas[gDataSel].caminho, sizeof(gPastaGta) - 1); gPastaGta[sizeof(gPastaGta) - 1] = 0;
+        SalvarConfig();
+        gSampOk = SampValido();
+    }
+    int sobraram = gLocSobraram + (gLocNumCand - n); // nao coube na thread + nao coube na hora de adicionar
+    char msg[320];
+    if (sobraram > 0) { // o motivo de verdade, nao "nao encontrou"
+        _snprintf(msg, sizeof(msg) - 1, T("Limite de %d datas atingido: %d encontrada(s) ficaram de fora. Remova uma data para adicionar outras."), MAX_DATAS, sobraram);
+        msg[sizeof(msg) - 1] = 0;
+        Avisar(msg);
+    } else if (n > 0) {
+        _snprintf(msg, sizeof(msg) - 1, T("%d data(s) encontrada(s) e adicionada(s)."), n); msg[sizeof(msg) - 1] = 0;
+        Avisar(msg);
+    } else if (!gLocPrimeiroAcesso) {
+        Avisar(gLocTetoBateu ? T("Busca parcial: alguma pasta era grande demais. Se faltou uma data, use Adicionar data.")
+                             : T("Nenhuma data nova encontrada."));
+    }
+    gLocPrimeiroAcesso = false;
+    InterlockedExchange(&gLocEstado, 0);
 }
 
 // links oficiais: cada slot guarda "rotulo>url"; legado (so url) ganha o rotulo padrao do slot
@@ -3334,6 +3429,10 @@ static void ImportarImagem(const char* origem, char* out, int outsz, int maxLado
 
 // roda no loop principal, FORA do frame imgui (dialogos nativos tem message pump propria)
 static void ProcessarPedidosDatas() {
+#ifdef TROK_TESTE_AVISO_LIMITE // exe de AMOSTRA: o aviso do limite de datas, depois do 1o quadro, pra avaliar o texto
+    { static int q = 0; if (++q % 40 == 20) { char m[320]; _snprintf(m, sizeof(m) - 1, T("Limite de %d datas atingido: %d encontrada(s) ficaram de fora. Remova uma data para adicionar outras."), MAX_DATAS, 3); m[sizeof(m) - 1] = 0; Avisar(m); } } // repete: o fade-in do aviso assume 4,5 s
+#endif
+    ConcluirLocalizarDatas(); // a varredura de datas terminou? entra na lista aqui (thread principal)
     if (gPickImagem >= 0 && gPickImagem < gNumDatas) {
         int i = gPickImagem; gPickImagem = -1;
         char arq[MAX_PATH];
@@ -4960,22 +5059,24 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(24, 48));
         ImGui::TextColored(ImColor(Cinza(140)), T("Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR."));
+        if (gNumDatas >= MAX_DATAS) { // no teto o card "+" some: o motivo fica escrito aqui
+            char lim[160];
+            _snprintf(lim, sizeof(lim) - 1, T("Limite de %d datas atingido. Remova uma para adicionar outra."), MAX_DATAS); lim[sizeof(lim) - 1] = 0;
+            ImGui::SameLine(0, 14);
+            ImGui::TextColored(ImColor(AC.hi), "%s", lim);
+        }
         ImGui::PopFont();
-        { // "Localizar datas no PC": registro do SA-MP e da Rockstar, Steam e pastas comuns
+        { // "Localizar datas no PC": roda em thread; enquanto procura o botao vira o contador de pastas
             ImGui::PushFont(gFtBold);
-            const float wLoc = 212.0f;
+            const float wLoc = 236.0f;
             ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wLoc, 22));
-            if (BotaoSec(T("Localizar datas no PC"), ImVec2(wLoc, 34))) {
-                int ach = LocalizarDatas();
-                if (ach > 0) {
-                    char msg[160];
-                    _snprintf(msg, sizeof(msg) - 1, T("%d data(s) encontrada(s) e adicionada(s)."), ach);
-                    msg[sizeof(msg) - 1] = 0;
-                    Avisar(msg);
-                } else Avisar(T("Nenhuma data nova encontrada."));
-            }
+            bool procurando = (gLocEstado != 0);
+            char rotLoc[96];
+            if (procurando) { _snprintf(rotLoc, sizeof(rotLoc) - 1, T("Procurando datas... (%d pastas)"), (int)gLocPastas); rotLoc[sizeof(rotLoc) - 1] = 0; }
+            else { strncpy(rotLoc, T("Localizar datas no PC"), sizeof(rotLoc) - 1); rotLoc[sizeof(rotLoc) - 1] = 0; }
+            if (BotaoSec(rotLoc, ImVec2(wLoc, 34), procurando ? Cinza(95) : 0) && !procurando) IniciarLocalizarDatas(false);
             ImGui::PopFont();
-            Dica(T("Procura pastas com gta_sa.exe e samp.exe nos discos, na Área de Trabalho, em Documentos e no registro"));
+            if (!procurando) Dica(T("Procura pastas com gta_sa.exe e samp.exe nos discos, na Área de Trabalho, em Documentos e no registro"));
         }
         ImGui::SetCursorPos(ImVec2(24, 76));
         ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 96), false);
@@ -6089,6 +6190,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::PopFont();
                 }
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+                ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, 500.0f)); // ate 24 datas: rola em vez de sair da tela
                 if (ImGui::BeginPopup("##popdata")) {
                     ImDrawList* cl2 = ImGui::GetWindowDrawList();
                     for (int q = -1; q < gNumDatas; q++) { // -1 = "data em uso (nao trocar)"
@@ -6548,6 +6650,7 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
         if (ImGui::BeginPopupModal("BemVindo##trok", NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
+            if (!gBoasVindas) ImGui::CloseCurrentPopup(); // a busca automatica achou uma data valida: some sozinho
             ImGui::PushFont(gFtBotao);
             ImGui::TextColored(ImColor(Cinza(245)), T("BEM-VINDO AO TROK LAUNCHER"));
             ImGui::PopFont();
@@ -6564,11 +6667,19 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
             ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button("Escolher o gta_sa.exe...", ImVec2(400, 42))) { // largura toda do modal
+            if (ImGui::Button(T("Escolher o gta_sa.exe..."), ImVec2(400, 42))) { // largura toda do modal
                 gPickCaminho = gDataSel; // o picker roda fora do frame e atualiza a data em uso
                 ImGui::CloseCurrentPopup(); // sem SA-MP valido o popup VOLTA no proximo frame
             }
             ImGui::PopStyleColor(4);
+            ImGui::Dummy(ImVec2(1, 6));
+            { // busca automatica (na 1a abertura ela ja sai rodando sozinha; aqui da pra repetir)
+                bool procurando = (gLocEstado != 0);
+                char rotL[96];
+                if (procurando) { _snprintf(rotL, sizeof(rotL) - 1, T("Procurando datas... (%d pastas)"), (int)gLocPastas); rotL[sizeof(rotL) - 1] = 0; }
+                else { strncpy(rotL, T("Localizar automaticamente"), sizeof(rotL) - 1); rotL[sizeof(rotL) - 1] = 0; }
+                if (BotaoSec(rotL, ImVec2(400, 38), procurando ? Cinza(95) : 0) && !procurando) IniciarLocalizarDatas(true);
+            }
             ImGui::PopFont();
             ImGui::EndPopup();
         }
@@ -7407,7 +7518,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     // copia mexia no mesmo .ini. Um mutex nomeado barra a segunda; a que ja esta aberta
     // vem pra frente (funciona ate escondida na bandeja, o pump roda antes do render).
     // Vem depois do LerConfig de proposito: e ele que define o idioma do aviso.
-#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE)
+#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE) && !defined(TROK_TESTE_AVISO_LIMITE)
     {
         bool reabrindo = (cmdLinha && strstr(cmdLinha, "--reabrir") != NULL);
         HANDLE mtxUnica = CreateMutexA(NULL, FALSE, "Local\\TrokLauncher-instancia-unica");
@@ -7443,6 +7554,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
         gBoasVindas = true; // amostra: sempre simula PC sem SA-MP
 #endif
         gSampOk = !gBoasVindas; // sem samp.exe, os botoes Jogar somem ate apontar um
+        if (gBoasVindas) IniciarLocalizarDatas(true); // 1a abertura sem SA-MP: ja sai procurando as datas sozinho
+#ifdef TROK_TESTE_AVISO_LIMITE // exe de AMOSTRA: mostra o aviso do limite de datas pra avaliar o texto
+        { for (int i = gNumDatas; i < MAX_DATAS; i++) { gDatas[i] = gDatas[0]; gDatas[i].tex = NULL; _snprintf(gDatas[i].nome, sizeof(gDatas[i].nome) - 1, "Data de teste %d", i + 1); }
+          gNumDatas = MAX_DATAS; } // lista cheia: cabecalho com o limite + rolagem da grade
+#endif
     }
 
     // nitido em qualquer escala do Windows (sem isso o DWM estica o app e borra)
