@@ -2687,7 +2687,7 @@ static bool gLocPrimeiroAcesso = false;    // disparada sozinha na 1a abertura s
 static char gLocCand[MAX_DATAS][MAX_PATH]; // candidatas achadas pela thread
 static int gLocNumCand = 0;
 static int gLocSobraram = 0;               // datas de verdade que nao couberam no limite (o aviso diz o motivo)
-static int gVarrTeto = 0;                  // orcamento da raiz atual (uma pasta visitada = -1)
+static void RegistrarNoLog(const char* linha); // crash.log ao lado do ini (definida perto do WinMain)
 
 static bool PastaIgnorada(const char* nome) { // sistema e arvores enormes onde nunca tem data
     static const char* IGN[] = { "Windows", "Windows.old", "ProgramData", "$Recycle.Bin", "System Volume Information",
@@ -2706,36 +2706,102 @@ static void CandidataAchada(const char* pasta) { // so registra; a thread princi
     if (gLocNumCand + gNumDatas >= MAX_DATAS) { gLocSobraram++; return; } // e data, mas nao cabe: contado pro aviso
     strncpy(gLocCand[gLocNumCand], limpa, MAX_PATH - 1); gLocCand[gLocNumCand][MAX_PATH - 1] = 0;
     gLocNumCand++;
+    { char d[MAX_PATH + 32]; _snprintf(d, sizeof(d) - 1, "data achada: %s", limpa); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); } // suporte: o que a busca viu
 }
-static void VarrerSubpastas(const char* raiz, int prof, bool raizDeDisco) { // raiz\* ate 'prof' niveis
-    char busca[MAX_PATH];
-    _snprintf(busca, MAX_PATH - 1, "%s\\*", raiz); busca[MAX_PATH - 1] = 0;
-    WIN32_FIND_DATAA fd;
-    HANDLE h = FindFirstFileA(busca, &fd);
-    if (h == INVALID_HANDLE_VALUE) return;
-    do {
-        if (gVarrTeto <= 0) { gLocTetoBateu = true; break; }
-        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
-        // ocultas/sistema fora (juncoes antigas do Windows sao assim); reparse point NAO e pulado -
-        // pasta do OneDrive pode ser um, e a profundidade limitada ja impede loop
-        if (fd.cFileName[0] == '.' || (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM))) continue;
-        if (PastaIgnorada(fd.cFileName)) continue;
-        // na raiz do disco, Program Files e Users tem varredura propria (regras e profundidade diferentes)
-        if (raizDeDisco && (_strnicmp(fd.cFileName, "Program Files", 13) == 0 || _stricmp(fd.cFileName, "Users") == 0)) continue;
-        gVarrTeto--;
-        InterlockedIncrement(&gLocPastas);
-        char sub[MAX_PATH];
-        _snprintf(sub, MAX_PATH - 1, "%s\\%s", raiz, fd.cFileName); sub[MAX_PATH - 1] = 0;
-        CandidataAchada(sub);
-        if (prof > 1) VarrerSubpastas(sub, prof - 1, false);
-    } while (FindNextFileA(h, &fd));
-    FindClose(h);
+// Passada a profundidade base, o launcher so continua descendo por pastas cujo nome sugere jogo
+// (D:\Rafael Arquivos\Datas\DATAS QUE USO\GTA Chefe\GTA Chefe\GTA: 6 niveis, caso real). Palavras
+// comparadas por TOKEN (espaco, _ e -), pra "Datas" e "GTA Chefe" contarem sem que "Database" conte.
+static bool NomeSugereJogo(const char* nome) {
+    static const char* PISTAS[] = { "gta", "gtasa", "samp", "sa-mp", "sa_mp", "sanandreas", "andreas", "san", "grand", "theft", "auto", "autos", "data", "datas",
+                                    "jogo", "jogos", "game", "games", "rockstar", "mod", "mods", "server", "servidor",
+                                    "rp", "roleplay", "launcher", "instalacao", "instalacoes", "instalação", "instalações",
+                                    "backup", "backups", "cliente", "client", "pack", "trok",
+                                    // jeitos de nomear data que o pessoal do SA-MP usa ("DATA PVP", "BASE LIMPA", "GTA by Chefe")
+                                    "pvp", "dm", "tdm", "base", "by", "limpa", "limpo", "clean", "original", "modded", "lite",
+                                    "leve", "pesada", "pesado", "fps", "cleo", "dl", "r1", "r2", "r3", "r4", "r5", "ultra",
+                                    "graphics", "graficos", "reshade", "enb", "hud", "skin", "skins", "texturas", "textures",
+                                    "open", "mp", "omp", "novo", "nova", "velho", "velha", "antigo", "antiga", "teste" };
+    char tok[64];
+    int n = 0;
+    for (const char* c = nome; ; c++) {
+        bool sep = (*c == 0 || *c == ' ' || *c == '_' || *c == '-' || *c == '.' || *c == '(' || *c == ')' || *c == '[' || *c == ']');
+        if (!sep) { if (n < 63) tok[n++] = (char)tolower((unsigned char)*c); }
+        else {
+            tok[n] = 0;
+            if (n > 0) for (int i = 0; i < (int)(sizeof(PISTAS) / sizeof(PISTAS[0])); i++) if (strcmp(tok, PISTAS[i]) == 0) return true;
+            n = 0;
+            if (*c == 0) break;
+        }
+    }
+    return false;
 }
-static void VarrerRaiz(const char* raiz, int prof, int teto, bool raizDeDisco) {
+// Varredura em LARGURA (nivel por nivel), nao em profundidade: assim uma arvore gigante no comeco
+// do disco (biblioteca da Steam, por exemplo) nao gasta o orcamento antes de a varredura chegar
+// nas outras pastas do mesmo nivel. Niveis 1..base olham TUDO; do base+1 ao base+6 so entram
+// pastas com nome de jogo (NomeSugereJogo), com orcamento proprio. Dentro de uma data nao se entra.
+struct FilaVarr { char (*p)[MAX_PATH]; int n, cap; };
+static bool FilaAdd(FilaVarr& f, const char* s) {
+    if (f.n >= f.cap) return false;
+    strncpy(f.p[f.n], s, MAX_PATH - 1); f.p[f.n][MAX_PATH - 1] = 0; f.n++;
+    return true;
+}
+static void VarrerRaiz(const char* raiz, int base, int tetoBase, int tetoExtra, bool raizDeDisco) {
     if (!raiz[0]) return;
-    gVarrTeto = teto;
-    CandidataAchada(raiz);
-    VarrerSubpastas(raiz, prof, raizDeDisco);
+    if (PastaTemGta(raiz)) { CandidataAchada(raiz); return; }
+    const int CAP = 12000; // pastas por nivel (2 x 12000 x MAX_PATH ~ 6 MB, so durante a busca)
+    FilaVarr atual = { (char (*)[MAX_PATH])malloc((size_t)CAP * MAX_PATH), 0, CAP };
+    FilaVarr prox  = { (char (*)[MAX_PATH])malloc((size_t)CAP * MAX_PATH), 0, CAP };
+    if (!atual.p || !prox.p) { free(atual.p); free(prox.p); return; }
+    FilaAdd(atual, raiz);
+    int orcBase = tetoBase, orcExtra = tetoExtra;
+    for (int nivel = 1; nivel <= base + 6 && atual.n > 0; nivel++) { // nivel = profundidade dos FILHOS enumerados
+        int& orc = (nivel > base) ? orcExtra : orcBase;
+        prox.n = 0;
+        for (int i = 0; i < atual.n && orc > 0; i++) {
+            char busca[MAX_PATH];
+            _snprintf(busca, MAX_PATH - 1, "%s\\*", atual.p[i]); busca[MAX_PATH - 1] = 0;
+            WIN32_FIND_DATAA fd;
+            HANDLE h = FindFirstFileA(busca, &fd);
+            if (h == INVALID_HANDLE_VALUE) continue;
+            do {
+                if (orc <= 0) { // orcamento da raiz acabou: fica no crash.log pra saber ONDE a busca parou
+                    if (!gLocTetoBateu || nivel == 1) {
+                        char d[MAX_PATH + 96];
+                        _snprintf(d, sizeof(d) - 1, "aviso: varredura de datas cortada em %s (nivel %d, orcamento %d pastas)", raiz, nivel, nivel > base ? tetoExtra : tetoBase);
+                        d[sizeof(d) - 1] = 0; RegistrarNoLog(d);
+                    }
+                    gLocTetoBateu = true; break;
+                }
+                if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) continue;
+                // ocultas/sistema fora (juncoes antigas do Windows sao assim); reparse point NAO e pulado -
+                // pasta do OneDrive pode ser um, e a profundidade limitada ja impede loop
+                if (fd.cFileName[0] == '.' || (fd.dwFileAttributes & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM))) continue;
+                if (PastaIgnorada(fd.cFileName)) continue;
+                // na raiz do disco, Program Files e Users tem varredura propria (regras e profundidade diferentes)
+                if (raizDeDisco && nivel == 1 && (_strnicmp(fd.cFileName, "Program Files", 13) == 0 || _stricmp(fd.cFileName, "Users") == 0)) continue;
+                orc--;
+                InterlockedIncrement(&gLocPastas);
+                char sub[MAX_PATH];
+                _snprintf(sub, MAX_PATH - 1, "%s\\%s", atual.p[i], fd.cFileName); sub[MAX_PATH - 1] = 0;
+                if (PastaTemGta(sub)) { CandidataAchada(sub); continue; } // dentro de uma data nao tem outra (e o modloader e enorme)
+                if (nivel < base || NomeSugereJogo(fd.cFileName)) { if (!FilaAdd(prox, sub)) gLocTetoBateu = true; }
+            } while (FindNextFileA(h, &fd));
+            FindClose(h);
+        }
+        // pastas com nome de jogo vao pra FRENTE do proximo nivel: se o orcamento acabar no meio,
+        // acaba nas pastas menos provaveis (foi assim que "__GRAND THEFT AUTOS", ultima da lista
+        // alfabetica dos Documentos, ficou de fora numa varredura de teste)
+        int k = 0;
+        for (int i = 0; i < prox.n; i++) {
+            const char* nome = strrchr(prox.p[i], '\\');
+            if (nome && NomeSugereJogo(nome + 1)) {
+                if (i != k) { char tmpP[MAX_PATH]; memcpy(tmpP, prox.p[i], MAX_PATH); memcpy(prox.p[i], prox.p[k], MAX_PATH); memcpy(prox.p[k], tmpP, MAX_PATH); }
+                k++;
+            }
+        }
+        FilaVarr tmp = atual; atual = prox; prox = tmp;
+    }
+    free(atual.p); free(prox.p);
 }
 static void PastaConhecida(const GUID& id, char* out, int outsz) { // Downloads movido pra outro disco, etc.
     out[0] = 0;
@@ -2786,15 +2852,15 @@ static DWORD WINAPI ThreadLocalizarDatas(LPVOID) {
         RegCloseKey(k);
     }
     // pasta do usuario inteira (Users\Fulano\Jogos\GTA\SAMP) + Area de Trabalho, Documentos e Downloads
-    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, v))) VarrerRaiz(v, 3, 8000, false);
+    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, v))) VarrerRaiz(v, 3, 20000, 6000, false);
     static const int PASTAS_SHELL[2] = { CSIDL_DESKTOPDIRECTORY, CSIDL_PERSONAL };
     for (int c = 0; c < 2; c++)
-        if (SUCCEEDED(SHGetFolderPathA(NULL, PASTAS_SHELL[c], NULL, 0, v))) VarrerRaiz(v, 3, 4000, false);
+        if (SUCCEEDED(SHGetFolderPathA(NULL, PASTAS_SHELL[c], NULL, 0, v))) VarrerRaiz(v, 3, 15000, 5000, false);
     static const GUID ID_DOWNLOADS = { 0x374DE290, 0x123F, 0x4565, { 0x91, 0x64, 0x39, 0xC4, 0x92, 0x5E, 0x46, 0x7B } };
     PastaConhecida(ID_DOWNLOADS, v, sizeof(v)); // o caminho REAL (Downloads movido pra outro disco)
     if (!v[0] && SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_PROFILE, NULL, 0, v))) strncat(v, "\\Downloads", MAX_PATH - 1 - strlen(v));
-    VarrerRaiz(v, 3, 4000, false);
-    // cada disco fixo ou removivel (HD externo): raiz com 3 niveis; Program Files com 2
+    VarrerRaiz(v, 3, 6000, 3000, false);
+    // cada disco fixo ou removivel (HD externo): raiz com 3 niveis (+6 por nome); Program Files com 2
     DWORD drives = GetLogicalDrives();
     for (int L = 2; L < 26; L++) { // A: e B: (disquete) fora
         if (!(drives & (1u << L))) continue;
@@ -2803,15 +2869,16 @@ static DWORD WINAPI ThreadLocalizarDatas(LPVOID) {
         if (tipoD != DRIVE_FIXED && tipoD != DRIVE_REMOVABLE) continue;
         if (!GetVolumeInformationA(raiz, NULL, 0, NULL, NULL, NULL, NULL, 0)) continue; // sem midia
         char semBarra[4] = { (char)('A' + L), ':', 0 };
-        VarrerRaiz(semBarra, 3, 12000, true);
+        VarrerRaiz(semBarra, 3, 30000, 10000, true);
         static const char* PF[2] = { "\\Program Files", "\\Program Files (x86)" };
         for (int p = 0; p < 2; p++) {
             char pf[MAX_PATH];
             _snprintf(pf, MAX_PATH - 1, "%s%s", semBarra, PF[p]); pf[MAX_PATH - 1] = 0;
-            VarrerRaiz(pf, 2, 3000, false);
+            VarrerRaiz(pf, 2, 3000, 2000, false);
         }
     }
     SetErrorMode(modoErro);
+    { char d[160]; _snprintf(d, sizeof(d) - 1, "varredura de datas: %d pastas visitadas, %d candidatas novas%s", (int)gLocPastas, gLocNumCand, gLocTetoBateu ? " (cortada em alguma raiz)" : ""); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); }
     InterlockedExchange(&gLocEstado, 2);
     return 0;
 }
@@ -2824,8 +2891,10 @@ static void IniciarLocalizarDatas(bool primeiroAcesso) {
 static void ConcluirLocalizarDatas() {
     if (gLocEstado != 2) return;
     int n = 0, primeiraNova = -1;
-    for (int i = 0; i < gLocNumCand; i++)
+    for (int i = 0; i < gLocNumCand; i++) {
         if (AdicionarDataAchada(gLocCand[i])) { n++; if (primeiraNova < 0) primeiraNova = gNumDatas - 1; }
+        else { char d[MAX_PATH + 48]; _snprintf(d, sizeof(d) - 1, "aviso: data achada nao entrou na lista: %s", gLocCand[i]); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); }
+    }
     if (n > 0) SalvarDatas();
     if (gLocPrimeiroAcesso && primeiraNova >= 0 && !SampValido()) { // 1a abertura sem SA-MP: a achada vira a data em uso
         gDataSel = primeiraNova;
@@ -2839,13 +2908,15 @@ static void ConcluirLocalizarDatas() {
         _snprintf(msg, sizeof(msg) - 1, T("Limite de %d datas atingido: %d encontrada(s) ficaram de fora. Remova uma data para adicionar outras."), MAX_DATAS, sobraram);
         msg[sizeof(msg) - 1] = 0;
         Avisar(msg);
+    } else if (gLocTetoBateu && (n > 0 || !gLocPrimeiroAcesso)) { // achou (ou nao), mas nao olhou tudo: diz isso
+        int L = 0;
+        if (n > 0) { _snprintf(msg, sizeof(msg) - 1, T("%d data(s) encontrada(s) e adicionada(s)."), n); msg[sizeof(msg) - 1] = 0; L = (int)strlen(msg); msg[L++] = ' '; }
+        _snprintf(msg + L, sizeof(msg) - 1 - L, "%s", T("Busca parcial: alguma pasta era grande demais. Se faltou uma data, use Adicionar data.")); msg[sizeof(msg) - 1] = 0;
+        Avisar(msg);
     } else if (n > 0) {
         _snprintf(msg, sizeof(msg) - 1, T("%d data(s) encontrada(s) e adicionada(s)."), n); msg[sizeof(msg) - 1] = 0;
         Avisar(msg);
-    } else if (!gLocPrimeiroAcesso) {
-        Avisar(gLocTetoBateu ? T("Busca parcial: alguma pasta era grande demais. Se faltou uma data, use Adicionar data.")
-                             : T("Nenhuma data nova encontrada."));
-    }
+    } else if (!gLocPrimeiroAcesso) Avisar(T("Nenhuma data nova encontrada."));
     gLocPrimeiroAcesso = false;
     InterlockedExchange(&gLocEstado, 0);
 }
