@@ -1,0 +1,93 @@
+<!-- ARQUIVO: rascunho "Instalar e configurar o SA-MP do zero: o que mudar no sa-mp.cfg" (permalink instalar-e-configurar-o-samp-do-zero, id 6398015160511017815), copiado em 09/09/2026 antes das mesclagens. -->
+<p>Seu radar esticado, o chat com 10 linhas e o jogo preso em 50 FPS saem todos do mesmo arquivo de texto que ninguém abre.</p>
+
+<p>Ele se chama <code>sa-mp.cfg</code>, o SA-MP cria sozinho na primeira vez que você joga, e quase tudo que incomoda no cliente se resolve ali ou num comando digitado no chat. Este post é a instalação do zero e, principalmente, o que fazer depois dela.</p>
+
+<p>[CAPA: o jogo em movimento com o contador de FPS grande e nítido num canto, em recorte fechado nele. Foco no número. É o resultado visível do arquivo que o post ensina a mexer, e número grande funciona pequeno.]</p>
+
+<h2>Instalar o cliente</h2>
+
+<ol>
+<li>Tenha um <strong>GTA San Andreas 1.0 US</strong>. É a única versão que o SA-MP aceita, e o motivo está em <a href="https://trokmods.blogspot.com/2026/09/downgrade-do-gta-sa-para-1-0.html">por que o SA-MP só aceita a 1.0</a>.</li>
+<li>Escolha a revisão. Resumo: <strong>R1 se você usa mods, R5 se você só quer jogar.</strong> A comparação inteira está no <a href="https://trokmods.blogspot.com/2026/09/qual-versao-do-samp-usar.html">guia de versões</a>, e o instalador do R1 fica no <a href="https://trokmods.blogspot.com/2026/09/samp-037-r1-download.html">post do R1</a>.</li>
+<li>Rode o instalador apontando para a pasta do GTA. Ele copia o <code>samp.exe</code>, o <code>samp.dll</code> e pouca coisa mais, sem tocar no jogo.</li>
+<li>Abra pelo <code>samp.exe</code>, ponha o nick e conecte.</li>
+</ol>
+
+<p>O nick tem regra, e ela derruba muita gente na primeira tentativa: no máximo 20 caracteres, e só letras, números e <code>[ ] ( ) $ @ . _ =</code>. Acento e espaço não passam.</p>
+
+<h2>Onde fica o sa-mp.cfg</h2>
+
+<p>Em <code>Documentos &gt; GTA San Andreas User Files &gt; SAMP</code>. É texto puro, abre no bloco de notas, e cada linha é uma opção. Feche o jogo antes de editar, senão ele sobrescreve o que você salvou.</p>
+
+<p>Boa parte dessas opções também tem um comando equivalente, que você digita no chat dentro do jogo. Aí não precisa fechar nada.</p>
+
+<h2>As configurações que valem a pena mexer</h2>
+
+<p><strong><code>fpslimit</code></strong>. Aceita de 20 a 90 e o SA-MP deixa em <strong>50</strong>. O detalhe que engana: esse limite só vale se o limitador de quadros estiver ligado nas opções gráficas do GTA. Se você ligou o limitador para conter algum bug e achou o jogo estranhamente travado, é isso. Comando: <code>/fpslimit 90</code>.</p>
+
+<p>Vale ler junto o post sobre <a href="https://trokmods.blogspot.com/2026/09/fps-alto-quebra-o-gta-sa.html">FPS alto quebrando o GTA</a>, porque limitador de quadros e física quebrada em FPS alto são o mesmo assunto por caminhos diferentes.</p>
+
+<p><strong><code>multicore</code></strong>. Vem em 1. Se o seu mouse trava depois que você sai do menu de pausa, ponha 0. É a correção clássica desse bug, e ele aparece com frequência suficiente para estar no post dos <a href="https://trokmods.blogspot.com/2026/09/erros-mais-comuns-do-samp.html">erros mais comuns</a>.</p>
+
+<p><strong><code>nohudscale</code></strong>. Ponha 1 e o radar para de ficar deformado em monitor widescreen. O comando é <code>/hudscalefix</code>. Essa opção só existe do <strong>0.3.7 R3</strong> em diante: quem ficou no R1 por causa de mod não tem ela, e precisa do <a href="https://trokmods.blogspot.com/2026/09/widescreen-fix-gta-sa-tela-larga.html">Widescreen Fix</a> para o mesmo efeito.</p>
+
+<p><strong><code>pagesize</code></strong>. Quantas linhas o chat mostra, de 10 a 20, e vem em 10. Em servidor de RP cheio, 20 muda a sua vida. Comando: <code>/pagesize 20</code>.</p>
+
+<p><strong><code>timestamp</code></strong>. Põe a hora ao lado de cada mensagem do chat. Comando: <code>/timestamp</code>. A hora é a do seu computador, não a do servidor.</p>
+
+<p><strong><code>fontweight</code></strong>. Aqui os valores são invertidos e todo mundo erra: <strong>0 é negrito</strong>, que é o padrão, e <strong>1 é normal</strong>. Junto com <code>/fontsize</code>, que aceita de -3 a 5, resolve chat pequeno demais ou grosso demais.</p>
+
+<p><strong><code>audiomsgoff</code></strong>. Ponha 1 para o servidor parar de anunciar no chat toda vez que toca um áudio. Comando: <code>/audiomsg</code>.</p>
+
+<p><strong><code>directmode</code></strong>. Só mexa se o texto do chat estiver corrompido ou piscando. Ele troca a renderização por uma mais lenta e mais compatível.</p>
+
+<p>Duas existem e quase ninguém toca. <code>disableheadmove</code> em 1 trava o movimento de cabeça dos jogadores, e tem uma pegadinha: <strong>o efeito é só seu</strong>, porque os outros continuam vendo a sua cabeça virar. E <code>audioproxyoff</code> em 1 faz o SA-MP ignorar o proxy configurado no Windows na hora de tocar áudio, o que só importa para quem usa proxy.</p>
+
+<p>Tem uma que é melhor deixar quieta: <code>fontface</code> troca a fonte do chat, dos diálogos e do placar, e a própria documentação avisa que não é oficialmente suportada e costuma dar problema.</p>
+
+<p>[print do chat do SA-MP com 20 linhas e timestamp ligado]</p>
+
+<h2>Comandos que valem a pena conhecer</h2>
+
+<p>Estes você digita no chat, e funcionam em qualquer servidor porque são do cliente, não do script:</p>
+
+<ul>
+<li><code>/save</code> grava a sua posição atual em <code>savedpositions.txt</code>, na pasta de User Files. É o comando mais usado por quem faz script, e serve para qualquer um que queira anotar um lugar bom.</li>
+<li><code>/rs</code> faz o mesmo, mas gravando só posição e ângulo, em <code>rawpositions.txt</code>.</li>
+<li><code>/interior</code> e <code>/vw</code> mostram no chat o interior e o mundo virtual em que você está.</li>
+<li><code>/dl</code> liga rótulos de depuração nos veículos: ID, modelo, vida, distância, assentos livres e posição. Ótimo para entender o que o servidor está fazendo.</li>
+<li><code>/mem</code> mostra o uso de memória, ainda que quase sempre responda 128 MB.</li>
+<li><code>/nametagstatus</code> liga e desliga a ampulheta que aparece ao lado do nome de quem pausou, minimizou ou caiu.</li>
+<li><code>/q</code> fecha o jogo na hora.</li>
+</ul>
+
+<p>Existe também o <code>/rcon</code>, que manda comando de administração para o servidor. Ele só faz sentido se você tem a senha, e essa é a hora de dizer o óbvio: digitar a sua senha de RCON no chat comum é o jeito mais rápido de entregá-la.</p>
+
+<h2>O que não se resolve por configuração</h2>
+
+<p>Duas coisas parecem configuração e não são.</p>
+
+<p><strong>Lista de servidores vazia.</strong> Não existe opção no <code>sa-mp.cfg</code> para isso. A lista oficial saiu do ar em setembro de 2023 e o cliente antigo continua perguntando para um endereço morto. Resolve com <a href="https://trokmods.blogspot.com/2026/09/version-dll-lista-de-servidores.html">version.dll</a>, ou usando o launcher do open.mp, que tem lista própria.</p>
+
+<p><strong>Jogo fechando ou engasgando.</strong> Configuração de cliente não conserta nenhum dos dois. Para o jogo que fecha, <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">achar a causa exata do crash</a>. Para o que engasga, <a href="https://trokmods.blogspot.com/2026/09/como-tirar-o-lag-do-gta-e-do-samp.html">tirar o lag</a>.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>Editei o arquivo e o jogo desfez.</strong><br />Você editou com o jogo aberto. O SA-MP reescreve o <code>sa-mp.cfg</code> ao fechar, então feche antes de mexer.</p>
+
+<p><strong>Uma opção que eu vi na internet não existe aqui.</strong><br />Algumas só aparecem no arquivo depois que você usa o comando correspondente uma vez. Digitar <code>/timestamp</code> no jogo, por exemplo, cria a linha.</p>
+
+<p><strong>Isso vale para o open.mp?</strong><br />Vale. O open.mp é o servidor; quem lê o <code>sa-mp.cfg</code> é o cliente SA-MP, que continua o mesmo.</p>
+
+<p><strong>Meus favoritos sumiram.</strong><br />Eles não ficam no <code>sa-mp.cfg</code>, e sim no <code>USERDATA.DAT</code>, na mesma pasta SAMP. Vale copiar esse arquivo antes de reinstalar qualquer coisa.</p>
+
+<p>Com o cliente instalado e ajustado, a base do jogo em si é o próximo passo, e está em <a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">monte um GTA pronto para SA-MP</a>.</p>
+
+<p>[print da pasta SAMP dentro de GTA San Andreas User Files, com o sa-mp.cfg e o USERDATA.DAT]</p>
+
+<p>Compatível: SA-MP 0.3.7 e 0.3.DL, PC<br />
+Créditos: documentação do cliente mantida pela comunidade no SA-MP Wiki e no open.mp<br />
+Fonte: <a href="https://open.mp/docs/client/sa-mp.cfg">sa-mp.cfg no open.mp</a>, <a href="https://open.mp/docs/client/ClientCommands">comandos do cliente</a> e <a href="https://sampwiki.blast.hk/wiki/Sa-mp.cfg">SA-MP Wiki</a></p>
+
+<p style="text-align: center;"><a href="https://open.mp/docs/client/sa-mp.cfg">Acesse a documentação completa do sa-mp.cfg</a></p>

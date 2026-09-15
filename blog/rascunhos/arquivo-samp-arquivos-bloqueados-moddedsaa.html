@@ -1,0 +1,87 @@
+<!-- ARQUIVO: rascunho "Seu mod some no SA-MP? Ele bloqueia nove arquivos do GTA" (permalink samp-arquivos-bloqueados-moddedsaa, id 7181612166634761841), copiado em 09/09/2026 antes das mesclagens. -->
+<p>Mod de mapa e textura de carro somem no servidor: o SA-MP bloqueia nove arquivos do GTA. Um .asi devolve isso, com uma ressalva séria.</p>
+
+<p>Vale começar afastando a confusão: skin, carro, som e mod de script funcionam normalmente no servidor. O problema é restrito a quem depende dos arquivos da lista abaixo, e aí não é o mod que quebrou: o cliente ignora o arquivo modificado e usa o original.</p>
+
+<p>[CAPA: o mod aparecendo no single player à esquerda e sumido no SA-MP à direita, mesma cena, mesmo ângulo. Foco no que desapareceu. É exatamente a frustração de quem instalou tudo certo e não entende.]</p>
+
+<h2>Quais arquivos o SA-MP bloqueia</h2>
+
+<p>O motivo tem nome: <code>samp.saa</code>. O SA-MP instala esse arquivo com cópias próprias de alguns arquivos do GTA, e carrega de lá em vez da sua versão modificada. É daí que vem o nome de toda essa família de mods: todos existem para fazer o jogo ler de fora do <code>samp.saa</code>.</p>
+
+<p>A lista é curta o suficiente para você reconhecer o seu problema nela:</p>
+
+<ul>
+<li><code>HANDLING.CFG</code> e <code>VEHICLES.IDE</code>: comportamento e definição dos veículos</li>
+<li><code>CARMODS.DAT</code>: peças de tuning</li>
+<li><code>WEAPON.DAT</code>: dados das armas</li>
+<li><code>VEHICLE.TXD</code>: as texturas compartilhadas dos carros</li>
+<li><code>GTA.DAT</code> e <code>STREAM.INI</code>: o que o jogo carrega e como</li>
+<li><code>TIMECYC.DAT</code>: iluminação e clima</li>
+<li><code>LOADSCS.TXD</code>: as telas de carregamento</li>
+</ul>
+
+<p>Repare que a maioria é visual. É por isso que a reclamação mais comum não é sobre trapaça, e sim sobre gráficos: a pessoa instalou um pack bonito e ele não aparece no servidor.</p>
+
+<h2>ModdedSAA, a solução conhecida</h2>
+
+<p>O <strong>ModdedSAA</strong> é um <code>.asi</code> do <strong>DarkP1xel</strong>, publicado em outubro de 2017. Ele intercepta o carregamento e faz o SA-MP ler esses arquivos de uma pasta própria, chamada <code>ModdedSAA</code>. Você põe os arquivos modificados lá dentro e pronto.</p>
+
+<p>O autor é conhecido: faz parte da BH Team, o grupo por trás do MoonLoader, que já apareceu no post sobre <a href="https://trokmods.blogspot.com/2026/09/cleo-e-moonloader-samp.html">CLEO e MoonLoader</a>.</p>
+
+<p>O uso que mais compensa é o visual. Carregar um <code>vehicle.txd</code> modificado, arrumar carro de mod com a roda afundada no chão pelo <code>vehicles.ide</code>, trocar a tela de carregamento. Coisas que mudam a sua tela e não mudam a partida de ninguém.</p>
+
+<h2>A ressalva, que é o ponto principal</h2>
+
+<p>Este mesmo mod carrega <code>weapon.dat</code> e <code>handling.cfg</code>. Ou seja, dá para deixar arma mais forte e carro mais rápido, e isso é vantagem sobre os outros jogadores.</p>
+
+<p>Por isso <strong>vários servidores proíbem</strong>. A ferramenta não é trapaça por natureza, mas o que você faz com ela pode ser, e o regulamento do servidor é quem decide. Se você joga em RP sério, leia as regras antes: tomar ban por causa de um pack de texturas é frustrante e evitável.</p>
+
+<p>A regra honesta que a gente sugere: use para o que é visual, e não toque em <code>weapon.dat</code> nem em <code>handling.cfg</code> se você joga em servidor com outras pessoas.</p>
+
+<p>[print da pasta ModdedSAA com os arquivos modificados dentro]</p>
+
+<h2>Três avisos práticos</h2>
+
+<p><strong>Antivírus reclama.</strong> Alguns, como o BitDefender, apontam o arquivo como malicioso. Tudo indica falso positivo: é um mod de 2017, conhecido, de um autor com nome na comunidade. Ainda assim, quem baixa decide.</p>
+
+<p><strong>Parte disso o ModLoader já resolve.</strong> Alguns desses arquivos o <a href="https://trokmods.blogspot.com/2026/09/modloader-instalar-mod-sem-substituir.html">ModLoader</a> consegue carregar sozinho, o <code>timecyc.dat</code> entre eles. Antes de instalar mais um mod, teste se o que você quer já não funciona.</p>
+
+<p><strong>Cuidado com meia instalação.</strong> Pôr linhas do <code>vehicles.ide</code> sem pôr também o <code>handling.cfg</code> causa crash, e esse caso está catalogado na lista de crash. Se acontecer, o caminho é <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">achar a causa exata do crash</a>.</p>
+
+<h2>CustomSAA2, o primeiro da família</h2>
+
+<p>Antes do ModdedSAA veio o <strong>CustomSAA2</strong>, do <strong>bartekdvd</strong>. O funcionamento é o mais direto de todos: você deixa os arquivos desempacotados numa pasta <code>CustomSAA2</code> e a ferramenta faz o jogo ler dali em vez de ler do <code>samp.saa</code>.</p>
+
+<p>Em número de arquivos ele ganha do ModdedSAA: cobre também <code>ped.dat</code>, <code>surface.dat</code>, <code>object.dat</code> e até o <code>main.scm</code>.</p>
+
+<p>O que o aposentou foi a compatibilidade. A lista de versões do autor vai até <strong>0.3.7 R4 e 0.3.DL-R1</strong>, e <strong>não inclui o R5</strong>, que é a revisão que os servidores grandes exigem hoje. Ele ainda circula em site de download com muito acesso acumulado, mas quem joga em 2026 provavelmente não consegue usá-lo.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>Meu pack de texturas não aparece no servidor.</strong><br />Se for textura de carro, é o <code>vehicle.txd</code> bloqueado, e é exatamente o que esse mod resolve.</p>
+
+<p><strong>Isso dá ban?</strong><br />Depende do servidor e do que você carrega. Visual costuma passar; <code>weapon.dat</code> e <code>handling.cfg</code> são o que levanta bandeira. Leia as regras.</p>
+
+<p><strong>Funciona em qualquer revisão do SA-MP?</strong><br />O ModdedSAA é o feito para o cliente atual. O CustomSAA2 é de 0.3z e não é a escolha para quem joga hoje.</p>
+
+<p><strong>Preciso disso se uso só mod de skin?</strong><br />Skin de jogador não está na lista de bloqueio, então provavelmente não.</p>
+
+<p>Montando o jogo do zero, a ordem está em <a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">monte um GTA pronto para SA-MP</a>, e a base mínima é o <a href="https://trokmods.blogspot.com/2026/09/sa-essentials-pack-mods-essenciais.html">SA Essentials Pack</a>.</p>
+
+<p>[print de uma tela de carregamento customizada aparecendo no SA-MP]</p>
+
+<p>Autor: DarkP1xel<br />
+Compatível: SA-MP, PC<br />
+Créditos: CustomSAA2, o antecessor, é do bartekdvd; página em português do ModdedSAA mantida por Junior_Djjr<br />
+Fonte: <a href="https://www.mixmods.com.br/2020/01/moddedsaa-carregar-arquivos-bloqueados-no-samp/">MixMods</a> e o <a href="https://blast.hk/threads/18701/">tópico original no BlastHack</a></p>
+
+<h2>Os dois estão ultrapassados</h2>
+
+<p>Circula desde 2025 o <a href="https://trokmods.blogspot.com/2026/09/xsaa-destrava-arquivos-samp.html">xSAA</a>, do Dante, que destrava <strong>27</strong> arquivos em vez de nove, destrava também o que o ModLoader não conseguia carregar no SA-MP, e funciona em R1, R3, R5, 0.3.DL e no open.mp. O próprio autor recomenda trocar, e os dois não convivem: é um ou outro.</p>
+
+<p>Então o placar fica assim: o <strong>CustomSAA2</strong> parou no R4, o <strong>ModdedSAA</strong> cobre nove arquivos e ainda funciona, e o <strong>xSAA</strong> cobre 27 e todas as revisões. Este post continua valendo para entender o problema e para quem já tem um dos dois antigos instalado.</p>
+
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/xsaa-destrava-arquivos-samp.html">Acesse o post do xSAA, que é a opção recomendada</a></p>
+
+<p style="text-align: center;"><a href="https://www.mixmods.com.br/2020/01/moddedsaa-carregar-arquivos-bloqueados-no-samp/">Acesse a página do ModdedSAA no MixMods</a></p>

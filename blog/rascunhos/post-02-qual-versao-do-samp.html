@@ -1,0 +1,110 @@
+<!--
+RASCUNHO 2 — cole no editor do Blogger em "Visualização em HTML".
+Título sugerido (até 60 caracteres): Qual versão do SA-MP usar: R1, R3, R5, 0.3.DL ou open.mp
+Marcadores: SAMP, Só PC, Tutoriais, Em Destaque
+Descrição de pesquisa (até 155): R1, R2, R3, R4, R5, 0.3.DL e open.mp: o que cada versão do SA-MP muda, qual os servidores aceitam e qual usar para mods.
+Pendências antes de publicar: [1] links dos posts de download de cada versão (R1 já tem rascunho; R5 e DL podem apontar para o sa-mp.mp por enquanto); [2] 1 print: mensagem "server requires 0.3.7-R5" no samp.exe; [3] 1 print: launcher com as datas.
+-->
+
+<p>Sete versões do mesmo cliente, um site oficial que não existe mais, e servidor reclamando "requer 0.3.7-R5" na sua cara. Este é o mapa: o que cada revisão do SA-MP mudou, quais mods funcionam em cada uma, e qual instalar no seu caso. A resposta curta está no fim, se você tem pressa.</p>
+
+<h2>A tabela</h2>
+
+<div style="overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+<thead>
+<tr style="background: #F4F4F5;">
+<th style="border: 1px solid #E6E6E8; padding: 8px; text-align: left;">Versão</th>
+<th style="border: 1px solid #E6E6E8; padding: 8px; text-align: left;">Quando saiu</th>
+<th style="border: 1px solid #E6E6E8; padding: 8px; text-align: left;">O que mudou</th>
+<th style="border: 1px solid #E6E6E8; padding: 8px; text-align: left;">Serve para</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.7 R1</strong></td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">maio de 2015</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">A versão-base: 500 objetos novos, tamanho de fonte do chat, variações de skin de polícia. Ficou dois anos e meio como a única versão.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Mods.</strong> SAMPFUNCS, MoonLoader (SF.lua, SAMP-API.lua) e praticamente todo CLEO e .asi para SA-MP suportam o R1. Não tem as correções de segurança abaixo: use só em servidor confiável.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.7 R2</strong></td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">21 de setembro de 2017</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">Atualização opcional. Corrigiu um ataque de falsificação de IP no navegador de servidores e mudou o protocolo de consulta. Mexeu no PlayerPlaySound (e criou um bug, corrigido no R3).</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Ninguém.</strong> Quase nenhum mod suporta R2 (o SAMPFUNCS não suporta). Se você tem, troque.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.7 R3</strong> (R3-1)</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">6 de dezembro de 2018</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">Opcional. Radar com escala certa em tela widescreen (<code>nohudscale=1</code> no sa-mp.cfg e <code>/hudscalefix</code>), atores voltando a girar, correção do timer que bugava câmera, mais checagens de dados vindos do servidor.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Meio-termo.</strong> Suportado pelo SAMPFUNCS e pelas bibliotecas do MoonLoader. Ainda sem as correções do R4 e do R5.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.7 R4</strong> (e R4-2)</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">22 de novembro de 2019</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">"Fortemente recomendada" na época: corrigiu um estouro de buffer no menu que um servidor malicioso conseguia disparar. Também checkpoint flutuando em objeto e mensagem de erro em componente de veículo.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Ninguém.</strong> O SAMPFUNCS pulou o R4. Quem quer segurança vai direto para o R5.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.7 R5</strong> (R5-1, R5-2-MP)</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">15 de novembro de 2022</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">A correção mais importante da história do cliente: um servidor conseguia executar código e ler arquivos no PC do jogador pelas caixas de diálogo (DIALOG_STYLE_LIST e TABLIST). Também filtra caracteres no GameTextForPlayer. O "R5-2-MP" é o mesmo R5 empacotado pelo sa-mp.mp, sem changelog publicado.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Jogar em qualquer servidor.</strong> É a versão que o sa-mp.mp distribui e que os servidores grandes exigem. SAMPFUNCS 5.7.1 e as bibliotecas Lua já suportam o R5-1; scripts antigos do fórum, não.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>0.3.DL</strong> (DL-R1, DL-R1-2-MP)</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">janeiro de 2018</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">Outro cliente, nascido do 0.3.8 que foi cancelado. "DL" é de download: o servidor manda skins e objetos próprios e o jogo baixa ao entrar. Não entra em servidor 0.3.7 comum, a não ser que o servidor rode o plugin de compatibilidade.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Só se o servidor pedir.</strong> Alguns RP grandes usam. SAMPFUNCS suporta o DL; a maioria dos CLEO e scripts Lua, não.</td>
+</tr>
+<tr>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>open.mp</strong></td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">2021 em diante</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;">Não é uma versão do cliente: é um <em>servidor</em> de código aberto que substitui o servidor do SA-MP. Você entra nele com o cliente SA-MP normal. O projeto tem um launcher próprio, com lista de servidores viva, que guarda as versões do cliente e escolhe por servidor.</td>
+<td style="border: 1px solid #E6E6E8; padding: 8px; vertical-align: top;"><strong>Quem quer o futuro.</strong> Como servidor, é o que continua sendo desenvolvido. Como jogador, você não muda nada: R1 para mods, R5 para o resto.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2>Qual instalar, pelo seu caso</h2>
+
+<ul>
+<li><strong>Você mexe com mods, CLEO, MoonLoader:</strong> R1. É a única versão que tudo suporta. Entre com ele só em servidor que você conhece.</li>
+<li><strong>Você só joga, em servidor grande:</strong> R5. É o que o servidor vai exigir e o que fecha a brecha de 2022. Tem post de download aqui no blog.</li>
+<li><strong>O servidor pede skins ou objetos próprios:</strong> 0.3.DL, e só para ele. Mantenha um 0.3.7 ao lado.</li>
+<li><strong>Você tem R2 ou R4:</strong> troque. Nenhum mod importante suporta, e o R4 já foi superado pelo R5 em segurança.</li>
+<li><strong>Você não sabe qual tem:</strong> abra o <code>samp.exe</code>; a versão aparece no canto da janela. Ou no launcher, na aba Datas, ao lado de cada instalação.</li>
+</ul>
+
+<!-- imagem: print do samp.exe com a mensagem "server requires 0.3.7-R5" -->
+
+<h2>Como ter mais de uma versão sem dor de cabeça</h2>
+
+<p>O SA-MP decide qual GTA abrir pelo registro do Windows, então duas instalações na mesma máquina ficam brigando: você abre uma e ela lança a outra. O jeito manual é editar a chave <code>HKCU\Software\SAMP\gta_sa_exe</code> toda vez.</p>
+
+<p>O <a href="https://trokmods.blogspot.com/2026/09/trok-launcher.html">Trok Launcher</a> foi feito para isso: cada instalação é uma "data" com seu User Files, e ao clicar em Jogar ele ajusta o registro para a data escolhida. Uma data "R1 com mods", uma "R5 limpo" e, se precisar, uma "DL". Sem duplicar o jogo à mão.</p>
+
+<!-- imagem: print do launcher com as três datas -->
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>"Server requires 0.3.7-R5". Meu R1 não entra?</strong><br />Não. O servidor checa a versão na entrada. Use a data R5.</p>
+
+<p><strong>Meu mod parou de funcionar depois que atualizei para o R5.</strong><br />O mod procura endereços do R1 no samp.dll. Ou o autor lançou versão para R5-1, ou você volta para o R1 naquela data.</p>
+
+<p><strong>O sa-mp.com sumiu. De onde baixar?</strong><br />O site fechou em setembro de 2023. O sucessor oficial é o <a href="https://www.sa-mp.mp/">sa-mp.mp</a>, que distribui o R5-2-MP e o DL-R1-2-MP. As versões antigas (R1, R3) a gente mantém aqui, com o instalador original.</p>
+
+<p><strong>SA-MP no celular é a mesma coisa?</strong><br />Não. O SA-MP Android é um cliente à parte, com as próprias regras de mod. Fica para um post só dele.</p>
+
+<h2>Resposta curta</h2>
+
+<p><strong>R1 para modificar, R5 para jogar, DL só se o servidor pedir.</strong> E as três ao mesmo tempo, com o launcher.</p>
+
+<p>Autor: Equipe TrokMods<br />
+Versão: guia 2026<br />
+Compatível: Só PC<br />
+Testado em: 0.3.7 R1, R3-1 e R5-1<br />
+Fonte: anúncios oficiais de cada versão e <a href="https://www.sa-mp.mp/">sa-mp.mp</a></p>
+
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/PREENCHER-link-do-post-do-R1">Acesse o post do SA-MP 0.3.7 R1</a></p>

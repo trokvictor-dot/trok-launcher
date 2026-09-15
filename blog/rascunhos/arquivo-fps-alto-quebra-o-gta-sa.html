@@ -1,0 +1,78 @@
+<!-- ARQUIVO: rascunho "FPS alto quebra o GTA San Andreas: o que muda e como corrigir" (permalink fps-alto-quebra-o-gta-sa, id 6571718856109411195), copiado em 09/09/2026 antes das mesclagens. -->
+<p>Você solta o acelerador e o carro desacelera como se freasse sozinho. Não é o servidor nem o seu PC: é o GTA quebrando em FPS alto.</p>
+
+<p>San Andreas foi feito para rodar a 30 quadros por segundo, em 2004. Boa parte da física do jogo foi escrita contando com isso, e passar disso desregula um monte de coisa que ninguém associa ao FPS. Em servidor de SA-MP o efeito é pior, porque quem simula o seu carro é o seu PC.</p>
+
+<p>[comparação de um carro desacelerando em 30 FPS e em 120 FPS]</p>
+
+<h2>O que quebra quando o FPS sobe</h2>
+
+<p>A lista não é teoria, é o que o Framerate Vigilante corrige. Vale ler inteira, porque a chance de você achar aqui aquele bug que você jurava ser lag é grande:</p>
+
+<ul>
+<li>Veículo perde velocidade rápido demais ao soltar o acelerador, como se freasse sozinho</li>
+<li>Não dá para andar enquanto mira com arma de duas mãos</li>
+<li>Natação lenta, e mergulhar fica difícil ou impossível</li>
+<li>Sirene de viatura custa a ligar e desligar</li>
+<li>Hélice de helicóptero acelera e desacelera rápido demais</li>
+<li>Roda de carro de NPC gira na velocidade errada</li>
+<li>O Skimmer não ganha velocidade na água e não consegue decolar</li>
+<li>Carro fica leve demais quando você empurra</li>
+<li>Carro e moto não giram direito no burnout, o que atrapalhava até a auto-escola</li>
+<li>Chassi, portas, para-choque e escada de bombeiro balançando rápido demais</li>
+</ul>
+
+<p>Em FPS baixo tudo isso acontece ao contrário. O que ficava rápido demais fica lento demais.</p>
+
+<h2>Por que isso pesa em servidor</h2>
+
+<p>No SA-MP, quem calcula a física do carro que você está dirigindo é o seu próprio computador. O servidor recebe a posição e repassa para os outros jogadores. Ou seja: o seu FPS entra direto na conta de como o seu carro se comporta.</p>
+
+<p>Dois jogadores no mesmo servidor, um a 60 e outro a 144, não estão dirigindo o mesmo carro. Em servidor de corrida ou de RP com perseguição, isso deixa de ser detalhe.</p>
+
+<h2>Framerate Vigilante</h2>
+
+<p>É um mod do Junior_Djjr, o mesmo da <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">lista de crash</a>, que corrige esses bugs em vez de te obrigar a travar o jogo em 30 FPS. Ele atende GTA III, Vice City e San Andreas, e o código é aberto no GitHub, com contribuição de gente como o ThirteenAG. A atualização mais recente é de 16 de agosto de 2026.</p>
+
+<p>Ele também limita o FPS sozinho nos momentos em que o jogo realmente não aguenta: sinuca, cutscenes, menu de pausa e a missão Just Business, onde FPS alto às vezes travava o Big Smoke e prendia a missão. O limite nesses casos costuma ser 60, como margem de segurança para quem joga acima disso.</p>
+
+<p>[CAPA: o carro derrapando reto sem virar, ou a bicicleta presa no ar. Foco no veículo, recorte fechado. É o defeito que todo mundo já viu e achou que era o próprio PC, então o reconhecimento é imediato.]</p>
+
+<h2>Como instalar</h2>
+
+<ol>
+<li>Baixe na página do MixMods e coloque na pasta raiz do GTA, junto do <code>gta_sa.exe</code>, ou dentro do <code>modloader</code> se você usa.</li>
+<li>Abra o <code>.ini</code> se quiser mexer nos limitadores automáticos. Os valores padrão já servem para a maioria.</li>
+<li>Precisa de um ASI Loader instalado, o que você provavelmente já tem se usa mods.</li>
+<li>Vale instalar o <a href="https://trokmods.blogspot.com/2026/09/silentpatch-corrige-bugs-do-gta-sa.html">SilentPatch</a> junto: ele remove o atraso de quadro que o jogo tem de fábrica, e os dois se completam.</li>
+</ol>
+
+<p>Esse mod entra no passo 4 da montagem, junto do SilentPatch. Se você ainda vai montar o jogo, comece por <a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">monte um GTA pronto para SA-MP</a>.</p>
+
+<h2>O que ele não resolve</h2>
+
+<p>Ele conserta a física, não a sua conexão. Se você está com <strong>lag, teleporte de outros jogadores ou kick</strong>, o problema é rede e não FPS. São três coisas diferentes que atendem pelo mesmo nome, e separamos elas em <a href="https://trokmods.blogspot.com/2026/09/como-tirar-o-lag-do-gta-e-do-samp.html">como tirar o lag do GTA e do SA-MP</a>.</p>
+
+<p>E ele não é um limitador de FPS de propósito geral. Se o seu jogo está com FPS alto demais a ponto de esquentar a placa, isso se resolve no driver ou no <code>.ini</code> de outro mod.</p>
+
+<p>Aliás, é aí que mora a confusão mais comum: <strong>consertar a física, destravar o teto e limitar o FPS são três coisas diferentes</strong>, feitas por mods diferentes, e quem instala uma esperando o resultado da outra acha que nada funcionou. Este mod faz a primeira. As outras duas, e qual FPS escolher para cbug ou para dirigir, estão em <a href="https://trokmods.blogspot.com/2026/09/fps-por-situacao-no-samp.html">FPS no SA-MP: destravar, limitar e consertar</a>.</p>
+
+<p>[vídeo curto ou GIF do CJ nadando: lento sem o mod, normal com ele]</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>Então é melhor eu travar em 30 FPS?</strong><br />Não precisa mais, e é justamente o que o mod evita. Travar em 30 hoje é abrir mão de um jogo fluido para consertar algo que já tem conserto.</p>
+
+<p><strong>Isso dá ban em servidor?</strong><br />É correção de bug do jogo, não vantagem. Ainda assim, servidor de corrida costuma ter regra própria, então vale olhar o regulamento antes.</p>
+
+<p><strong>Funciona com o SA-MP?</strong><br />O mod é do GTA San Andreas, e o SA-MP roda em cima dele. Corrige a física do seu lado, que é o lado que o servidor recebe.</p>
+
+<p><strong>Meu jogo continua estranho depois de instalar.</strong><br />Se ficou pior, tem conflito com outro mod. Se o jogo fecha, o post sobre <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">como achar a causa exata do crash</a> resolve mais rápido do que ir removendo mod no chute.</p>
+
+<p>Autor: Junior_Djjr<br />
+Versão: atualizado em 16 de agosto de 2026<br />
+Compatível: GTA San Andreas, Vice City e GTA III<br />
+Créditos: contribuições de ThirteenAG, HzanRsxa2959, martonp96, 0x416c69 e void, pela página do autor; no repositório aparecem também Blackbird88 e lopezloo<br />
+Fonte: <a href="https://www.mixmods.com.br/2022/08/iii-vc-sa-framerate-vigilante/">MixMods</a> e <a href="https://github.com/GTAmodding/FramerateVigilante">código no GitHub</a></p>
+
+<p style="text-align: center;"><a href="https://www.mixmods.com.br/2022/08/iii-vc-sa-framerate-vigilante/">Acesse a página do Framerate Vigilante no MixMods</a></p>

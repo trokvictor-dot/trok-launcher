@@ -1,0 +1,75 @@
+<!-- ARQUIVO: versao do rascunho "Downgrade do GTA San Andreas: por que o SA-MP so aceita a 1.0" (permalink downgrade-do-gta-sa-para-1-0, id 2334692021858412137) ANTES de receber a secao da Definitive Edition, em 09/09/2026. O post continua existindo no Blogger, ampliado. -->
+<p>Quem comprou o GTA na Steam tem a 3.0, e o SA-MP recusa. Saber qual versão você tem leva dez segundos e muda tudo que vem depois.</p>
+
+<p>Este post é o mapa: quais versões do GTA San Andreas existem, o que muda entre elas, como descobrir a sua, e o que o tal downgrade faz de verdade. Tem também um aviso no fim que você não vai achar em outro lugar, e é justamente por isso que ele está aqui.</p>
+
+<p>Um aviso de contexto antes de começar: <strong>o GTA San Andreas clássico saiu da venda em 2021</strong>, quando a Rockstar lançou a Definitive Edition. Hoje as lojas vendem só a DE, que não roda SA-MP. Quem comprou o clássico antes disso continua com ele na biblioteca, e é dessa cópia que este post trata.</p>
+
+<p>[CAPA: recorte fechado na janela de propriedades do gta_sa.exe, com o número da versão ocupando o centro do quadro. Foco único no número. A pessoa vai conferir o dela antes mesmo de terminar de ler o post.]</p>
+
+<h2>As versões que existem</h2>
+
+<p><strong>1.0</strong> é a original, de 2004, e é a que tem tudo dentro. É nela que a cena de mods se firmou, e é a que o SA-MP espera.</p>
+
+<p><strong>1.01</strong> foi o único patch oficial que a Rockstar lançou para PC. Corrigiu bugs e adicionou suporte a 720p e 1080i. Também trouxe proteções de arquivo que atrapalham mod, e é por isso que a comunidade nunca migrou para ela.</p>
+
+<p><strong>2.0</strong> é a 1.01 vendida em disco, com mais conteúdo removido.</p>
+
+<p><strong>3.0</strong> é a que confunde todo mundo. O número é maior, mas ela não é uma evolução da 1.01: parte da 1.0 e acrescenta proteção contra mod. Ou seja, ela nem tem as correções da 1.01, nem a liberdade da 1.0. Foi a versão da Steam por muito tempo.</p>
+
+<p><strong>As versões atuais da Steam e do Rockstar Launcher</strong> foram além: perderam 17 músicas do rádio, porque as licenças venceram, ganharam suporte nativo a controle e mudaram outras coisas por dentro. Mod feito para a versão da Steam frequentemente não roda na do Rockstar Launcher, e vice-versa.</p>
+
+<h2>Como saber qual é a sua</h2>
+
+<p>Clique com o botão direito no <code>gta_sa.exe</code>, vá em Propriedades e olhe o tamanho em bytes. O executável que a cena de mods usa tem <strong>14.383.616 bytes</strong>, ou <strong>5.189.632 bytes</strong> numa variante mais enxuta.</p>
+
+<p>Se o número for outro, você não está na 1.0. Os sintomas que confirmam: o ModLoader responde <em>UNKNOWN GAME</em> ou <em>this game is not supported</em>, mods <code>.asi</code> e CLEO não carregam, e o SA-MP não conecta.</p>
+
+<p>Outro sinal fácil: se faltam músicas no rádio, você está numa das versões novas de loja.</p>
+
+<p>[print da mensagem UNKNOWN GAME ou this game is not supported aparecendo ao abrir o jogo]</p>
+
+<h2>Por que o SA-MP recusa</h2>
+
+<p>O SA-MP não conversa com o jogo por uma porta oficial. Ele lê e escreve direto na memória do GTA, em endereços que foram mapeados na mão. Cada versão move esses endereços de lugar, e as versões novas ainda por cima trazem proteções que barram exatamente esse tipo de acesso.</p>
+
+<p>Não é implicância do SA-MP. É que o jogo que ele aprendeu a mexer é outro.</p>
+
+<h2>O que o downgrade faz</h2>
+
+<p>Downgrade é voltar a instalação para a 1.0. Na prática o pacote troca o executável e alguns arquivos do jogo pelos equivalentes da versão antiga. O efeito é triplo: devolve as músicas que sumiram, tira as checagens que impedem mod, e remove a verificação de DRM da versão do Rockstar Launcher.</p>
+
+<p>É esse terceiro item que cria o problema do qual ninguém fala.</p>
+
+<h2>O aviso que falta em todo tutorial</h2>
+
+<p>Os downgraders que circulam, inclusive os mais recomendados em guias de Steam e wikis de PC, <strong>não são um patch do que você já tem</strong>. Eles substituem o seu executável por uma build já quebrada, sem proteção de cópia, hospedada em serviço de arquivo anônimo. O guia mais citado da Steam Community, inclusive, foi removido de lá por violar as diretrizes da plataforma.</p>
+
+<p>O TrokMods não hospeda nem linka esse tipo de arquivo. Não é julgamento de quem usa: é que existe uma diferença entre explicar como uma coisa funciona e distribuir a coisa, e a gente fica do lado de explicar.</p>
+
+<p>Então este post vai até aqui de propósito. Você agora sabe qual versão tem, por que ela não serve e o que precisaria acontecer para servir. O que fazer com essa informação é decisão sua.</p>
+
+<p>Um caminho que não tem esse problema: <strong>DVD original antigo</strong>. As prensagens da época costumam ser 1.0, e nesse caso não há downgrade nenhum a fazer. Confira pelo tamanho do executável, como está mais acima.</p>
+
+<p>[print da tela de rádio do jogo, mostrando a estação com menos faixas nas versões novas]</p>
+
+<h2>Depois que você tiver a 1.0</h2>
+
+<p>A partir daí o caminho está todo mapeado aqui no blog. Comece pelo <a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">guia de montar um GTA pronto para SA-MP</a>, que põe na ordem certa o ASI Loader, o <a href="https://trokmods.blogspot.com/2026/09/modloader-instalar-mod-sem-substituir.html">ModLoader</a>, o <a href="https://trokmods.blogspot.com/2026/09/silentpatch-corrige-bugs-do-gta-sa.html">SilentPatch</a> e o resto.</p>
+
+<p>Para escolher a versão do SA-MP em si, que é outra decisão, veja <a href="https://trokmods.blogspot.com/2026/09/qual-versao-do-samp-usar.html">qual versão do SA-MP usar</a>.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>A 3.0 não é mais nova que a 1.01?</strong><br />O número é maior, mas ela parte da 1.0 e não incorpora as correções da 1.01. Número de versão maior não quer dizer versão melhor aqui.</p>
+
+<p><strong>Comprei na Steam. Perdi meu dinheiro?</strong><br />Não para jogar o modo história, que funciona normalmente. O problema é só de mod e SA-MP.</p>
+
+<p><strong>Dá para ter as duas instalações?</strong><br />Dá, e é o que muita gente faz: uma para jogar normal e outra montada para mod. O <a href="https://trokmods.blogspot.com/2026/09/trok-launcher.html">Trok Launcher</a> alterna entre elas sem você renomear pasta.</p>
+
+<p><strong>Por que sumiram músicas do rádio?</strong><br />Licença vencida. A Rockstar tirou 17 faixas das versões novas, e é por isso que a estação soa diferente de como você lembra.</p>
+
+<p>Compatível: GTA San Andreas, PC<br />
+Fonte: <a href="https://gtamods.com/wiki/San_Andreas_Versions">GTAMods Wiki</a> e <a href="https://www.pcgamingwiki.com/wiki/Grand_Theft_Auto:_San_Andreas">PCGamingWiki</a></p>
+
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">Acesse o guia de montar um GTA pronto para SA-MP</a></p>

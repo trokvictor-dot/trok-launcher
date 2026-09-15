@@ -1,0 +1,129 @@
+<!-- ARQUIVO: rascunho "FPS no SA-MP: destravar, limitar e consertar são três coisas" (permalink blog-post, id 8648824637759270660), copiado em 09/09/2026 antes das mesclagens. -->
+<p>No SA-MP, FPS alto ganha tiroteio e perde curva. E os mods que resolvem isso são três coisas diferentes, não uma.</p>
+
+<p>Quase todo guia trata FPS como número: quanto mais, melhor. No San Andreas não funciona assim, porque o jogo foi feito para 30 quadros e a física ainda acredita nisso.</p>
+
+<p>[CAPA: recorte bem fechado no contador de FPS, com um número alto de um lado e um baixo do outro, na mesma cena e no mesmo enquadramento. Foco único no número. Passa nos 120px porque número grande sobrevive ao tamanho do card.]</p>
+
+<h2>O que muda de verdade</h2>
+
+<p>Isso não é teoria. Existe teste em vídeo, do <strong>zBicudin</strong>, comparando o mesmo jogador no mesmo PC em quatro faixas de FPS:</p>
+
+<ul>
+<li><strong>165, sem limite</strong>: cbug sai fácil e com margem de erro grande no aperto das teclas. Dirigir é péssimo, o carro quase não vira sem tirar o pé. E dá para morrer de queda em lugar que normalmente não mata.</li>
+<li><strong>95</strong>: cbug ainda bom, margem menor. Dirigir continua ruim. A queda já não mata.</li>
+<li><strong>60</strong>: cbug jogável, mas exige treino. Dirigir fica bom, o carro vira direito.</li>
+<li><strong>30</strong>: cbug praticamente não sai. Mas dirigir fica excelente, a traseira chega a escapar, quase dá para girar o carro.</li>
+</ul>
+
+<p>Repare que as duas colunas apontam para lados opostos. <strong>Não existe um número certo, existe um número certo para cada coisa que você está fazendo.</strong> A frase dele resume: se desse para ter a dirigibilidade dos 30 FPS com a resposta dos 165, estaria perfeito.</p>
+
+<p>Tem mais um detalhe que quase ninguém considera: <strong>a velocidade real difere</strong>. Dois carros marcando 150 no velocímetro andam diferente se um jogador está em 200 FPS e o outro não.</p>
+
+<p>[link do vídeo do zBicudin para eu colocar aqui]</p>
+
+<h2>Por que o carro não vira em FPS alto</h2>
+
+<p>Porque parte da física do GTA San Andreas conta quadros em vez de contar tempo. Se o jogo desenha o dobro de quadros, algumas contas rodam o dobro de vezes e o resultado sai errado.</p>
+
+<p>É a mesma raiz de outros bugs que você já viu sem saber o nome: nadar devagar, não conseguir andar mirando um rifle, o carro perdendo velocidade como se estivesse com o freio de mão puxado, e o avião Skimmer que não decola da água. O assunto tem post próprio, sobre <a href="https://trokmods.blogspot.com/2026/09/fps-alto-quebra-o-gta-sa.html">FPS alto quebrando o jogo</a>.</p>
+
+<p>Uma dica de leitura: tudo que fica <strong>rápido demais</strong> em FPS alto fica <strong>lento demais</strong> em FPS baixo. É o mesmo defeito, virado do avesso.</p>
+
+<h2>As três coisas que as pessoas confundem</h2>
+
+<p>Aqui está a parte que arruma a cabeça. Quando alguém fala em "mod de FPS", pode ser uma de três coisas, e elas não se substituem:</p>
+
+<p><strong>1. Destravar.</strong> Tirar o teto e deixar o jogo passar do limite. E aqui tem uma confusão que vale desfazer, porque o SA-MP tem <strong>dois números diferentes</strong> e as pessoas misturam os dois:</p>
+
+<ul>
+<li><strong>100 FPS é o teto forçado</strong> do cliente. Ele existe mesmo se você não mexer em nada. É esse que o <a href="https://trokmods.blogspot.com/2026/09/crash-fix-crashes-asi-samp.html">Crash Fix</a> consegue desligar, e ele deixa a opção desativada de propósito, porque passar disso dá vantagem.</li>
+<li><strong>De 20 a 90 é o alcance do <code>fpslimit</code></strong>, o limitador que você mesmo configura. É outra coisa: não é teto, é o valor que você escolhe.</li>
+</ul>
+
+<p>Some a isso o atraso entre quadros que o GTA já carregava de fábrica, e você tem três coisas segurando o seu FPS ao mesmo tempo.</p>
+
+<p><strong>2. Limitar.</strong> Prender o FPS num valor escolhido. O SA-MP já tem isso embutido: o <code>fpslimit</code> do <a href="https://trokmods.blogspot.com/2026/09/instalar-e-configurar-o-samp-do-zero.html">sa-mp.cfg</a> <strong>vem configurado em 50</strong>, e o mesmo valor se troca no jogo com <code>/fpslimit</code>. O problema é que ele é impreciso e a faixa é fechada nos 90.</p>
+
+<p><strong>3. Consertar.</strong> Fazer a física parar de depender do FPS. Isso não mexe no seu número de quadros, mexe no jogo.</p>
+
+<p>Quem instala um e espera o resultado do outro fica achando que o mod não funcionou.</p>
+
+<h2>Quem faz cada uma</h2>
+
+<p><strong>Destravar: FPS UNLOCK</strong>, do EXPORT, do BlastHack, de 2015. É um script CLEO que escreve na memória da <code>SAMP.DLL</code> para tirar o atraso de 14 ms entre quadros. Tem arquivo separado para 0.3.7 e para 0.3.DL, porque o endereço muda. <strong>Exige o limitador de quadros desligado</strong> nas opções do jogo.</p>
+
+<p>Quanto isso vale em número? A lista de mudanças do SAMP Addon mede o mesmo conserto pelo lado dela e fala em <strong>cerca de 10 FPS</strong> de ganho ao remover o sleep por quadro. São duas fontes independentes dizendo a mesma coisa: a tal "trava do SA-MP" é uma pausa, não um limitador.</p>
+
+<p>A família cresceu depois dele. Em 2019 saiu a versão <code>.asi</code>, num arquivo só e já <strong>cobrindo R2 e R3</strong>, e um <code>/fpslimit patcher</code> que promete tirar os limites do comando em qualquer versão do cliente.</p>
+
+<p><strong>Limitar: fpslimiter</strong>, do sc6ut, de 2022. É um <code>.asi</code> que conserta o <code>/fpslimit</code> do próprio SA-MP, que travava acima do pedido: você pedia 45 e recebia 48. Ele também tira a faixa fixa, então dá para pôr qualquer valor. <strong>Exige o limitador de quadros ligado.</strong></p>
+
+<p><strong>Os dois de uma vez: hkFPSUnlock</strong>, do ALF-ONE, de 2020. É o mais completo da família, e o único que encara a contradição de frente. Em vez de exigir uma configuração fixa, ele <strong>lê se o limitador de quadros está ligado nas opções e liga ou desliga a trava de acordo</strong>. E refaz o <code>/fpslimit</code>: o comando passa a ligar e desligar o limitador, e a <strong>faixa de 20 a 90 some</strong>. Digitar <code>/fpslimit 20</code> liga; digitar de novo desliga.</p>
+
+<p>O autor dá três avisos que valem repetir aqui. Se você já tem plugin parecido, tire antes de instalar este. Se o seu jogo anda fechando sozinho, desligue o <code>fpslimit</code> na configuração. E se você quer passar dos 60 FPS num monitor que aguenta mais que 60 Hz, tem um segundo plugin para isso, o <strong>RefreshRateFix</strong> — que é também a saída para o problema do modo janela lá embaixo.</p>
+
+<p><strong>Consertar: Framerate Vigilante</strong>, do Junior_Djjr, atualizado em agosto de 2026. É o que arruma a física de verdade, e é o único dos três que eu recomendo sem ressalva de instalação. O que ele corrige, um a um, e como instalar, está no post sobre <a href="https://trokmods.blogspot.com/2026/09/fps-alto-quebra-o-gta-sa.html">FPS alto quebrando o GTA</a>.</p>
+
+<p>Ele já absorveu três mods que antes eram separados e que batem exatamente nas queixas de sempre: o de dirigir, o de nadar e o de andar mirando rifle. Se você achar essas páginas soltas por aí, elas hoje só mandam usar o Framerate Vigilante.</p>
+
+<h2>Ele já limita por situação, e quase ninguém sabe</h2>
+
+<p>Detalhe que vale o post inteiro: o Framerate Vigilante <strong>limita o FPS sozinho em momentos específicos</strong>, e você escolhe quais no <code>.ini</code> dele.</p>
+
+<p>Hoje ele faz isso na sinuca, no hot coffee, em cutscenes, no menu de pausa e na missão Just Business, onde o Big Smoke às vezes travava e prendia a missão. Os limites são geralmente 60 FPS, como rede de segurança para quem joga acima disso.</p>
+
+<p>Ou seja, a ideia de "um FPS para cada situação" já existe. Ela só ainda não cobre o que interessa para servidor: um valor a pé, outro dirigindo, outro nadando.</p>
+
+<h2>A contradição que precisa de teste</h2>
+
+<p>Tem um problema no arranjo ideal, e vale dizer em vez de esconder: <strong>o destravador pede o limitador de quadros desligado, e o limitador pede ligado</strong>. Nas opções do jogo é a mesma chave, então não dá para atender os dois.</p>
+
+<p>E isso não parece defeito de mod, parece como o SA-MP foi feito: o <code>fpslimit</code> dele só vale com o limitador de quadros ligado, e é justamente esse limitador que segura o teto. Destravar e limitar puxam a mesma corda para lados opostos.</p>
+
+<p>Ainda assim, afirmar sem testar seria chute, e o teste ainda vai acontecer por aqui.</p>
+
+<p>O que já dá para dizer é que <strong>alguém resolveu isso em 2020</strong>, e é o motivo de o hkFPSUnlock estar na lista acima. Em vez de escolher um lado da chave, ele lê o estado dela e se comporta de acordo, e devolve o <code>/fpslimit</code> como liga e desliga. É a resposta de projeto para uma corda sendo puxada dos dois lados.</p>
+
+<p>[testar: destravador e limitador juntos, com o frame limiter ligado e desligado, e anotar o que acontece]</p>
+
+<h2>O que dá para recomendar agora</h2>
+
+<p>Com o que está confirmado:</p>
+
+<ol>
+<li><strong>Framerate Vigilante, sempre.</strong> Ele conserta a causa, não o sintoma, e não depende de nenhum dos outros. Já vem no <a href="https://trokmods.blogspot.com/2026/09/sa-essentials-pack-mods-essenciais.html">SA Essentials Pack</a>.</li>
+<li><strong>Destravar só se o seu PC entrega mais.</strong> Sem folga de máquina, destravar não traz nada. O post sobre <a href="https://trokmods.blogspot.com/2026/09/como-tirar-o-lag-do-gta-e-do-samp.html">tirar o lag</a> vem antes.</li>
+<li><strong>Limitar conforme o servidor.</strong> Servidor de DM costuma cortar em 100 ou 101 de qualquer jeito, então passar disso é desperdício.</li>
+<li><strong>Cuidado com o <a href="https://trokmods.blogspot.com/2026/09/windowed-mode-gta-sa.html">Windowed Mode</a>.</strong> Ele amarra o FPS ao Hz do seu monitor: em tela de 60 Hz você fica em 60, e destravador nenhum muda isso. Aqui a saída não é destravar, é trocar de ferramenta. O <code>BorderlessMode.asi</code> dá a janela sem amarrar o FPS, e o <code>RefreshRateFix</code> ataca o lado da taxa de atualização.</li>
+</ol>
+
+<p>Os scripts CLEO da lista precisam da <a href="https://trokmods.blogspot.com/2026/09/cleo-e-moonloader-samp.html">CLEO</a> instalada, e os <code>.asi</code> precisam do <a href="https://trokmods.blogspot.com/2026/09/asi-loader-gta-sa.html">ASI Loader</a>.</p>
+
+<h2>A ressalva honesta</h2>
+
+<p>Mod que mexe em física e movimentação muda o seu jogo em relação ao dos outros, e isso merece ser dito mesmo quando o mod é bom.</p>
+
+<p>O Framerate Vigilante altera como o seu carro desacelera, quão rápido você nada e a sua capacidade de andar mirando arma pesada em FPS alto. Para a maioria isso é conserto. Para quem treinou anos no comportamento antigo, é mudança, e vai estranhar nos primeiros dias.</p>
+
+<p>Vale ainda um aviso de outra ordem: <strong>confira as regras do servidor onde você joga</strong>. Alguns limitam FPS por conta própria, e a política sobre mod de cliente varia de lugar para lugar.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>Qual FPS é o melhor para SA-MP?</strong><br />Não existe um. Alto para mira e cbug, baixo para dirigir. Se tiver que escolher um número único, algo entre 60 e 100 é o meio-termo que a maioria usa.</p>
+
+<p><strong>Destravar dá ban?</strong><br />Depende do servidor, não do mod. Muitos limitam FPS por conta e o assunto morre aí. Confira as regras antes.</p>
+
+<p><strong>Instalei o destravador e o FPS não subiu.</strong><br />Ou o limitador de quadros continua ligado nas opções, ou o seu PC não entrega mais do que isso.</p>
+
+<p><strong>Preciso dos três?</strong><br />Não. O Framerate Vigilante sozinho já resolve a maior parte do que incomoda.</p>
+
+<p><strong>Isso vale para o 0.3.DL?</strong><br />O destravador tem versão própria para ele. Sobre as diferenças entre versões, o <a href="https://trokmods.blogspot.com/2026/09/qual-versao-do-samp-usar.html">guia de versões</a> explica.</p>
+
+<p>[print do arquivo .ini do Framerate Vigilante com as opções de limite automático]</p>
+
+<p>Compatível: GTA San Andreas 1.0, SA-MP 0.3.7 e 0.3.DL<br />
+Créditos: Framerate Vigilante por Junior_Djjr, com ThirteenAG, HzanRsxa2959, martonp96, 0x416c69 e void; FPS UNLOCK por EXPORT; fpslimiter por sc6ut; hkFPSUnlock por ALF-ONE<br />
+Fonte: <a href="https://www.mixmods.com.br/2022/08/iii-vc-sa-framerate-vigilante/">Framerate Vigilante no MixMods</a>, e os tópicos do BlastHack do <a href="https://www.blast.hk/threads/9084/">FPS UNLOCK</a>, do <a href="https://www.blast.hk/threads/132527/">fpslimiter</a> e do <a href="https://www.blast.hk/threads/8440/">FPS-LIMITER</a>, mais o <a href="https://github.com/ALF-ONE/hkFPSUnlock">hkFPSUnlock no GitHub</a></p>
+
+<p style="text-align: center;"><a href="https://www.mixmods.com.br/2022/08/iii-vc-sa-framerate-vigilante/">Acesse a página do Framerate Vigilante</a></p>

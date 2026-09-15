@@ -1,0 +1,69 @@
+<!-- ARQUIVO: rascunho "O GTA não abre: descubra qual das cinco causas é a sua" (permalink o-gta-nao-abre, id 7979251553904355989), fundido em "Os erros mais comuns do SA-MP" em 09/09/2026. -->
+<p>Clica no ícone e não acontece nada. Ou abre o SA-MP e não abre o modo história. São problemas diferentes, com causas diferentes.</p>
+<p>"Meu GTA não abre" é o pedido de ajuda mais comum que existe, e o mais inútil de responder no chute. São pelo menos cinco causas documentadas, e o sintoma exato que você vê aponta para uma delas. Este post é o caminho até lá, sem instalar mod aleatório pelo meio.</p>
+<p>[CAPA: a área de trabalho com o ícone do GTA e o resto da tela preto, recorte fechado no ícone. Foco único e contraste máximo, e diz "cliquei e não veio nada" sem uma palavra. Passa nos 120px porque é um objeto brilhante sozinho no escuro.]</p>
+<h2>Olhe o sintoma antes de mexer em qualquer mod</h2>
+<p>A diferença entre "não acontece nada" e "a tela pisca e volta" separa causas que não têm relação nenhuma entre si. Abra o Gerenciador de Tarefas com <code>Ctrl + Shift + Esc</code>, clique no jogo e observe.</p>
+<ul>
+<li><strong>Nada na tela, mas o processo aparece e come CPU sem nunca abrir.</strong> É a causa 1, e ela engana todo mundo.</li>
+<li><strong>Nada na tela e nenhum processo.</strong> Olhe a causa 2 e a 4.</li>
+<li><strong>Abria antes, parou depois que você formatou o PC.</strong> Causa 2, quase sempre.</li>
+<li><strong>Mensagem citando uma DLL.</strong> Causa 3.</li>
+<li><strong>O SA-MP abre normal e o modo história não.</strong> Pule para a seção do meio do post: o diagnóstico é completamente outro.</li>
+</ul>
+<h2>Causa 1: o jogo trava tentando buscar atualização na internet</h2>
+<p>O sintoma é inconfundível: <strong>o processo existe, consome processador e nunca desenha uma janela</strong>. Você espera, mata o processo, tenta de novo, e é a mesma coisa.</p>
+<p>A causa é a última que alguém adivinharia. O Windows tenta buscar informação de atualização do jogo pelo <code>rundll32.exe</code> e não sabe lidar com a resposta que recebe. Fica preso ali. <strong>Só acontece com jogo antigo</strong>, e o San Andreas é de 2004.</p>
+<p>O conserto é o <code>rundll32exefix.asi</code>, do <strong>Swoorup</strong>, que mata o <code>rundll32.exe</code> assim que o jogo abre. O pacote traz junto um <code>.bat</code> e um <code>.reg</code> que desligam o <code>GameUX.dll</code> de vez. Se você instalou o <a href="https://trokmods.blogspot.com/2026/09/sa-essentials-pack-mods-essenciais.html">SA Essentials Pack</a>, já tem.</p>
+<p>Duas coisas confirmam que a causa é essa mesmo. A primeira é o efeito colateral: com o conserto, o jogo passa a abrir <strong>mais rápido</strong>, porque a checagem some. A segunda vem de outro projeto, de outro autor, de outro país: o <a href="https://trokmods.blogspot.com/2026/09/samp-addon-500-correcoes.html">SAMP Addon</a> desativa o GameExplorer, e o motivo declarado é o mesmo, <em>o jogo pode abrir devagar ou não abrir</em>.</p>
+<h2>Causa 2: falta o Visual C++ no Windows</h2>
+<p>Este pega quem formatou o PC. O jogo abria, você reinstalou o Windows, refez tudo igual, e agora ele não abre ou fecha sozinho <strong>sem mensagem nenhuma</strong>.</p>
+<p>Mod <code>.asi</code> é código C++, e código C++ depende dos <em>redistributables</em> do Visual C++ estarem instalados no sistema. Windows recém-formatado não tem nenhum deles. Não vale instalar um por um, porque as versões que os mods usam são várias: existe pacote único que põe todos de uma vez.</p>
+<p>Não é teoria de fórum. Aparece em quatro lugares independentes. O MixMods explica a dependência e indica o instalador único. Um canal de dependências de comunidade brasileira traz o relato exato: <em>formatei o computador e o jogo parou de funcionar e passou a fechar sozinho, sem motivo aparente</em>. Um guia fixado de comunidade internacional começa o passo a passo por <em>DirectX e bibliotecas do Visual Studio</em>, antes de qualquer mod. E até um mod pequeno de limitador de FPS declara como requisito o redistributable de 2019.</p>
+<p>Quando quatro fontes que não se falam começam pelo mesmo pré-requisito, o pré-requisito é real.</p>
+<h2>Causa 3: DirectX mal instalado, ou a dinput8.dll</h2>
+<p>Aqui pelo menos o jogo avisa: aparece uma mensagem citando uma DLL, quase sempre a <code>dinput8.dll</code>. Reinstale o DirectX e reinicie o PC, nessa ordem. Reiniciar não é frescura, é o que faz o Windows enxergar o que foi instalado.</p>
+<p>Se insistir, copie a <code>dinput.dll</code> de <code>C:\Windows\System32</code> para a pasta raiz do GTA. É remendo, mas resolve.</p>
+<h2>Causa 4: o gta_sa.set corrompido</h2>
+<p>Este é o mais fácil de testar e o mais fácil de esquecer. O arquivo <code>gta_sa.set</code> guarda as suas configurações de vídeo e controle, fica em <em>Documentos, GTA San Andreas User Files</em>, e <strong>corrompe com uma facilidade que surpreende</strong>.</p>
+<p>Apague. O jogo cria outro na próxima abertura, e você perde só as configurações. Leva dez segundos e elimina uma causa inteira da lista.</p>
+<p>[print da pasta GTA San Andreas User Files com o gta_sa.set em destaque]</p>
+<h2>Causa 5: o cliente de voz derruba o jogo sozinho</h2>
+<p>Esta é a mais específica, e é a que quase não tem documentação. Depois de instalar mod de voz, <strong>o jogo para de abrir até no modo história</strong>.</p>
+<p>O relato está no fórum do MixMods, de março de 2022, e a frase de quem passou por isso resume o tamanho do problema: procurou em tudo que era vídeo e site, e não achou ninguém com a solução.</p>
+<p>A resposta que apareceu lá não é um mod, é um jeito de organizar: <strong>o mod de voz existe para o SA-MP</strong>, então faça uma cópia do seu GTA só para o SA-MP e mantenha outra limpa para o modo história. Guarde essa ideia, porque ela volta no fim do post.</p>
+<h2>O caso que confunde: o SA-MP abre e o single player não</h2>
+<p>Se o seu caso é este, esqueça as cinco causas acima. <strong>Nenhuma delas se aplica</strong>, e a lógica é simples: se faltasse Visual C++ ou se o <code>rundll32</code> estivesse travando, o SA-MP também não abriria. Como ele abre, o problema está em algo que só existe por causa do SA-MP.</p>
+<h2>Por que isso acontece</h2>
+<p>Quando você abre o SA-MP, a <code>samp.dll</code> está carregada na memória. Quando você abre o jogo sozinho, <strong>não está</strong>. Mod bem escrito confere isso antes de agir. Mod mal escrito assume que a <code>samp.dll</code> existe, tenta usar, e derruba o jogo junto.</p>
+<p>Dá para ver a checagem certa no código de um script publicado no fórum do MixMods, o <em>Enable Radar in Samp</em>. Ele faz três linhas antes de qualquer outra coisa:</p>
+<p><code>LOAD_DYNAMIC_LIBRARY "samp.dll" inSamp</code><br />
+<code>IF NOT inSamp &gt; 0</code><br />
+<code>TERMINATE_THIS_CUSTOM_SCRIPT</code></p>
+<p>Traduzindo: tenta carregar a <code>samp.dll</code> e, se ela não estiver lá, <strong>o script se encerra sozinho, em silêncio</strong>. É exatamente essa checagem que falta nos mods que quebram o modo história.</p>
+<h2>A ordem para achar o culpado</h2>
+<p>Tire um por vez e abra o modo história depois de cada um. Na ordem de probabilidade:</p>
+<ol>
+<li><strong>Cliente de voz.</strong> É o suspeito número um, e tem relato idêntico documentado, como na causa 5.</li>
+<li><strong>A <a href="https://trokmods.blogspot.com/2026/09/version-dll-lista-de-servidores.html">version.dll</a>.</strong> Ela é uma DLL-proxy criada para consertar a lista de servidores do SA-MP. Fora do SA-MP não tem função nenhuma, e proxy de DLL é justamente o tipo de coisa que atrapalha quando o alvo não está lá.</li>
+<li><strong>Os <code>.asi</code> feitos para o cliente</strong>: <a href="https://trokmods.blogspot.com/2026/09/samp-graphic-restore-enb-skygfx.html">SAMP Graphic Restore</a>, depois <a href="https://trokmods.blogspot.com/2026/09/xsaa-destrava-arquivos-samp.html">xSAA</a> e parentes. Eles existem para lidar com o que o SA-MP faz. Sem SA-MP, não têm com o que lidar.</li>
+<li><strong>O <code>SAMPFUNCS.asi</code>.</strong> Ele é carregado pelo ASI Loader no GTA, não no SA-MP, então ele <strong>carrega mesmo quando você abre o jogo sozinho</strong>. E se for ele, tem armadilha extra: o pacote traz quatro arquivos diferentes, um para cada revisão do cliente, e usar o da revisão errada é erro fácil de cometer e difícil de perceber. O post do <a href="https://trokmods.blogspot.com/2026/09/sampfuncs-cleo-no-samp.html">SAMPFUNCS</a> explica qual é qual.</li>
+<li><strong>A pasta <code>CLEO</code> inteira.</strong> Esvazie e devolva os <code>.cs</code> aos poucos. Você está procurando o que usa opcode de SA-MP sem fazer a checagem de três linhas lá de cima.</li>
+</ol>
+<p>Se o suspeito for script, o <a href="https://trokmods.blogspot.com/2026/09/scrlog-qual-mod-cleo-deu-crash.html">SCRLog</a> encurta o caminho: ele aponta o arquivo em vez de você testar um por um.</p>
+<h2>A saída que resolve de vez</h2>
+<p>Depois de achar o culpado, vem uma escolha chata: desinstalar um mod que você quer, ou conviver sem o modo história. Tem uma terceira, e é a que o fórum já dava em 2022.</p>
+<p><strong>Duas instalações.</strong> Uma limpa para o modo história, outra montada para o SA-MP. Mod de cliente fica só na segunda, e o problema deixa de existir em vez de ser administrado.</p>
+<p>Não é ideia nova nem exagero: é a mesma lógica do post sobre <a href="https://trokmods.blogspot.com/2026/09/como-ter-uma-data-boa-de-samp.html">ter uma data boa de SA-MP</a>, e a razão de existir mod como o PortableGTA, que separa os saves. Se você já mantém uma cópia por causa de <a href="https://trokmods.blogspot.com/2026/09/qual-versao-do-samp-usar.html">revisão do cliente</a>, você já faz isso e nem percebeu.</p>
+<p>[print de duas pastas do GTA lado a lado, uma limpa e uma com mods]</p>
+<h2>Perguntas que sempre aparecem</h2>
+<p><strong>Reinstalar o jogo resolve?</strong><br />Resolve o sintoma e apaga a pista. Se o problema for mod, ele volta assim que você reinstalar os mesmos mods. Vale mais gastar dez minutos achando a causa.</p>
+<p><strong>Meu antivírus pode estar bloqueando?</strong><br />Pode, principalmente <code>.asi</code>, que é DLL renomeada e se injeta em processo. Antes de acusar o antivírus, confira se ele realmente pôs algum arquivo em quarentena.</p>
+<p><strong>Como sei se é mod ou é o jogo?</strong><br />Tire o <a href="https://trokmods.blogspot.com/2026/09/asi-loader-gta-sa.html">ASI Loader</a> e a pasta <code>CLEO</code> e tente abrir. Se abrir, é mod. Se não abrir, é uma das cinco causas do começo do post.</p>
+<p><strong>E se ele abre e fecha em seguida?</strong><br />Aí não é "não abre", é crash na inicialização, e o endereço diz a causa: <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">como achar a causa exata do crash</a>.</p>
+<p><strong>Instalei o SA-MP e ele abre o single player.</strong><br />Outro problema, e está no post dos <a href="https://trokmods.blogspot.com/2026/09/erros-mais-comuns-do-samp.html">erros mais comuns do SA-MP</a>, junto com os erros de conexão.</p>
+<p>[print da pasta do jogo com o ASI Loader e a pasta CLEO movidos para fora, o teste que separa mod de jogo]</p>
+<p>Compatível: GTA San Andreas 1.0 US, com ou sem SA-MP<br />
+Créditos: rundll32exefix por Swoorup; a remoção do GameUX é de autor desconhecido; o exemplo de checagem da samp.dll vem do script Enable Radar in Samp, do Angelomon<br />
+Fonte: <a href="https://www.mixmods.com.br/2020/10/rundll32-exe-fix-gameux-dll-fix-corrigir-jogo-nao-abrindo/">RunDLL32.exe Fix</a> e <a href="https://www.mixmods.com.br/2015/08/download-de-todas-as-dll-que-voce-precisa/">as DLL que você precisa</a>, no MixMods; o relato do mod de voz vem do fórum do MixMods; a instalação por revisão do SAMPFUNCS vem da <a href="https://wiki.blast.hk/sampfuncs">wiki do BlastHack</a></p>
+<p style="text-align: center;"><a href="https://www.mixmods.com.br/2020/10/rundll32-exe-fix-gameux-dll-fix-corrigir-jogo-nao-abrindo/">Acesse a página do RunDLL32.exe Fix no MixMods</a></p>

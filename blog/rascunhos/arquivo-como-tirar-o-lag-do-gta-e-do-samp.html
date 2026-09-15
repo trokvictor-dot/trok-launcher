@@ -1,0 +1,66 @@
+<!-- ARQUIVO: rascunho "Como tirar o lag do GTA e do SA-MP (e o que não é lag)" (permalink como-tirar-o-lag-do-gta-e-do-samp, id 3106793131267779944), copiado em 09/09/2026 antes das mesclagens. -->
+<p>Lag no SA-MP são três problemas diferentes com o mesmo nome, e só um tem conserto no seu PC. Descobrir qual é o seu vem antes de tudo.</p>
+
+<p>Essa confusão é o motivo de tanto "kit anti-lag" no YouTube não resolver nada. A pessoa tenta consertar no computador um problema que está na rede, ou no servidor, e volta achando que o GTA não tem jeito.</p>
+
+<p>[CAPA: um jogador teleportando no servidor, com o corpo em dois lugares ou atravessando o cenário, e o contador de FPS alto visível no canto. Foco no jogador. É a imagem exata da tese do post: lag não é FPS.]</p>
+
+<h2>Os três lags</h2>
+
+<p><strong>FPS baixo.</strong> O jogo engasga, a imagem trava por instantes, virar a câmera parece pesado. Acontece igual no modo história. Esse é o único que depende do seu PC, e é o que este post resolve.</p>
+
+<p><strong>Ping alto.</strong> O jogo roda liso, mas o que você faz demora a acontecer. Você atira e o tiro sai depois, o carro anda e volta atrás. É a distância entre o seu PC e o servidor, e nenhum mod conserta.</p>
+
+<p><strong>Lag do servidor.</strong> Todo mundo trava ao mesmo tempo, os jogadores teleportam, o chat atrasa. Não é você. É o servidor sem fôlego, e a única saída é trocar de servidor ou avisar o dono.</p>
+
+<h2>Como saber qual é o seu</h2>
+
+<p>Abra o placar com TAB dentro do servidor e olhe a coluna de ping. Abaixo de 100 é bom, acima de 200 você vai sentir. Se o ping está alto, o problema é rede, e mexer em mod não vai adiantar.</p>
+
+<p>Agora olhe o FPS com um contador na tela. Se ele cai junto com a travada, é desempenho. Um teste rápido: entre no modo história, sem servidor nenhum. Se travar do mesmo jeito, é o seu PC. Se ficar liso, é rede ou servidor.</p>
+
+<p>[print do jogo com contador de FPS no canto, mostrando a queda no momento da travada]</p>
+
+<h2>Se é FPS: por onde começar</h2>
+
+<p><strong>Tire o atraso de quadro.</strong> O GTA espera de propósito cerca de 15 milissegundos entre um quadro e outro, o que derruba 30 FPS para 25 e 100 para 80. Remover isso é a mudança de maior efeito por menos trabalho, e quem faz é o <a href="https://trokmods.blogspot.com/2026/09/silentpatch-corrige-bugs-do-gta-sa.html">SilentPatch</a>, que de quebra corrige centenas de outros bugs.</p>
+
+<p><strong>Não instale o "FPS Increaser".</strong> Ele faz só isso, mas como um executável que precisa ficar aberto durante o jogo, e é apontado como vírus por vários antivírus. Não vale o risco quando um mod sério faz a mesma coisa e mais.</p>
+
+<p><strong>Prefira .img a centenas de arquivos soltos.</strong> Pack de textura em HD com centenas de <code>.dff</code> e <code>.txd</code> jogados em pastas do <a href="https://trokmods.blogspot.com/2026/09/modloader-instalar-mod-sem-substituir.html">ModLoader</a> pesa no carregamento. Empacotar num <code>.img</code> alivia.</p>
+
+<p><strong>Troque carro pesado por carro leve.</strong> Mod de carro em alta poligonagem é bonito parado na garagem e caro em servidor cheio, onde aparecem dezenas ao mesmo tempo.</p>
+
+<p><strong>Não use GTA "já vem com mods".</strong> Aquelas instalações prontas cheias de velocímetro e mod aleatório custam FPS de graça. Quem troca por uma instalação limpa e coloca só o que usa costuma ganhar bastante.</p>
+
+<p>[print do mapa carregando com prédio aparecendo na frente do jogador, o problema de streaming]</p>
+
+<h2>O que não é lag</h2>
+
+<p>Mapa sumindo, prédio aparecendo na sua frente, textura demorando a carregar: isso não é lag, é <em>streaming</em>. O jogo está carregando o mundo devagar, e a solução é outra, ligada a limite de memória de streaming, não a FPS.</p>
+
+<p>Vale saber também que <strong>FPS alto demais tem os seus próprios problemas</strong>, e eles não são lag: carro que freia sozinho, natação lenta, burnout que não gira. Está tudo explicado no post sobre <a href="https://trokmods.blogspot.com/2026/09/fps-alto-quebra-o-gta-sa.html">FPS alto quebrando o GTA</a>.</p>
+
+<h2>Se é ping</h2>
+
+<p>Escolha servidor mais perto de você. Servidor brasileiro para quem está no Brasil resolve mais que qualquer mod. Cabo em vez de wi-fi ajuda, e fechar o que estiver consumindo a internet também.</p>
+
+<p>O que não ajuda: mod, otimizador, "acelerador de internet". Ping é distância e qualidade de conexão, e nenhum arquivo dentro da pasta do GTA muda isso.</p>
+
+<p>Vale dizer que instalação bem montada já nasce com menos problema de desempenho. A ordem certa está em <a href="https://trokmods.blogspot.com/2026/09/monte-um-gta-pronto-para-samp.html">monte um GTA pronto para SA-MP</a>.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>Meu FPS é bom mas o jogo trava do nada.</strong><br />Se trava por instantes e volta, olhe streaming e limite de memória. Se fecha de vez, é crash, e o caminho é o post sobre <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">achar a causa exata do crash</a>.</p>
+
+<p><strong>Kit anti-lag funciona?</strong><br />Os que circulam por aí costumam ser pacote de arquivo aleatório, quando não são malware. O que funciona é instalação limpa, mods sérios e menos peso na tela.</p>
+
+<p><strong>Travar o FPS ajuda?</strong><br />Ajuda na estabilidade. Um jogo constante em 60 é melhor que um oscilando entre 40 e 110, e ainda evita parte dos bugs de FPS alto.</p>
+
+<p><strong>Trocar de versão do SA-MP muda alguma coisa?</strong><br />No desempenho, quase nada. Mas a versão importa por outros motivos, explicados em <a href="https://trokmods.blogspot.com/2026/09/qual-versao-do-samp-usar.html">qual versão do SA-MP usar</a>.</p>
+
+<p>Compatível: GTA San Andreas 1.0 US e SA-MP<br />
+Créditos: a parte de desempenho do GTA se apoia no tutorial do Junior_Djjr, no MixMods<br />
+Fonte: <a href="https://www.mixmods.com.br/2017/01/como-tirar-o-lag-do-gta/">MixMods</a></p>
+
+<p style="text-align: center;"><a href="https://www.mixmods.com.br/2017/01/como-tirar-o-lag-do-gta/">Acesse o tutorial de desempenho do MixMods</a></p>

@@ -1,0 +1,71 @@
+<!--
+RASCUNHO 1 — cole no editor do Blogger em "Visualização em HTML".
+Título sugerido (até 60 caracteres): SA-MP 0.3.7 R1: download e por que é a versão dos mods
+Marcadores: SAMP, Só PC, Programas e Utilitários, Em Destaque
+Descrição de pesquisa (até 155): Baixe o SA-MP 0.3.7 R1, a versão que todo mod, CLEO e script suporta, e veja quando usar R5 no lugar.
+Pendências antes de publicar: [1] link do sharemods no botão Download; [2] tamanho do instalador na ficha; [3] 3 prints: pasta do GTA com o instalador, tela do instalador, launcher com duas datas (R1 e R5).
+-->
+
+<p>O site oficial do SA-MP saiu do ar em setembro de 2023, e com ele foi embora o lugar onde todo mundo baixava o cliente. O sucessor oficial, o <a href="https://www.sa-mp.mp/">sa-mp.mp</a>, só oferece a versão mais nova (R5). Só que quem mexe com mod sabe: <strong>a versão que os mods entendem é a 0.3.7 R1</strong>, de 2015. Este post explica por quê, deixa o instalador original à mão, e diz com todas as letras quando você <em>não</em> deve usar o R1.</p>
+
+<!-- imagem: print da pasta do GTA San Andreas com o instalador sa-mp-0.3.7-install.exe -->
+
+<h2>Por que o R1 é a versão dos mods</h2>
+
+<p>Quase tudo que roda dentro do SA-MP precisa saber onde as coisas ficam na memória do <code>samp.dll</code>. Cada revisão (R2, R3, R4, R5) muda esses endereços, e o autor do mod tem que atualizar. Como o R1 foi a única versão durante dois anos e meio, ele virou a base de tudo:</p>
+
+<ul>
+<li><strong>SAMPFUNCS</strong> (5.7.1, a base de centenas de mods .asi): suporta 0.3.7 R1, R3, R5 e 0.3.DL. Não suporta R2 nem R4.</li>
+<li><strong>MoonLoader</strong> (scripts em Lua): as bibliotecas SF.lua e SAMP-API.lua suportam R1, R3-1 e R5-1. Scripts antigos do fórum, só R1.</li>
+<li><strong>CLEO</strong> feitos para SA-MP (anti-AFK, chat, teclas, hud): a maioria foi escrita e testada no R1 e nunca foi atualizada.</li>
+<li><strong>Mods gráficos e de correção</strong> (SilentPatch, SAMP Addon, widescreen fix, timecyc para SAMP): funcionam em qualquer revisão, porque não mexem no samp.dll.</li>
+</ul>
+
+<p>Resumo: se um mod para SA-MP existe, ele funciona no R1. Nas outras versões é "depende".</p>
+
+<h2>O que o R1 não tem (e isso importa)</h2>
+
+<p>As revisões seguintes existem por um motivo. Em ordem de gravidade:</p>
+
+<ul>
+<li><strong>R5 (novembro de 2022)</strong> corrigiu uma falha séria: um servidor mal-intencionado conseguia executar código no PC do jogador pelas caixas de diálogo (DIALOG_STYLE_LIST e TABLIST). Isso afeta R1, R2, R3 e R4.</li>
+<li><strong>R4 (novembro de 2019)</strong> corrigiu um estouro de buffer no menu, também explorável por servidor.</li>
+<li><strong>R3 (dezembro de 2018)</strong> arrumou a escala do radar em tela widescreen.</li>
+<li><strong>R2 (setembro de 2017)</strong> corrigiu um problema no navegador de servidores.</li>
+</ul>
+
+<p>Ou seja: <strong>o R1 é seguro em servidor confiável e perigoso em servidor desconhecido.</strong> A regra que a gente usa: R1 na instalação de mods, para os servidores que você já conhece; R5 numa instalação limpa, para entrar em qualquer lugar. E servidor que exige R5 na entrada não vai aceitar o R1 de qualquer forma.</p>
+
+<h2>Como instalar</h2>
+
+<ol>
+<li>Tenha um GTA San Andreas <strong>1.0 US</strong> limpo (é o único que o SA-MP aceita). Se o seu já tem mods, faça uma cópia da pasta antes.</li>
+<li>Rode o <code>sa-mp-0.3.7-install.exe</code> e aponte para a pasta do GTA. Ele só copia o <code>samp.exe</code>, o <code>samp.dll</code> e alguns arquivos; não mexe no jogo.</li>
+<li>Abra o <code>samp.exe</code>, coloque seu nick e adicione o servidor.</li>
+</ol>
+
+<p><strong>Para ter R1 e R5 ao mesmo tempo</strong>, sem duas cópias do jogo brigando pelo registro: no <a href="https://trokmods.blogspot.com/2026/09/trok-launcher.html">Trok Launcher</a>, cada instalação vira uma "data", com seu próprio User Files. Você cria uma data "R1 com mods" e outra "R5 limpo" e troca com um clique; o launcher ajusta o registro antes de abrir.</p>
+
+<!-- imagem: print da aba Datas do launcher com "SA-MP R1 (mods)" e "SA-MP R5 (limpo)" -->
+
+<h2>Perguntas que sempre aparecem</h2>
+
+<p><strong>O servidor diz "requer 0.3.7-R5". E agora?</strong><br />Ele está checando a versão na entrada. Use a data R5. Os mods que não dependem do samp.dll (gráficos, correções, skins) continuam funcionando lá.</p>
+
+<p><strong>Dá para usar o R1 no open.mp?</strong><br />Sim. O open.mp é o servidor; o cliente continua sendo o SA-MP. O launcher do open.mp inclusive deixa escolher a versão do cliente por servidor.</p>
+
+<p><strong>E o 0.3.DL?</strong><br />É outro cliente, para servidores que mandam skins e objetos próprios. Não entra em servidor 0.3.7 comum. Tem post separado sobre ele.</p>
+
+<p><strong>Esse arquivo é o original?</strong><br />É o instalador original do SA-MP Team, o mesmo que ficava no sa-mp.com. Não foi modificado.</p>
+
+<p>Autor: SA-MP Team (Kalcor)<br />
+Versão: 0.3.7 R1 (maio de 2015)<br />
+Tamanho: [PREENCHER] MB<br />
+Compatível: Só PC<br />
+Testado em: GTA San Andreas 1.0 US<br />
+Site: <a href="https://www.sa-mp.mp/">sa-mp.mp</a><br />
+Fonte: instalador original do sa-mp.com</p>
+
+<p style="text-align: center;"><a href="https://sharemods.com/PREENCHER/sa-mp-0.3.7-R1-install.zip.html">Download</a></p>
+
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/trok-launcher.html">Acesse o Trok Launcher para ter R1 e R5 juntos</a></p>

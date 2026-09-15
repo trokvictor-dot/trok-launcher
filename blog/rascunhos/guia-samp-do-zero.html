@@ -1,0 +1,89 @@
+<p>Data pronta vem com jogo pirata, mod sem crédito e às vezes vírus. Montar a sua leva uma tarde, começa por ter o GTA certo e termina com você entrando no servidor. Este é o caminho inteiro, na ordem certa, com o botão de cada peça embaixo do passo.</p>
+
+<div class="caixa-nota">Nota: "data" é a instalação já modificada, o pacote pronto que alguém monta e distribui. O nome vem da pasta Android/data do celular e acabou vazando para o PC. Aqui você monta a sua.</div>
+
+<!-- [CAPA: a mesma cena do jogo antes e depois de tudo que este guia manda instalar, mesmo ângulo e mesma hora do dia.] -->
+
+<h2>Por que não baixar uma pronta</h2>
+<ul>
+<li><strong>Você não sabe o que tem dentro.</strong> Pacote de terceiro já veio com propaganda, permissão demais e código malicioso mais de uma vez.</li>
+<li><strong>Os autores não aparecem.</strong> Uma data junta centenas de mods de gente que passou meses em cada um, e quase nunca credita ninguém.</li>
+<li><strong>Você não consegue consertar.</strong> Quando algo quebra, e vai quebrar, não dá para saber qual mod é o culpado porque você não instalou nenhum.</li>
+</ul>
+<div class="caixa-nota">Nota: gostou de um GTA que viu no YouTube? Não instale o pacote. Baixe, abra a pasta <code>modloader</code> dele e copie só as pastas de mod que você quer para a sua data, uma de cada vez, testando entre uma e outra. Você fica com o visual e continua sabendo o que tem dentro.</div>
+<p>Quase todo problema que aparece no Discord de servidor vem de instalação montada fora de ordem: mod de conteúdo antes da base que carrega mod, GTA já modificado como ponto de partida, jogo na pasta errada do Windows. Seguindo os passos abaixo, nessa sequência, isso não acontece.</p>
+
+<h2>Passo 1: um GTA 1.0 limpo, no lugar certo</h2>
+<p>O SA-MP só funciona no GTA San Andreas <strong>1.0 US</strong>, o primeiro lançamento, o de DVD. A versão da Steam, a do Rockstar Launcher e a Definitive Edition não servem, e não é questão de configuração: é outro executável por dentro.</p>
+<p>Para conferir a sua: botão direito no <code>gta_sa.exe</code>, Propriedades, Tamanho. O executável certo tem <strong>14.383.616 bytes</strong> (ou 5.189.632 na variante compacta). Número diferente quer dizer que não é 1.0, e é por isso que o ModLoader responde "UNKNOWN GAME" e o SA-MP recusa conectar.</p>
+<div class="caixa-aviso">Atenção: instale fora de Program Files. O Windows protege essa pasta e o sintoma é bizarro: você desinstala um mod e ele continua lá, troca o executável e nada muda. Documentos, Área de Trabalho ou outra unidade, qualquer lugar menos ali.</div>
+<p>Guarde um backup do jogo limpo. A pasta <code>audio</code> tem uns 3 GB e quase nunca muda; guardando só o resto, pouco mais de 1 GB, você tem um ponto de retorno para o dia em que algo quebrar.</p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/downgrade-do-gta-sa-para-1-0.html">Acesse o guia de versões do GTA: descubra a sua e o que é o downgrade</a></p>
+
+<h2>Passo 2: o Windows pronto</h2>
+<p>Mods .asi são feitos em C++ e dependem do Visual C++ Redistributable. Junto com ele, instale o DirectX End-User Runtime, porque o Windows moderno não traz as funções de DirectX antigo que os mods gráficos usam. PC formatado há pouco quase sempre está sem os dois, e isso explica mod que não carrega sem dar erro nenhum.</p>
+<p style="text-align: center;"><a href="https://aka.ms/vs/17/release/vc_redist.x86.exe">Baixar o Visual C++ Redistributable (x86)</a></p>
+<p style="text-align: center;"><a href="https://www.microsoft.com/download/details.aspx?id=35">Acesse o DirectX End-User Runtime</a></p>
+
+<h2>Passo 3: a base que carrega mod</h2>
+<p>Nada de mod funciona sem essa camada. Instale nesta ordem, um de cada vez, abrindo o jogo entre um e outro:</p>
+<ol>
+<li><strong>ASI Loader.</strong> Faz o jogo carregar arquivos .asi, que é como quase todo plugin sério se instala. Sem ele, metade da lista abaixo é ignorada em silêncio. No San Andreas, use o do Silent.</li>
+<li><strong>CLEO.</strong> Habilita os mods .cs, os mais comuns do GTA.</li>
+<li><strong>CLEO+.</strong> Extensão da CLEO feita pelo Junior_Djjr. Mod criado com ela trava o jogo se ela não estiver instalada, então vale ter desde o começo.</li>
+<li><strong>ModLoader.</strong> A partir daqui você instala mod jogando numa pasta, sem substituir arquivo nenhum do jogo. É o que torna tudo reversível.</li>
+</ol>
+<p style="text-align: center;"><a href="https://cookieplmonster.github.io/mods/gta-sa/">Acesse o site do Silent: ASI Loader</a></p>
+<p style="text-align: center;"><a href="https://cleo.li/">Acesse o site oficial da CLEO</a></p>
+<p style="text-align: center;"><a href="https://github.com/JuniorDjjr/CLEOPlus/releases">Acesse a página do CLEO+</a></p>
+<p style="text-align: center;"><a href="https://github.com/thelink2012/modloader/releases">Acesse a página do ModLoader</a></p>
+
+<h2>Passo 4: as correções de base</h2>
+<p>Ainda não é hora de mod de conteúdo. Antes, conserte o jogo. O <strong>SilentPatch</strong> corrige centenas de bugs nativos que a Rockstar deixou para trás. O <strong>Framerate Vigilante</strong> impede que FPS acima de 30 quebre a física: sem ele, carro freia sozinho e a natação fica lenta. Os dois vão dentro do ModLoader, e é aqui que você percebe por que o passo 3 vem antes.</p>
+<p>Se você já sabe que vai instalar mod pesado, de textura ou de mapa, acrescente a dupla de memória, Largeaddress e Improved Streaming. Sem eles o jogo bate no teto de 2 GB e começa a sumir com o mapa até fechar.</p>
+<p style="text-align: center;"><a href="https://cookieplmonster.github.io/mods/gta-sa/">Acesse o site do Silent: SilentPatch</a></p>
+<p style="text-align: center;"><a href="https://github.com/JuniorDjjr/FramerateVigilante/releases">Acesse a página do Framerate Vigilante</a></p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/mapa-sumindo-memoria-do-gta.html">Acesse o post sobre memória: Largeaddress e Improved Streaming</a></p>
+
+<h2>Passo 5: o SA-MP 0.3.7 R1</h2>
+<p>Com o jogo de pé, entra o multiplayer. A versão que os mods entendem é a <strong>0.3.7 R1</strong>, de 2015: SAMPFUNCS, MoonLoader e praticamente todo CLEO e .asi para SA-MP foram feitos nela, porque ela ficou dois anos e meio como a única versão. O site oficial saiu do ar em 2023 e o sucessor, o sa-mp.mp, só oferece a versão nova (R5). Por isso o instalador original do R1 fica aqui.</p>
+<p>Rode o instalador apontando para a pasta do GTA. Ele copia o <code>samp.exe</code>, o <code>samp.dll</code> e pouca coisa mais, sem tocar no jogo. Depois abra pelo <code>samp.exe</code> e ponha o nick: no máximo 20 caracteres, só letras, números e [ ] ( ) $ @ . _ =, sem acento e sem espaço.</p>
+<p style="text-align: center;"><a href="https://sharemods.com/COLE-AQUI-O-LINK/sa-mp-0.3.7-R1-install.zip.html">Download do SA-MP 0.3.7 R1 (instalador original)</a></p>
+<div class="caixa-aviso">Atenção: o R1 não tem a correção de segurança do R5. Um servidor mal-intencionado consegue rodar programa no seu PC pelas caixas de diálogo. Instale o DialogRCEfix logo em seguida e use o R1 só em servidor que você conhece.</div>
+<p>Mais três peças que resolvem os problemas clássicos do R1:</p>
+<ul>
+<li><strong>DialogRCEfix</strong> fecha a brecha acima.</li>
+<li><strong>version.dll</strong> devolve a lista de servidores, que ficou vazia quando a lista oficial saiu do ar.</li>
+<li><strong>SAMPFUNCS</strong> é o que quase todo mod de SA-MP exige no leiame: sem ele, mod que lê chat, jogadores e diálogos não funciona.</li>
+</ul>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/dialogrcefix.html">Acesse o post do DialogRCEfix</a></p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/version-dll-lista-de-servidores.html">Acesse o post do version.dll</a></p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/sampfuncs-cleo-no-samp.html">Acesse o post do SAMPFUNCS</a></p>
+<p>Dois avisos que poupam horas. Se o seu mod de mapa ou de timecyc some no SA-MP, é o cliente bloqueando uma lista de arquivos do GTA: o xSAA destrava. E radar esticado, chat de 10 linhas e jogo preso em 50 FPS saem todos do sa-mp.cfg.</p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/xsaa-destrava-arquivos-samp.html">Acesse o post do xSAA</a></p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/instalar-e-configurar-o-samp-do-zero.html">Acesse o post do sa-mp.cfg: o que mudar depois de instalar</a></p>
+
+<h2>Passo 6: o Trok Launcher e as suas datas</h2>
+<p>Duas instalações na mesma máquina brigam pelo registro do Windows: você abre uma e ela lança a outra. O Trok Launcher resolve isso: cada instalação vira uma data com o seu próprio User Files, e ao clicar em Jogar ele ajusta o registro para a data escolhida. Monte uma data "R1 com mods" e outra "R5 limpo" para entrar em servidor grande, e troque com um clique. Ele ainda mostra a versão do SA-MP de cada data, para você nunca confundir as duas.</p>
+<p style="text-align: center;"><a href="https://trokmods.blogspot.com/2026/09/trok-launcher.html">Acesse o post do Trok Launcher</a></p>
+
+<h2>Passo 7: agora sim, conteúdo</h2>
+<p>Skin, carro, textura, HUD. Um de cada vez, cada um na sua pasta dentro do ModLoader, testando o jogo entre um e outro. Parece lento, mas é o que separa "achei o mod que quebrou" de "vou reinstalar tudo". Pacote grande de textura? Prefira empacotar em .img a espalhar centenas de arquivos soltos em pastas: pesa menos no carregamento.</p>
+
+<!-- [print do SA-MP conectado num servidor, com o jogo já modificado rodando] -->
+
+<h2>Quando der problema</h2>
+<p>Vai dar, e os caminhos já existem. Se o jogo fecha sozinho, vá para <a href="https://trokmods.blogspot.com/2026/09/crash-do-gta-sa-causa-exata.html">como achar a causa exata do crash</a>. Se ele engasga ou atrasa, <a href="https://trokmods.blogspot.com/2026/09/como-tirar-o-lag-do-gta-e-do-samp.html">como tirar o lag</a>. Se você cai do servidor ou leva kick sem entender, o assunto é rede: <a href="https://trokmods.blogspot.com/2026/09/queda-desconexao-kick-no-samp.html">queda, desconexão e kick</a>. Se desinstalou um mod e o jogo piorou, sobrou lixo: <a href="https://trokmods.blogspot.com/2026/09/arquivos-e-jogo-salvo-limpar-gta.html">o que os mods deixam para trás</a>.</p>
+
+<h2>Perguntas que sempre aparecem</h2>
+<p><strong>Preciso mesmo seguir a ordem?</strong><br />Precisa. Mod de conteúdo instalado antes do ASI Loader e do ModLoader simplesmente não carrega, e você vai achar que o mod é ruim.</p>
+<p><strong>O ModLoader diz "UNKNOWN GAME".</strong><br />Executável errado. Confira o tamanho como está no passo 1.</p>
+<p><strong>Instalei tudo e o jogo nem abre.</strong><br />Volte ao backup do passo 1 e recoloque por partes. Se você usava mods antes, limpe também o cache do ModLoader em %localappdata%/modloader.</p>
+<p><strong>Não dá para comprar o GTA que roda SA-MP?</strong><br />Hoje, não. O clássico saiu da venda em 2021 e o que se vende no lugar não roda. Quem tem DVD antigo ou instalação velha está com a peça certa.</p>
+<p><strong>A Definitive Edition serve?</strong><br />Não, e não é questão de configuração. É outro jogo por dentro, em outra engine, e sem multiplayer.</p>
+<p><strong>Data pronta funciona?</strong><br />Às vezes funciona, e é justamente aí que o problema começa: quando parar, você não vai ter como consertar.</p>
+<p><strong>Posso pular o SilentPatch?</strong><br />Pode, mas vai passar o resto do tempo caçando bug que já tem correção pronta.</p>
+<p><strong>O servidor diz "requer 0.3.7-R5". E agora?</strong><br />Ele checa a versão na entrada. Use a data R5 do passo 6; os mods que não dependem do samp.dll (gráficos, skins, correções) continuam funcionando nela.</p>
+<p><strong>Uso celular, isso vale para mim?</strong><br />Os passos são de PC. A ideia de montar a sua em vez de baixar pronta vale para os dois.</p>
+
+<p>Compatível: GTA San Andreas 1.0 US e SA-MP 0.3.7<br />Testado em: SA-MP 0.3.7 R1, R3-1 e R5-1<br />Créditos: a sequência de montagem do GTA se apoia no guia do Junior_Djjr, no MixMods<br />Fonte: <a href="https://www.mixmods.com.br/2021/09/primeiros-passos-para-montar-um-gta-modificado/">MixMods</a> e <a href="https://www.sa-mp.mp/">sa-mp.mp</a></p>
