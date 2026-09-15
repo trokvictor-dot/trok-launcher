@@ -5159,6 +5159,33 @@ static void DesenhaUI(HWND hwnd) {
         float CW = (wGrid - (porLinha - 1) * GAP) / porLinha;
         float CH = CW * 9.0f / 16.0f;
         int totalCards = gNumDatas + (gNumDatas < MAX_DATAS ? 1 : 0); // +1 = adicionar
+        // ---- reordenar: o destino e a POSICAO entre cards mais perto do mouse, nao "o card
+        //      embaixo do mouse". Da pra soltar no vao, em cima do "+" e no fim da grade, e a
+        //      barra laranja mostra exatamente onde a data vai cair. Antes so o card de destino
+        //      aceitava a soltura: mandar a primeira pro fim (ou o contrario) exigia mirar num
+        //      card certo - ele reclamou que era desconfortavel.
+        const ImGuiPayload* payD = ImGui::GetDragDropPayload();
+        bool arrastandoData = payD && payD->IsDataType("TROK_DATA");
+        int deD = arrastandoData ? *(const int*)payD->Data : -1;
+        if (deD < 0 || deD >= gNumDatas) arrastandoData = false;
+        int slotIns = -1; // 0..gNumDatas = "cai antes do card slotIns" (gNumDatas = no fim)
+        ImVec2 gridPos = ImGui::GetCursorScreenPos(); // origem da grade (ja descontada a rolagem)
+        if (arrastandoData) {
+            ImVec2 mp = ImGui::GetMousePos();
+            ImVec2 wA = ImGui::GetWindowPos(), wB(wA.x + ImGui::GetWindowSize().x, wA.y + ImGui::GetWindowSize().y);
+            if (mp.x >= wA.x && mp.x <= wB.x && mp.y >= wA.y && mp.y <= wB.y) { // fora da grade = cancela
+                float mx = mp.x - gridPos.x, my = mp.y - gridPos.y;
+                int lin = (int)floorf(my / (CH + GAP)); if (lin < 0) lin = 0;
+                int col = (int)floorf(mx / (CW + GAP) + 0.5f); // metade direita do card = depois dele
+                if (col < 0) col = 0; if (col > porLinha) col = porLinha;
+                slotIns = lin * porLinha + col;
+                if (slotIns > gNumDatas) slotIns = gNumDatas;
+                // rolagem automatica perto das bordas (com muitas datas a ultima linha fica fora da vista)
+                float sy = ImGui::GetScrollY();
+                if (mp.y < wA.y + 40) ImGui::SetScrollY(sy - 700.0f * dt);
+                else if (mp.y > wB.y - 40) ImGui::SetScrollY(sy + 700.0f * dt);
+            }
+        }
         for (int i = 0; i < totalCards; i++) {
             bool ehAdd = (i == gNumDatas);
             int col = i % porLinha, lin = i / porLinha;
@@ -5168,25 +5195,12 @@ static void DesenhaUI(HWND hwnd) {
             ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
             bool ch = ImGui::IsItemHovered();
             ImDrawList* wl = ImGui::GetWindowDrawList();
-            // arrastar e soltar para reordenar (igual aos favoritos da Home; o fantasma e global)
+            // arrastar para reordenar (o fantasma completo e desenhado no fim do quadro)
             if (!ehAdd && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip)) {
                 ImGui::SetDragDropPayload("TROK_DATA", &i, sizeof(int));
                 ImGui::EndDragDropSource();
             }
-            const ImGuiPayload* payD = ImGui::GetDragDropPayload();
-            bool arrastandoData = payD && payD->IsDataType("TROK_DATA");
-            bool euArrastadoD = arrastandoData && *(const int*)payD->Data == i;
-            if (!ehAdd && ImGui::BeginDragDropTarget()) {
-                if (const ImGuiPayload* pay = ImGui::AcceptDragDropPayload("TROK_DATA",
-                        ImGuiDragDropFlags_AcceptBeforeDelivery | ImGuiDragDropFlags_AcceptNoDrawDefaultRect)) {
-                    if (pay->IsDelivery()) MoverData(*(const int*)pay->Data, i);
-                    else if (*(const int*)pay->Data != i) { // faixa pulsando na borda esquerda do destino
-                        float pulso = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 7.0f);
-                        wl->AddRectFilled(ImVec2(ca.x - 10, ca.y + 8), ImVec2(ca.x - 5, cb.y - 8), ComAlpha(AC.cor, pulso), 2);
-                    }
-                }
-                ImGui::EndDragDropTarget();
-            }
+            bool euArrastadoD = arrastandoData && deD == i;
             if (ehAdd) {
                 // card "+" para adicionar data
                 wl->AddRectFilled(ca, cb, Cinza(16, ch ? 235 : 190), 13);
@@ -5285,6 +5299,23 @@ static void DesenhaUI(HWND hwnd) {
                 gTrocouDataManual = true; // escolha manual vence a data padrao dos favoritos
                 strncpy(gPastaGta, d.caminho, sizeof(gPastaGta) - 1);
                 SalvarConfig();
+            }
+        }
+        if (slotIns >= 0) { // barra de destino + entrega ao soltar
+            ImDrawList* wl2 = ImGui::GetWindowDrawList();
+            int colI = slotIns % porLinha, linI = slotIns / porLinha;
+            if (slotIns == gNumDatas && gNumDatas >= MAX_DATAS && colI == 0 && linI > 0) { // sem card "+": fim = depois do ultimo
+                colI = porLinha; linI--;
+            }
+            float bx = (colI == 0) ? gridPos.x + 2.0f : gridPos.x + colI * (CW + GAP) - GAP * 0.5f;
+            if (colI == porLinha) bx = gridPos.x + porLinha * (CW + GAP) - GAP - 2.0f;
+            float by0 = gridPos.y + linI * (CH + GAP) + 8.0f, by1 = by0 + CH - 16.0f;
+            float pulso = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 7.0f);
+            wl2->AddRectFilled(ImVec2(bx - 2.5f, by0), ImVec2(bx + 2.5f, by1), ComAlpha(AC.cor, pulso), 2);
+            // soltou: o payload do imgui ainda esta vivo no quadro em que o botao e solto
+            if (ImGui::IsMouseReleased(0)) {
+                int para = slotIns > deD ? slotIns - 1 : slotIns; // "antes do slot", descontando a origem
+                if (para != deD) MoverData(deD, para);
             }
         }
         int linhasTot = (totalCards + porLinha - 1) / porLinha;
@@ -7576,6 +7607,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     if (barra) strcpy(barra + 1, "teste-sem-samp.ini"); else strcpy(gIniPath, "teste-sem-samp.ini");
 #elif defined(TROK_TESTE_UPDATE)
     if (barra) strcpy(barra + 1, "teste-update.ini"); else strcpy(gIniPath, "teste-update.ini");
+#elif defined(TROK_TESTE_LIVRE) // amostra "livre": launcher normal, mas fora da trava de copia unica e com ini proprio
+    if (barra) strcpy(barra + 1, "teste-livre.ini"); else strcpy(gIniPath, "teste-livre.ini");
 #else
     if (barra) strcpy(barra + 1, "Trok Launcher.ini"); else strcpy(gIniPath, "Trok Launcher.ini");
 #endif
@@ -7589,7 +7622,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     // copia mexia no mesmo .ini. Um mutex nomeado barra a segunda; a que ja esta aberta
     // vem pra frente (funciona ate escondida na bandeja, o pump roda antes do render).
     // Vem depois do LerConfig de proposito: e ele que define o idioma do aviso.
-#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE) && !defined(TROK_TESTE_AVISO_LIMITE)
+#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE) && !defined(TROK_TESTE_AVISO_LIMITE) && !defined(TROK_TESTE_LIVRE)
     {
         bool reabrindo = (cmdLinha && strstr(cmdLinha, "--reabrir") != NULL);
         HANDLE mtxUnica = CreateMutexA(NULL, FALSE, "Local\\TrokLauncher-instancia-unica");
@@ -7611,7 +7644,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
         }
     }
 #endif
-#if defined(TROK_TESTE_SEM_SAMP) || defined(TROK_TESTE_UPDATE)
+#if defined(TROK_TESTE_SEM_SAMP) || defined(TROK_TESTE_UPDATE) || defined(TROK_TESTE_LIVRE)
     gFecharBandeja = false; // exe de amostra fecha DE VERDADE no X (sem pegadinha da bandeja)
     gIniciarMin = false;
 #endif
