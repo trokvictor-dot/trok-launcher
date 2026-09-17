@@ -1,6 +1,4 @@
-v1.7
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.7/TrokLauncher-Setup.exe
-Corrige a capa de post que não aparecia na aba TrokMods quando a imagem tinha nome de arquivo longo.
-Duas capas baixando ao mesmo tempo não se atrapalham mais, e imagem que chega quebrada é baixada de novo em vez de ficar cinza pra sempre.
-Download de capa com tempo limite: servidor travado não segura mais o carregamento das outras.
-sha256=517189df021e3a5a3f5a076251a6204397d1903b3ee84eb1b4d50a9667ef23e5
+v1.8
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.8/TrokLauncher-Setup.exe
+A capa do post agora aparece mesmo quando a imagem tem nome de arquivo longo - antes ela era baixada e guardada com o nome errado, e o card ficava cinza.
+sha256=23f10660beb0623c5159b4ff10235f95f64fd3397f87e016a928e5aa97007a0d
