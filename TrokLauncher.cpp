@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.6"
+#define VERSAO "v1.7"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -510,7 +510,10 @@ struct ModPost {
     char data[48];
     char resumo[200];        // comeco do texto do post, sem html
     char imgCache[MAX_PATH]; // primeira imagem do post, baixada pra pasta de cache
-    char imgUrl[300];        // de onde baixar a capa (so quando o card aparece na tela)
+    // 512: a url do Blogger e "base (~255) + /s72-c/ + NOME DO ARQUIVO". Com 300, uma imagem
+    // chamada "Captura de tela 2026-09-16 202359.png" (o %20 conta 3) estourava e o post ficava
+    // SEM CAPA, calado. Agora sobra folga pra nome longo, e o que nao couber vai pro crash.log.
+    char imgUrl[512];        // de onde baixar a capa (so quando o card aparece na tela)
     char guid[96];           // id estavel do post no Blogger (a URL muda se o titulo mudar)
     unsigned long long ordem; // AAAAMMDDhhmm da publicacao (UTC): "mais novo" sem depender da ordem da lista
 };
@@ -554,6 +557,7 @@ static bool gSalvarSenhaServ = false; // opcoes do SA-MP original (HKCU\Software
 static bool gSalvarSenhaRcon = false;
 
 // aviso na tela (toast): unico feedback de erro que o usuario ve (ex: samp.exe sumiu)
+static void RegistrarNoLog(const char* linha); // crash.log ao lado do ini (definida perto do WinMain)
 static char gAviso[320] = ""; // avisos longos (limite de datas em russo) nao podem ser cortados no meio
 static float gAvisoT = 0;
 static void Avisar(const char* msg) {
@@ -1753,6 +1757,9 @@ static DWORD WINAPI ThreadImagens(LPVOID) {
                     if (url[0]) BaixarImagemMods(url, cam, sizeof(cam));
                 }
                 t = CarregarImagemMax(gDev, j.caminho, j.maxLado);
+                // arquivo que nao decodifica (download pela metade, formato que o WIC nao abre) ficava
+                // pra sempre no cache e o download era pulado por "ja existe": capa cinza eterna.
+                if (!t) DeleteFileA(j.caminho);
             } else {
                 t = CarregarImagemMax(gDev, j.caminho, j.maxLado);
             }
@@ -2264,13 +2271,20 @@ static void BaixarImagemMods(const char* url, char* outCache, int outSz, bool ba
     if (GetFileAttributesA(outCache) != INVALID_FILE_ATTRIBUTES) return; // já no cache
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     if (!h) { outCache[0] = 0; return; }
+    { // sem isso, servidor travado prende uma das 2 operarias de imagem por minutos
+        DWORD tCon = 8000, tRec = 15000;
+        InternetSetOptionA(h, INTERNET_OPTION_CONNECT_TIMEOUT, &tCon, sizeof(tCon));
+        InternetSetOptionA(h, INTERNET_OPTION_RECEIVE_TIMEOUT, &tRec, sizeof(tRec));
+        InternetSetOptionA(h, INTERNET_OPTION_SEND_TIMEOUT, &tRec, sizeof(tRec));
+    }
     DWORD fl = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
     if (_strnicmp(url, "https", 5) == 0) fl |= INTERNET_FLAG_SECURE;
     HINTERNET u = InternetOpenUrlA(h, url, NULL, 0, fl, 0);
     if (!u) { InternetCloseHandle(h); outCache[0] = 0; return; }
     HANDLE f = CreateFileA(outCache, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (f == INVALID_HANDLE_VALUE) { InternetCloseHandle(u); InternetCloseHandle(h); outCache[0] = 0; return; }
-    static char bufI[32768];
+    char bufI[32768]; // NAO pode ser static: as 2 operarias de imagem baixam ao mesmo tempo e
+                      // embaralhariam os bytes uma da outra (arquivo corrompido no cache)
     DWORD lidos = 0, soma = 0, esc = 0;
     bool ok = true;
     while (InternetReadFile(u, bufI, sizeof(bufI), &lidos) && lidos > 0) {
@@ -2449,7 +2463,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         gModsTmp[n].resumo[0] = 0;
         gModsTmp[n].imgCache[0] = 0;
         gModsTmp[n].imgUrl[0] = 0;
-        char imgUrl[300] = "";
+        char imgUrl[512] = "";
         { // 1a escolha de capa: <media:thumbnail url="..."> (Blogger sempre manda)
             const char* mt = strstr(bloco, "media:thumbnail");
             if (mt) {
@@ -2461,6 +2475,12 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                         memcpy(imgUrl, uq, fq - uq);
                         imgUrl[fq - uq] = 0;
                         CapaBlogger16x9(imgUrl, (int)sizeof(imgUrl)); // thumb de 72px -> capa 16:9
+                    } else if (fq) { // nao coube: o post ficaria sem capa sem ninguem saber por que
+                        char d[160];
+                        _snprintf(d, sizeof(d) - 1, "aviso: url da capa longa demais (%d chars) no post \"%.60s\"",
+                                  (int)(fq - uq), gModsTmp[n].titulo);
+                        d[sizeof(d) - 1] = 0;
+                        RegistrarNoLog(d);
                     }
                 }
             }
@@ -2687,7 +2707,6 @@ static bool gLocPrimeiroAcesso = false;    // disparada sozinha na 1a abertura s
 static char gLocCand[MAX_DATAS][MAX_PATH]; // candidatas achadas pela thread
 static int gLocNumCand = 0;
 static int gLocSobraram = 0;               // datas de verdade que nao couberam no limite (o aviso diz o motivo)
-static void RegistrarNoLog(const char* linha); // crash.log ao lado do ini (definida perto do WinMain)
 
 static bool PastaIgnorada(const char* nome) { // sistema e arvores enormes onde nunca tem data
     static const char* IGN[] = { "Windows", "Windows.old", "ProgramData", "$Recycle.Bin", "System Volume Information",
