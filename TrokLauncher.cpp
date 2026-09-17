@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.7"
+#define VERSAO "v1.8"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -1750,11 +1750,25 @@ static DWORD WINAPI ThreadImagens(LPVOID) {
                 if (!t) t = CarregarImagemMax(gDev, j.caminho, j.maxLado); // cache falhou: original
             } else if (j.tipo == 2) { // capa de post: baixa pro cache se ainda nao existe
                 if (GetFileAttributesA(j.caminho) == INVALID_FILE_ATTRIBUTES) {
-                    char url[300] = "";
+                    // MESMO tamanho do campo (512): com 300 aqui, a url voltava a ser cortada na hora
+                    // de baixar - o campo maior nao adiantava nada e a capa continuava cinza
+                    char url[sizeof(gMods[0].imgUrl)] = "";
                     for (int k = 0; k < gNumMods; k++)
-                        if (_stricmp(gMods[k].imgCache, j.caminho) == 0) { strncpy(url, gMods[k].imgUrl, sizeof(url) - 1); break; }
+                        if (_stricmp(gMods[k].imgCache, j.caminho) == 0) { strncpy(url, gMods[k].imgUrl, sizeof(url) - 1); url[sizeof(url) - 1] = 0; break; }
                     char cam[MAX_PATH];
-                    if (url[0]) BaixarImagemMods(url, cam, sizeof(cam));
+                    if (url[0]) {
+                        BaixarImagemMods(url, cam, sizeof(cam));
+                        // O cache e nomeado pelo hash da url. Se o nome sair diferente do que o card
+                        // espera (foi o bug da capa: a url chegava cortada aqui e o arquivo ficava
+                        // orfao), renomeia em vez de deixar o download perdido no disco.
+                        if (cam[0] && _stricmp(cam, j.caminho) != 0) {
+                            MoveFileA(cam, j.caminho);
+                            char d[MAX_PATH + 64];
+                            _snprintf(d, sizeof(d) - 1, "aviso: capa salva com nome diferente do pedido (%s)", cam);
+                            d[sizeof(d) - 1] = 0;
+                            RegistrarNoLog(d);
+                        }
+                    }
                 }
                 t = CarregarImagemMax(gDev, j.caminho, j.maxLado);
                 // arquivo que nao decodifica (download pela metade, formato que o WIC nao abre) ficava
