@@ -1,6 +1,6 @@
-v1.6
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.6/TrokLauncher-Setup.exe
-Localiza datas em qualquer disco (até 9 níveis de pasta quando o nome sugere jogo), HD externo, Program Files e na pasta do usuário - em segundo plano, sem travar.
-Limite de datas subiu de 8 para 24, e o launcher avisa quando bate no limite em vez de dizer que não achou.
-Primeira abertura sem SA-MP: procura as datas sozinho e já deixa uma pronta pra jogar.
-sha256=06a4b7fd902d8acbc13df44f50b0ce23160d6be2de00bb395875323301a8e399
+v1.7
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.7/TrokLauncher-Setup.exe
+Corrige a capa de post que não aparecia na aba TrokMods quando a imagem tinha nome de arquivo longo.
+Duas capas baixando ao mesmo tempo não se atrapalham mais, e imagem que chega quebrada é baixada de novo em vez de ficar cinza pra sempre.
+Download de capa com tempo limite: servidor travado não segura mais o carregamento das outras.
+sha256=517189df021e3a5a3f5a076251a6204397d1903b3ee84eb1b4d50a9667ef23e5
