@@ -1,4 +1,4 @@
-v1.8
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.8/TrokLauncher-Setup.exe
-A capa do post agora aparece mesmo quando a imagem tem nome de arquivo longo - antes ela era baixada e guardada com o nome errado, e o card ficava cinza.
-sha256=23f10660beb0623c5159b4ff10235f95f64fd3397f87e016a928e5aa97007a0d
+v1.9
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.9/TrokLauncher-Setup.exe
+Avisos na bandeja quando sai post novo no TrokMods, com a capa e o titulo - clicar abre o post. Fim do ciclo de atualizacao pra quem instalou fora da pasta padrao. Datas herdam o nome da pasta e acompanham se voce renomear, cabem 24, e a grade nao corta mais na direita.
+sha256=9d87f9799ff2106692f1cb1863b412e5bd3b020c17dda020f06789671de1c3e5
