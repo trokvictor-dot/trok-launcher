@@ -567,6 +567,8 @@ static char gNotifPostUrl[300] = "";                // clicar no balao abre este
 static bool gFocarBusca = false;   // Ctrl+F: foca a busca da aba Servidores
 static bool gBoasVindas = false;   // 1a execucao sem SA-MP detectado: guia a pessoa
 static bool gSampOk = true;        // a data em uso tem samp.exe? (reavaliado a cada ~1s; esconde os botoes Jogar)
+static DWORD gEsperandoPasta = 0;  // pasta da data em uso nao respondeu no arranque: instante ate o qual esperamos
+static bool gIniTinhaDatas = false; // o ini ja trazia data configurada? (so o 1o acesso DE VERDADE adota data sozinho)
 static float gHomeSlide = 1.0f;    // slide estilo Rockstar: conteudo da Home entra da direita
 static bool  gSideAberta = false;  // menu lateral expandido (nomes das abas, estilo Rockstar)
 static float gSideAnim = 0.0f;     // 0 = recolhido (76px), 1 = expandido (~230px)
@@ -1044,6 +1046,7 @@ static void LerConfig() {
         if (p5) strncpy(d.idExe, p5, sizeof(d.idExe) - 1);
         gNumDatas++;
     }
+    gIniTinhaDatas = (gNumDatas > 0); // so o 1o acesso DE VERDADE deixa a varredura adotar data
     if (gNumDatas == 0) { // garante ao menos uma, com a pasta atual: o nome vem da PASTA
         DataGta& d = gDatas[0];
         memset(&d, 0, sizeof(d));
@@ -3085,7 +3088,10 @@ static void ConcluirLocalizarDatas() {
         else { char d[MAX_PATH + 48]; _snprintf(d, sizeof(d) - 1, "aviso: data achada nao entrou na lista: %s", gLocCand[i]); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); }
     }
     if (n > 0) SalvarDatas();
-    if (gLocPrimeiroAcesso && primeiraNova >= 0 && !SampValido()) { // 1a abertura sem SA-MP: a achada vira a data em uso
+    // 1a abertura sem SA-MP: a achada vira a data em uso. Só quando o ini NÃO trazia data nenhuma:
+    // com data já configurada, trocar sozinho (e gravar) é o que fazia o launcher abrir na data
+    // errada depois de um boot em que o disco da data demorou a subir.
+    if (gLocPrimeiroAcesso && primeiraNova >= 0 && !gIniTinhaDatas && !SampValido()) {
         gDataSel = primeiraNova;
         strncpy(gPastaGta, gDatas[gDataSel].caminho, sizeof(gPastaGta) - 1); gPastaGta[sizeof(gPastaGta) - 1] = 0;
         SalvarConfig();
@@ -4124,6 +4130,23 @@ static bool SampValido() { // a data em uso tem samp.exe?
     return GetFileAttributesA(c) != INVALID_FILE_ATTRIBUTES;
 }
 
+// Pasta que ainda nao subiu (OneDrive, HD externo, pasta de rede) responde IGUAL a "pasta sem
+// SA-MP" numa checagem so - e a diferenca decide se o launcher mostra as boas-vindas e sai
+// varrendo o PC. Distinguir os dois e o que impede um boot rapido de virar troca de data.
+enum EstadoDaPasta { PASTA_PRONTA, PASTA_SEM_SAMP, PASTA_NAO_RESPONDE };
+static EstadoDaPasta EstadoDaDataEmUso() {
+    if (!gPastaGta[0]) return PASTA_NAO_RESPONDE;
+    DWORD a = GetFileAttributesA(gPastaGta);
+    if (a == INVALID_FILE_ATTRIBUTES || !(a & FILE_ATTRIBUTE_DIRECTORY)) return PASTA_NAO_RESPONDE;
+    char c[MAX_PATH];
+    _snprintf(c, MAX_PATH - 1, "%s\\samp.exe", gPastaGta); c[MAX_PATH - 1] = 0;
+    if (GetFileAttributesA(c) != INVALID_FILE_ATTRIBUTES) return PASTA_PRONTA;
+    // a pasta responde, mas sem samp.exe: so e "PC sem SA-MP" se o proprio GTA estiver la.
+    // Sem o gta_sa.exe tambem, o mais provavel e que o disco ainda esteja subindo.
+    _snprintf(c, MAX_PATH - 1, "%s\\gta_sa.exe", gPastaGta); c[MAX_PATH - 1] = 0;
+    return (GetFileAttributesA(c) != INVALID_FILE_ATTRIBUTES) ? PASTA_SEM_SAMP : PASTA_NAO_RESPONDE;
+}
+
 // favorito com DATA pre-selecionada: troca a instalacao em uso antes de conectar
 // (igual a conta: se o usuario escolheu uma data NA MAO nesta sessao, a escolha dele vence)
 static bool gTrocouDataManual = false;
@@ -4571,6 +4594,18 @@ static void DesenhaUI(HWND hwnd) {
         if (GetTickCount() - tChkSamp > 1000) {
             tChkSamp = GetTickCount();
             gSampOk = SampValido();
+            if (gEsperandoPasta) { // arranque com a pasta fora do ar: a decisao ficou para cá
+                EstadoDaPasta e = EstadoDaDataEmUso();
+                if (e == PASTA_PRONTA) {
+                    gEsperandoPasta = 0;
+                    RegistrarNoLog("a pasta da data em uso respondeu; nada a fazer");
+                } else if ((int)(GetTickCount() - gEsperandoPasta) >= 0) { // esgotou a espera
+                    gEsperandoPasta = 0;
+                    gBoasVindas = true;
+                    RegistrarNoLog("a pasta da data em uso nao respondeu a tempo; mostrando as boas-vindas");
+                    IniciarLocalizarDatas(true);
+                }
+            }
             for (int i = 0; i < gNumDatas; i++) // instalou o SA-MP com o launcher aberto? o card atualiza
                 if (!gDatas[i].versao[0]) DetectarVersaoSamp(gDatas[i].caminho, gDatas[i].versao, sizeof(gDatas[i].versao));
         }
@@ -8003,14 +8038,19 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
 #endif
     srand(GetTickCount()); // ANTES do primeiro sorteio de capas (CarregarImagensDatas)
     { // 1a execucao em PC sem SA-MP: mostra as boas-vindas guiando a configuracao
-        char chk[MAX_PATH];
-        _snprintf(chk, sizeof(chk) - 1, "%s\\samp.exe", gPastaGta);
-        chk[sizeof(chk) - 1] = 0;
-        if (GetFileAttributesA(chk) == INVALID_FILE_ATTRIBUTES) gBoasVindas = true;
+        EstadoDaPasta est = EstadoDaDataEmUso();
+        if (est == PASTA_SEM_SAMP) gBoasVindas = true;
+        else if (est == PASTA_NAO_RESPONDE) {
+            // Pasta ainda subindo (OneDrive e companhia). NAO concluir nada agora: quem abria o
+            // launcher logo depois de ligar o PC via o launcher achar que nao havia SA-MP, varrer
+            // o disco e ADOTAR outra data como a em uso. O loop principal decide quando ela subir.
+            gEsperandoPasta = GetTickCount() + 20000;
+            RegistrarNoLog("a pasta da data em uso ainda nao responde; esperando antes de decidir");
+        }
 #ifdef TROK_TESTE_SEM_SAMP
-        gBoasVindas = true; // amostra: sempre simula PC sem SA-MP
+        gBoasVindas = true; gEsperandoPasta = 0; // amostra: sempre simula PC sem SA-MP
 #endif
-        gSampOk = !gBoasVindas; // sem samp.exe, os botoes Jogar somem ate apontar um
+        gSampOk = (est == PASTA_PRONTA); // sem samp.exe, os botoes Jogar somem ate apontar um
         if (gBoasVindas) IniciarLocalizarDatas(true); // 1a abertura sem SA-MP: ja sai procurando as datas sozinho
 #ifdef TROK_TESTE_AVISO_LIMITE // exe de AMOSTRA: mostra o aviso do limite de datas pra avaliar o texto
         { for (int i = gNumDatas; i < MAX_DATAS; i++) { gDatas[i] = gDatas[0]; gDatas[i].tex = NULL; _snprintf(gDatas[i].nome, sizeof(gDatas[i].nome) - 1, "Data de teste %d", i + 1); }
