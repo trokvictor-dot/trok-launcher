@@ -1,4 +1,4 @@
-v1.9
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.9/TrokLauncher-Setup.exe
-Avisos na bandeja quando sai post novo no TrokMods, com a capa e o titulo - clicar abre o post. Fim do ciclo de atualizacao pra quem instalou fora da pasta padrao. Datas herdam o nome da pasta e acompanham se voce renomear, cabem 24, e a grade nao corta mais na direita.
-sha256=9d87f9799ff2106692f1cb1863b412e5bd3b020c17dda020f06789671de1c3e5
+v1.10
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.10/TrokLauncher-Setup.exe
+Quem guarda as datas no OneDrive, em HD externo ou em pasta de rede podia abrir o launcher logo depois de ligar o PC e cair em outra data, que ainda ficava gravada assim. Agora ele espera a pasta responder antes de concluir qualquer coisa.
+sha256=98b23ef7665f39851c2f8b4a0e5a947e750ee791df910b61e59d91a85fe7e8c4
