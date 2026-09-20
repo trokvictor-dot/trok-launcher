@@ -50,7 +50,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.8"
+#define VERSAO "v1.9"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -262,6 +262,15 @@ static const Traducao TRADUCOES[] = {
     { { "Trocar User Files...", "Change User Files...", "Cambiar User Files...", "Изменить User Files...", "Ubah User Files...", "User Files'ı değiştir..." } },
     { { "Procurando datas... (%d pastas)", "Searching for installs... (%d folders)", "Buscando instalaciones... (%d carpetas)", "Поиск установок... (%d папок)", "Mencari instalasi... (%d folder)", "Kurulumlar aranıyor... (%d klasör)" } },
     { { "Localizar automaticamente", "Find automatically", "Buscar automáticamente", "Найти автоматически", "Cari otomatis", "Otomatik bul" } },
+    { { "Acesse o site", "Visit the site", "Visita el sitio", "Открыть сайт", "Kunjungi situs", "Siteyi ziyaret et" } },
+    { { "Reportar problema", "Report a problem", "Reportar problema", "Сообщить о проблеме", "Laporkan masalah", "Sorun bildir" } },
+    { { "L A U N C H E R", "L A U N C H E R", "L A U N C H E R", "Л А У Н Ч Е Р", "L A U N C H E R", "B A Ş L A T I C I" } },
+    { { "J O G O", "G A M E", "J U E G O", "И Г Р А", "G A M E", "O Y U N" } },
+    { { "S A - M P", "S A - M P", "S A - M P", "S A - M P", "S A - M P", "S A - M P" } },
+    { { "Fala com a gente no Discord da TrokMods", "Talk to us on the TrokMods Discord", "Habla con nosotros en el Discord de TrokMods", "Напишите нам в Discord TrokMods", "Bicara dengan kami di Discord TrokMods", "TrokMods Discord'unda bize yazın" } },
+    { { "Notificações no Windows", "Windows notifications", "Notificaciones de Windows", "Уведомления Windows", "Notifikasi Windows", "Windows bildirimleri" } },
+    { { "Avisa perto do relógio quando sai post novo no blog TrokMods", "Shows a tray notice when a new post comes out on the TrokMods blog", "Avisa junto al reloj cuando sale un post nuevo en el blog TrokMods", "Показывает уведомление у часов о новом посте в блоге TrokMods", "Memberi tahu di dekat jam saat ada postingan baru di blog TrokMods", "TrokMods blogunda yeni gönderi çıkınca saat yanında bildirir" } },
+    { { "Post novo no TrokMods", "New post on TrokMods", "Post nuevo en TrokMods", "Новый пост в TrokMods", "Postingan baru di TrokMods", "TrokMods'ta yeni gönderi" } },
     { { "Limite de %d datas atingido: %d encontrada(s) ficaram de fora. Remova uma data para adicionar outras.", "Limit of %d installs reached: %d found were left out. Remove one to add others.", "Límite de %d instalaciones alcanzado: %d encontradas quedaron fuera. Elimina una para añadir otras.", "Достигнут лимит в %d установок: %d найденных не добавлены. Удалите одну, чтобы добавить другие.", "Batas %d instalasi tercapai: %d yang ditemukan tidak dimasukkan. Hapus satu untuk menambah yang lain.", "%d kurulum sınırına ulaşıldı: bulunan %d tanesi dışarıda kaldı. Başka eklemek için birini kaldırın." } },
     { { "Limite de %d datas atingido. Remova uma para adicionar outra.", "Limit of %d installs reached. Remove one to add another.", "Límite de %d instalaciones alcanzado. Elimina una para añadir otra.", "Достигнут лимит в %d установок. Удалите одну, чтобы добавить другую.", "Batas %d instalasi tercapai. Hapus satu untuk menambah lagi.", "%d kurulum sınırına ulaşıldı. Başka eklemek için birini kaldırın." } },
     { { "Busca parcial: alguma pasta era grande demais. Se faltou uma data, use Adicionar data.", "Partial search: a folder was too big. If an install is missing, use Add install.", "Búsqueda parcial: una carpeta era demasiado grande. Si falta una instalación, usa Añadir.", "Поиск неполный: одна из папок слишком большая. Если установки нет, добавьте её вручную.", "Pencarian sebagian: ada folder yang terlalu besar. Jika instalasi kurang, pakai Tambah.", "Kısmi arama: bir klasör çok büyüktü. Eksik kurulum varsa Ekle'yi kullanın." } },
@@ -358,6 +367,7 @@ struct DataGta {
     char img[MAX_PATH];             // imagem 16:9 (png/jpg); vazio = card com inicial
     char userfiles[MAX_PATH];       // User Files desta data; vazio = Documentos\GTA San Andreas User Files
     char userfilesAuto[MAX_PATH];   // achado SOZINHO (GTASA_ em Documentos ou dentro da data); nao vai pro ini
+    char idExe[40];                 // digital do gta_sa.exe (volume+indice NTFS): sobrevive a renomear a pasta
     char versao[24];               // "0.3.7-R1", "0.3.DL-R1"... lida do samp.dll; vazio = sem SA-MP
     IDirect3DTexture9* tex;
 };
@@ -501,6 +511,7 @@ static char gAttSha[65] = "";     // sha-256 esperado do setup (linha "sha256=" 
 // aba MODS: posts do blog TrokMods (feed RSS do Blogger); post novo = bolinha na sidebar
 #define URL_BLOG "https://trokmods.blogspot.com"
 #define URL_DISCORD "https://discord.gg/2uHzexhg6J"   // comunidade TrokMods
+#define URL_REPORTAR "https://discord.com/invite/BQtGKQHpJ3" // convite que cai no canal de relatar problema
 // GitHub so por baixo dos panos (versao.txt e download do update): nada visivel aponta pra la
 #define URL_POST_LAUNCHER URL_BLOG "/2026/09/trok-launcher.html"
 #define MAX_MODS 300 // o feed e paginado (150 por pagina) ate este teto
@@ -547,6 +558,12 @@ static long long gRPDesde = 0;
 static HWND gHwnd = NULL;
 static float gEscala = 1.0f; // janela fisica / 1420 logico: a UI inteira escala junto
 
+static bool gNotifWin = true;      // avisa perto do relogio (atualizacao nova, post novo)
+static volatile LONG gNotifPost = 0; // pedido vindo da thread do feed; o loop dispara o balao
+static char gNotifPostTit[200] = "";                // titulo do post que acendeu o aviso
+static char gNotifPostDesc[240] = "";               // resumo do post (corpo do balao)
+static char gNotifPostImg[MAX_PATH] = "";           // capa ja baixada (vira o icone do balao)
+static char gNotifPostUrl[300] = "";                // clicar no balao abre este post
 static bool gFocarBusca = false;   // Ctrl+F: foca a busca da aba Servidores
 static bool gBoasVindas = false;   // 1a execucao sem SA-MP detectado: guia a pessoa
 static bool gSampOk = true;        // a data em uso tem samp.exe? (reavaliado a cada ~1s; esconde os botoes Jogar)
@@ -862,8 +879,69 @@ static void CriarIniInicial() {
     }
     if (nImp == 0)
         fputs("servidor0 = Adicione seus servidores aqui|127.0.0.1:7777|-|0\r\n", f);
-    fprintf(f, "[datas]\r\ndata0 = Principal|%s||\r\n", pasta);
+    { // a data nasce com o NOME DA PASTA (nada de "Principal" chapado)
+        const char* nomePasta = strrchr(pasta, '\\');
+        fprintf(f, "[datas]\r\ndata0 = %s|%s||\r\n",
+                (nomePasta && nomePasta[1]) ? nomePasta + 1 : pasta, pasta);
+    }
     fclose(f);
+}
+
+static void SalvarDatas(); // definida junto das outras de data (mais abaixo)
+
+// "Digital" do gta_sa.exe: numero de serie do volume + indice do arquivo no NTFS. Renomear ou
+// mover a pasta NAO muda esses numeros, entao da pra reencontrar a instalacao depois.
+static bool IdDoGtaExe(const char* pasta, char* out, int sz) {
+    out[0] = 0;
+    if (!pasta || !pasta[0]) return false;
+    char exe[MAX_PATH];
+    _snprintf(exe, MAX_PATH - 1, "%s\\gta_sa.exe", pasta);
+    exe[MAX_PATH - 1] = 0;
+    HANDLE f = CreateFileA(exe, FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                           NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (f == INVALID_HANDLE_VALUE) return false;
+    BY_HANDLE_FILE_INFORMATION bi;
+    bool ok = GetFileInformationByHandle(f, &bi) != 0;
+    CloseHandle(f);
+    if (!ok || (!bi.nFileIndexHigh && !bi.nFileIndexLow)) return false; // FAT/exFAT nao tem indice
+    _snprintf(out, sz - 1, "%08lx-%08lx%08lx", bi.dwVolumeSerialNumber, bi.nFileIndexHigh, bi.nFileIndexLow);
+    out[sz - 1] = 0;
+    return true;
+}
+
+// A pasta da data sumiu: procura nas IRMAS (mesmo pai) uma instalacao com a mesma digital.
+// Cobre "renomeei a pasta do jogo" - antes virava data nova e a antiga dizia "sem SA-MP".
+static bool SeguirPastaRenomeada(DataGta& d) {
+    if (!d.idExe[0] || !d.caminho[0]) return false;
+    char pai[MAX_PATH];
+    strncpy(pai, d.caminho, MAX_PATH - 1);
+    pai[MAX_PATH - 1] = 0;
+    char* b = strrchr(pai, '\\');
+    if (!b || b == pai) return false;
+    const char* nomeAntigo = b + 1; // se o nome da data era o da pasta, acompanha o rename
+    bool herdaNome = (_stricmp(d.nome, nomeAntigo) == 0);
+    *b = 0;
+    char busca[MAX_PATH];
+    _snprintf(busca, MAX_PATH - 1, "%s\\*", pai);
+    busca[MAX_PATH - 1] = 0;
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(busca, &fd);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    bool achou = false;
+    do {
+        if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) || fd.cFileName[0] == '.') continue;
+        char sub[MAX_PATH], id[sizeof(d.idExe)];
+        _snprintf(sub, MAX_PATH - 1, "%s\\%s", pai, fd.cFileName);
+        sub[MAX_PATH - 1] = 0;
+        if (!IdDoGtaExe(sub, id, sizeof(id)) || _stricmp(id, d.idExe) != 0) continue;
+        strncpy(d.caminho, sub, sizeof(d.caminho) - 1);
+        d.caminho[sizeof(d.caminho) - 1] = 0;
+        if (herdaNome) { strncpy(d.nome, fd.cFileName, sizeof(d.nome) - 1); d.nome[sizeof(d.nome) - 1] = 0; }
+        achou = true;
+        break;
+    } while (FindNextFileA(h, &fd));
+    FindClose(h);
+    return achou;
 }
 
 static void LerConfig() {
@@ -939,6 +1017,7 @@ static void LerConfig() {
     }
     // datas (instalacoes)
     gNumDatas = 0;
+    bool datasMudaram = false; // caminho corrigido/digital nova: grava no fim
     for (int i = 0; i < MAX_DATAS; i++) {
         char chave[16], linha[1200] = ""; // mesmo tamanho que o SalvarDatas escreve (512 cortava linha longa)
         sprintf(chave, "data%d", i);
@@ -955,25 +1034,57 @@ static void LerConfig() {
         if (p3) *p3++ = 0;
         char* p4 = p3 ? strchr(p3, '|') : NULL;   // userfiles (opcional)
         if (p4) *p4++ = 0;
+        char* p5 = p4 ? strchr(p4, '|') : NULL;   // digital do gta_sa.exe (opcional)
+        if (p5) *p5++ = 0;
         strncpy(d.nome, linha, sizeof(d.nome) - 1);
         strncpy(d.caminho, p1, sizeof(d.caminho) - 1);
         if (p2) strncpy(d.desc, p2, sizeof(d.desc) - 1);
         if (p3) strncpy(d.img, p3, sizeof(d.img) - 1);
         if (p4) strncpy(d.userfiles, p4, sizeof(d.userfiles) - 1);
+        if (p5) strncpy(d.idExe, p5, sizeof(d.idExe) - 1);
         gNumDatas++;
     }
-    if (gNumDatas == 0) { // garante ao menos uma, com a pasta atual
+    if (gNumDatas == 0) { // garante ao menos uma, com a pasta atual: o nome vem da PASTA
         DataGta& d = gDatas[0];
         memset(&d, 0, sizeof(d));
-        strcpy(d.nome, T("Principal"));
         strncpy(d.caminho, gPastaGta, sizeof(d.caminho) - 1);
+        const char* nomePasta = strrchr(gPastaGta, '\\');
+        if (nomePasta && nomePasta[1]) strncpy(d.nome, nomePasta + 1, sizeof(d.nome) - 1);
+        else if (gPastaGta[0]) strncpy(d.nome, gPastaGta, sizeof(d.nome) - 1);
+        else strcpy(d.nome, T("Principal")); // sem pasta ainda: rotulo generico
         d.desc[0] = 0;
         gNumDatas = 1;
+        datasMudaram = true;
     }
-    for (int i = 0; i < gNumDatas; i++) { // versao do SA-MP de cada data (card) + User Files achado sozinho
-        DetectarVersaoSamp(gDatas[i].caminho, gDatas[i].versao, sizeof(gDatas[i].versao));
-        LocalizarUserFilesAuto(gDatas[i]);
+    for (int i = 0; i < gNumDatas; i++) {
+        DataGta& d = gDatas[i];
+        // pasta no lugar: guarda/atualiza a digital. Sumiu: procura a pasta RENOMEADA pela digital
+        // (o caso "renomeei a pasta do jogo" virava data nova + a antiga dizendo "sem SA-MP")
+        char idAgora[sizeof(d.idExe)];
+        if (IdDoGtaExe(d.caminho, idAgora, sizeof(idAgora))) {
+            if (_stricmp(d.idExe, idAgora) != 0) {
+                strncpy(d.idExe, idAgora, sizeof(d.idExe) - 1); d.idExe[sizeof(d.idExe) - 1] = 0;
+                datasMudaram = true;
+            }
+        } else if (d.idExe[0] && SeguirPastaRenomeada(d)) {
+            datasMudaram = true;
+        }
+        { // nome automatico velho ("Principal" e companhia): passa a usar o nome da PASTA
+            static const char* AUTO[] = { "Principal", "Main", "Основная", "Utama", "Ana", "Nova data", "New install" };
+            bool ehAuto = false;
+            for (int k = 0; k < (int)(sizeof(AUTO) / sizeof(AUTO[0])) && !ehAuto; k++)
+                if (_stricmp(d.nome, AUTO[k]) == 0) ehAuto = true;
+            const char* nomePasta = strrchr(d.caminho, '\\');
+            if (ehAuto && nomePasta && nomePasta[1] && _stricmp(d.nome, nomePasta + 1) != 0) {
+                strncpy(d.nome, nomePasta + 1, sizeof(d.nome) - 1);
+                d.nome[sizeof(d.nome) - 1] = 0;
+                datasMudaram = true;
+            }
+        }
+        DetectarVersaoSamp(d.caminho, d.versao, sizeof(d.versao)); // versao do SA-MP mostrada no card
+        LocalizarUserFilesAuto(d);
     }
+    if (datasMudaram) SalvarDatas();
     gAvatarCor = GetPrivateProfileIntA("config", "avatar_cor", 0, gIniPath) % N_ACCENTS;
     gDataSel = GetPrivateProfileIntA("config", "data_sel", 0, gIniPath);
     if (gDataSel < 0 || gDataSel >= gNumDatas) gDataSel = 0;
@@ -1006,6 +1117,7 @@ static void LerConfig() {
     }
     gPerfilSel = GetPrivateProfileIntA("config", "perfil_sel", 0, gIniPath);
     if (gPerfilSel < 0 || gPerfilSel >= gNumPerfis) gPerfilSel = 0;
+    gNotifWin = GetPrivateProfileIntA("config", "notif_windows", 1, gIniPath) != 0; // vem ligada
     gLembrarUlt = GetPrivateProfileIntA("config", "lembrar_ultimo", 1, gIniPath) != 0;
     gUltimoPrimeiro = GetPrivateProfileIntA("config", "ultimo_primeiro", 1, gIniPath) != 0;
     if (gLembrarUlt) { // abre no ultimo servidor selecionado (opcional)
@@ -1040,6 +1152,7 @@ static void SalvarConfig() {
     WritePrivateProfileStringA("config", "ocultar_off", gOcOff ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "discord_rp", gDiscordRP ? "1" : "0", gIniPath);
     { char vi[4]; sprintf(vi, "%d", gIdiomaCfg); WritePrivateProfileStringA("config", "idioma", vi, gIniPath); }
+    WritePrivateProfileStringA("config", "notif_windows", gNotifWin ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "lembrar_ultimo", gLembrarUlt ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "ultimo_primeiro", gUltimoPrimeiro ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "mods_feed", gModsFeed, gIniPath);
@@ -2006,7 +2119,7 @@ static DWORD WINAPI ThreadAtualizacao(LPVOID) {
         }
         l = fimL ? fimL + 1 : NULL;
     }
-    gAttEstado = 1;
+    gAttEstado = 1; // (sem balao na bandeja: o aviso de versao nova fica so no proprio launcher)
     return 0;
 }
 
@@ -2546,8 +2659,36 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         // (Mais vistos) nao acende a bolinha de novo. Com a aba aberta, a UI marca como visto
         // no proximo quadro e salva no ini.
         unsigned long long maisNovo = 0;
-        for (int k = 0; k < n; k++) if (gMods[k].ordem > maisNovo) maisNovo = gMods[k].ordem;
-        if (maisNovo > gModsUltimoOrdem && gTela != 5) gModsNovo = true;
+        int idxNovo = 0;
+        for (int k = 0; k < n; k++) if (gMods[k].ordem > maisNovo) { maisNovo = gMods[k].ordem; idxNovo = k; }
+        if (maisNovo > gModsUltimoOrdem && gTela != 5) {
+            gModsNovo = true;
+            if (gModsUltimoOrdem > 0) { // 1a leitura do feed nao e "post novo": nao notifica
+                strncpy(gNotifPostTit, gMods[idxNovo].titulo, sizeof(gNotifPostTit) - 1);
+                gNotifPostTit[sizeof(gNotifPostTit) - 1] = 0;
+                { // resumo curto: o balao do Windows corta no meio da palavra depois de ~3 linhas
+                    const int LIM = 118;
+                    strncpy(gNotifPostDesc, gMods[idxNovo].resumo, sizeof(gNotifPostDesc) - 1);
+                    gNotifPostDesc[sizeof(gNotifPostDesc) - 1] = 0;
+                    if ((int)strlen(gNotifPostDesc) > LIM) {
+                        int c = LIM;
+                        while (c > 0 && (gNotifPostDesc[c] & 0xC0) == 0x80) c--; // nao corta letra acentuada no meio
+                        while (c > 0 && gNotifPostDesc[c] != ' ') c--;           // volta pro fim da palavra
+                        if (c < 40) c = LIM;
+                        strcpy(gNotifPostDesc + c, "...");
+                    }
+                }
+                strncpy(gNotifPostUrl, gMods[idxNovo].url, sizeof(gNotifPostUrl) - 1); // clique no balao
+                gNotifPostUrl[sizeof(gNotifPostUrl) - 1] = 0;
+                gNotifPostImg[0] = 0;
+                if (gMods[idxNovo].imgUrl[0]) { // capa pro icone do balao: baixa agora (estamos em thread)
+                    char cache[MAX_PATH];
+                    BaixarImagemMods(gMods[idxNovo].imgUrl, cache, sizeof(cache));
+                    if (cache[0]) { strncpy(gNotifPostImg, cache, MAX_PATH - 1); gNotifPostImg[MAX_PATH - 1] = 0; }
+                }
+                InterlockedExchange(&gNotifPost, 1);
+            }
+        }
     }
     BuscarMaisVistos(); // depois dos recentes: a aba "Mais vistos" chega logo em seguida
     return 0;
@@ -2649,7 +2790,7 @@ static void SalvarDatas() {
         sprintf(chave, "data%d", i);
         if (i < gNumDatas) {
             DataGta& d = gDatas[i];
-            sprintf(linha, "%s|%s|%s|%s|%s", d.nome, d.caminho, d.desc, d.img, d.userfiles);
+            sprintf(linha, "%s|%s|%s|%s|%s|%s", d.nome, d.caminho, d.desc, d.img, d.userfiles, d.idExe);
             if (!GravarIniComRetentativa("datas", chave, linha)) ok = false;
         } else {
             if (!GravarIniComRetentativa("datas", chave, NULL)) ok = false; // apaga sobras
@@ -2691,10 +2832,25 @@ static int AdicionarDataAchada(const char* pasta) { // 1 = entrou na lista
     strncpy(limpa, pasta, MAX_PATH - 1); limpa[MAX_PATH - 1] = 0;
     size_t L = strlen(limpa);
     while (L > 3 && (limpa[L - 1] == '\\' || limpa[L - 1] == '/')) limpa[--L] = 0;
-    if (gNumDatas >= MAX_DATAS || !PastaTemGta(limpa) || DataJaCadastrada(limpa)) return 0;
+    if (!PastaTemGta(limpa) || DataJaCadastrada(limpa)) return 0;
+    char idNovo[sizeof(gDatas[0].idExe)];
+    bool temId = IdDoGtaExe(limpa, idNovo, sizeof(idNovo));
+    if (temId) { // mesma instalacao de uma data que ja existe (pasta renomeada/movida): so corrige
+        for (int i = 0; i < gNumDatas; i++) {
+            if (!gDatas[i].idExe[0] || _stricmp(gDatas[i].idExe, idNovo) != 0) continue;
+            if (PastaTemGta(gDatas[i].caminho)) return 0; // a antiga ainda existe: e copia, nao rename
+            strncpy(gDatas[i].caminho, limpa, sizeof(gDatas[i].caminho) - 1);
+            gDatas[i].caminho[sizeof(gDatas[i].caminho) - 1] = 0;
+            DetectarVersaoSamp(limpa, gDatas[i].versao, sizeof(gDatas[i].versao));
+            LocalizarUserFilesAuto(gDatas[i]);
+            return 0;
+        }
+    }
+    if (gNumDatas >= MAX_DATAS) return 0;
     DataGta& d = gDatas[gNumDatas];
     memset(&d, 0, sizeof(d));
     strncpy(d.caminho, limpa, sizeof(d.caminho) - 1);
+    if (temId) strncpy(d.idExe, idNovo, sizeof(d.idExe) - 1);
     DetectarVersaoSamp(limpa, d.versao, sizeof(d.versao));
     LocalizarUserFilesAuto(d);
     const char* nomePasta = strrchr(limpa, '\\');
@@ -3560,6 +3716,7 @@ static void ProcessarPedidosDatas() {
             if (b) *b = 0;
             strncpy(gDatas[i].caminho, arq, sizeof(gDatas[i].caminho) - 1);
             DetectarVersaoSamp(arq, gDatas[i].versao, sizeof(gDatas[i].versao));
+            IdDoGtaExe(arq, gDatas[i].idExe, sizeof(gDatas[i].idExe)); // digital nova: segue rename daqui pra frente
             LocalizarUserFilesAuto(gDatas[i]);
             gFotosDir[0] = 0; // caminho novo: o User Files achado pode mudar junto (a galeria reescaneia)
             if (i == gDataSel) { strncpy(gPastaGta, arq, sizeof(gPastaGta) - 1); SalvarConfig(); }
@@ -3652,6 +3809,7 @@ static void ProcessarPedidosDatas() {
                 memset(&d, 0, sizeof(d));
                 strncpy(d.caminho, arq, sizeof(d.caminho) - 1);
                 DetectarVersaoSamp(arq, d.versao, sizeof(d.versao));
+                IdDoGtaExe(arq, d.idExe, sizeof(d.idExe));
                 LocalizarUserFilesAuto(d);
                 const char* nomePasta = strrchr(arq, '\\');
                 strncpy(d.nome, nomePasta ? nomePasta + 1 : T("Nova data"), sizeof(d.nome) - 1);
@@ -4261,10 +4419,10 @@ static bool LinhaOpcao(const char* rot, bool* v, float w) {
     if (hov) d->AddRectFilled(a, b, Cinza(30, 165), 8);
     d->AddText(ImVec2(a.x + 10, (a.y + b.y) * 0.5f - 9), Cinza(hov ? 240 : 222), rot);
     // switch com deslize animado (anim guardada por variavel; ate 8 na tela)
-    static const bool* chaves[8]; static float anims[8]; static int nT = 0;
+    static const bool* chaves[24]; static float anims[24]; static int nT = 0; // 24: sobra p/ opcoes novas
     int slot = -1;
     for (int i = 0; i < nT; i++) if (chaves[i] == v) slot = i;
-    if (slot < 0 && nT < 8) { chaves[nT] = v; anims[nT] = *v ? 1.0f : 0.0f; slot = nT++; }
+    if (slot < 0 && nT < 24) { chaves[nT] = v; anims[nT] = *v ? 1.0f : 0.0f; slot = nT++; }
     float t = *v ? 1.0f : 0.0f;
     if (slot >= 0) { anims[slot] += (t - anims[slot]) * 0.35f; t = anims[slot]; }
     ImVec2 ta(b.x - 10 - 46, (a.y + b.y) * 0.5f - 12), tb(ta.x + 46, ta.y + 24);
@@ -4351,6 +4509,24 @@ static void Icone(ImDrawList* d, ImVec2 centro, const char* gl, ImU32 cor, float
     if (!f) return;
     ImVec2 sz = f->CalcTextSizeA(tam, 99999.0f, 0.0f, gl);
     d->AddText(f, tam, ImVec2(centro.x - sz.x * 0.5f, centro.y - sz.y * 0.5f), cor, gl);
+}
+
+// bandeirinha de "reportar problema" (a fonte de icones embutida nao traz o glifo flag):
+// mesmo traco dos outros icones, caixa 24x24 do Lucide
+static void IconeBandeira(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    const float e = tam / 24.0f;
+    const float ox = c.x - 12.0f * e, oy = c.y - 12.0f * e;
+    #define BPT(X, Y) ImVec2(ox + (X) * e, oy + (Y) * e)
+    d->PathClear();                                  // pano: onda em cima e embaixo
+    d->PathLineTo(BPT(5.5f, 14.5f));
+    d->PathBezierQuadraticCurveTo(BPT(9.5f, 12.0f), BPT(13.0f, 14.5f));
+    d->PathBezierQuadraticCurveTo(BPT(16.5f, 17.0f), BPT(19.5f, 15.0f));
+    d->PathLineTo(BPT(19.5f, 4.5f));
+    d->PathBezierQuadraticCurveTo(BPT(16.5f, 6.5f), BPT(13.0f, 4.0f));
+    d->PathBezierQuadraticCurveTo(BPT(9.5f, 1.5f), BPT(5.5f, 4.0f));
+    d->PathStroke(cor, ImDrawFlags_Closed, 1.7f * e * 1.6f);
+    d->AddLine(BPT(5.5f, 14.0f), BPT(5.5f, 21.0f), cor, 1.7f * e * 1.6f); // haste
+    #undef BPT
 }
 
 // logo do Discord desenhado a mao: a fonte Lucide nao tem marcas, e o logo oficial
@@ -4744,13 +4920,8 @@ static void DesenhaUI(HWND hwnd) {
             rl->AddText(ImVec2(ca.x + 30, ca.y + 12), Cinza(240), NomeExib(sc));
             ImGui::PopFont();
             ImGui::PopClipRect();
-            if (!sc.texLogo) { // descricao so nos cards SEM logo
-                ImGui::PushClipRect(ImVec2(ca.x, ca.y), ImVec2(cb.x - 12, cb.y), true);
-                ImGui::PushFont(gFtCardDesc);
-                rl->AddText(ImVec2(ca.x + 15, ca.y + 34), Cinza(152), sc.modoQ[0] ? sc.modoQ : sc.modo);
-                ImGui::PopFont();
-                ImGui::PopClipRect();
-            } else { // logo maior, centralizada no espaco livre entre o nome e os numeros
+            // (a descricao/modo saiu dos mini cards - pedido dele; o modo continua na Home grande)
+            if (sc.texLogo) { // logo maior, centralizada no espaco livre entre o nome e os numeros
                 D3DSURFACE_DESC ld2;
                 if (SUCCEEDED(sc.texLogo->GetLevelDesc(0, &ld2)) && ld2.Height) {
                     float escL = 1.0f + 0.10f * ha; // hover: logo cresce junto com o zoom da capa
@@ -5186,12 +5357,27 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 96), false);
         // cards 16:9 esticados para fechar exatamente na borda direita da grade
         const float GAP = 20;
-        float wGrid = pb.x - pa.x - 48;
+        // largura REAL de dentro do child: quando aparece a barra de rolagem ela come ~8px e os
+        // cards da ultima coluna ficavam cortados na direita. GetContentRegionAvail ja desconta.
+        float wGrid = ImGui::GetContentRegionAvail().x;
+        if (wGrid < 100.0f) wGrid = pb.x - pa.x - 48; // seguranca (child ainda sem layout)
         int porLinha = (int)((wGrid + GAP) / (330.0f + GAP)); // quantos cabem no tamanho base
         if (porLinha < 1) porLinha = 1;
+        int totalCards = gNumDatas + (gNumDatas < MAX_DATAS ? 1 : 0); // +1 = adicionar
+        { // aperta as colunas ate a ULTIMA fileira caber inteira: em 1920x1080 a 3a linha aparecia
+            //  cortada pela metade. So encolhe ate 250px de card; dai em diante a grade rola mesmo.
+            float hVis = ImGui::GetContentRegionAvail().y;
+            while (porLinha < totalCards) {
+                int linhas = (totalCards + porLinha - 1) / porLinha;
+                float cw = (wGrid - (porLinha - 1) * GAP) / porLinha;
+                if (linhas * (cw * 9.0f / 16.0f + GAP) - GAP <= hVis) break; // ja cabe
+                float cwProx = (wGrid - porLinha * GAP) / (porLinha + 1);
+                if (cwProx < 250.0f) break; // menor que isso o card vira selo: melhor rolar
+                porLinha++;
+            }
+        }
         float CW = (wGrid - (porLinha - 1) * GAP) / porLinha;
         float CH = CW * 9.0f / 16.0f;
-        int totalCards = gNumDatas + (gNumDatas < MAX_DATAS ? 1 : 0); // +1 = adicionar
         // ---- reordenar: o destino e a POSICAO entre cards mais perto do mouse, nao "o card
         //      embaixo do mouse". Da pra soltar no vao, em cima do "+" e no fim da grade, e a
         //      barra laranja mostra exatamente onde a data vai cair. Antes so o card de destino
@@ -5267,14 +5453,17 @@ static void DesenhaUI(HWND hwnd) {
                 wl->AddText(ImVec2((ca.x + cb.x - gsz.x) * 0.5f, (ca.y + cb.y - gsz.y) * 0.5f - 8), Cinza(70), ini2);
                 ImGui::PopFont();
             }
-            // fade tambem NO TOPO (leitura do EM USO, pasta e "...")
-            wl->AddRectFilled(ca, ImVec2(cb.x, ca.y + 13), Cinza(8, 150), 13, ImDrawFlags_RoundCornersTop);
+            // fade tambem NO TOPO (leitura do EM USO, pasta e "..."). As faixas se ENCOSTAM meio
+            // pixel: com o card em coordenada fracionaria (escala da janela), emendas exatas
+            // deixavam uma fresta de ~1px sem escurecer - a "linha" que aparecia atravessando os
+            // cards de capa clara. Meio pixel de sobreposicao fecha a fresta sem escurecer a vista.
+            wl->AddRectFilled(ca, ImVec2(cb.x, ca.y + 13.5f), Cinza(8, 150), 13, ImDrawFlags_RoundCornersTop);
             wl->AddRectFilledMultiColor(ImVec2(ca.x, ca.y + 13), ImVec2(cb.x, ca.y + 98),
                 Cinza(8, 150), Cinza(8, 150), Cinza(8, 0), Cinza(8, 0));
             // fade de leitura em 2 estagios (mais alto e mais forte na base) + nome/descricao
-            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 140), ImVec2(cb.x, cb.y - 48),
+            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 140), ImVec2(cb.x, cb.y - 47.5f),
                 Cinza(8, 0), Cinza(8, 0), Cinza(8, 175), Cinza(8, 175));
-            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 48), ImVec2(cb.x, cb.y - 13),
+            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 48), ImVec2(cb.x, cb.y - 12.5f),
                 Cinza(8, 175), Cinza(8, 175), Cinza(8, 235), Cinza(8, 235));
             wl->AddRectFilled(ImVec2(ca.x, cb.y - 13), cb, Cinza(8, 235), 13, ImDrawFlags_RoundCornersBottom);
             // versao do SA-MP (lida do samp.dll) no canto direito da linha do nome
@@ -5612,30 +5801,22 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImGui::PopFont();
         }
-        { // comunidade no Discord + blog, a esquerda do atualizar
-            struct AtalhoMods { const char* gl; const char* url; const char* dica; };
-            static const AtalhoMods ATALHOS[2] = {
-                { I_COMUNIDADE, URL_DISCORD, "Entrar na comunidade do Discord" },
-                { I_GLOBO,      URL_BLOG,    "Abrir o blog TrokMods" },
-            };
-            for (int k = 0; k < 2; k++) {
-                ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 36 * (3 - k), 18));
-                char idA[16]; sprintf(idA, "##modsat%d", k);
-                bool cl = ImGui::InvisibleButton(idA, ImVec2(36, 34));
-                ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
-                bool hv = ImGui::IsItemHovered();
-                if (hv) pl->AddRectFilled(aa, ab, Cinza(255, 16), 9);
-                ImVec2 cIco((aa.x + ab.x) * 0.5f, (aa.y + ab.y) * 0.5f);
-                ImU32 corIco = hv ? AC.hi : Cinza(170);
-                if (k == 0) IconeDiscord(pl, cIco, corIco, 23.0f); // logo oficial, desenhado
-                else if (gLogoBlogger) {                             // marca oficial do Blogger,
-                    float r = 8.5f;                                  // tingida e do mesmo peso visual do Discord
-                    pl->AddImage((ImTextureID)gLogoBlogger, ImVec2(cIco.x - r, cIco.y - r),
-                                 ImVec2(cIco.x + r, cIco.y + r), ImVec2(0, 0), ImVec2(1, 1), corIco);
-                } else Icone(pl, cIco, ATALHOS[k].gl, corIco, 17.0f);
-                Dica(T(ATALHOS[k].dica));
-                if (cl) ShellExecuteA(NULL, "open", ATALHOS[k].url, NULL, NULL, SW_SHOWNORMAL);
-            }
+        { // Discord (icone) + "Acesse o site" (botao de texto; a marca do Blogger saiu - pedido dele)
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 72, 18));
+            bool clD = ImGui::InvisibleButton("##modsdiscord", ImVec2(36, 34));
+            ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
+            bool hv = ImGui::IsItemHovered();
+            if (hv) pl->AddRectFilled(aa, ab, Cinza(255, 16), 9);
+            IconeDiscord(pl, ImVec2((aa.x + ab.x) * 0.5f, (aa.y + ab.y) * 0.5f), hv ? AC.hi : Cinza(170), 23.0f);
+            Dica(T("Entrar na comunidade do Discord"));
+            if (clD) ShellExecuteA(NULL, "open", URL_DISCORD, NULL, NULL, SW_SHOWNORMAL);
+            ImGui::PushFont(gFtBold);
+            float wSite = ImGui::CalcTextSize(T("Acesse o site")).x + 34.0f;
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 72 - 10 - wSite, 18));
+            bool clS = BotaoSec(T("Acesse o site"), ImVec2(wSite, 34));
+            ImGui::PopFont();
+            Dica(T("Abrir o blog TrokMods"));
+            if (clS) ShellExecuteA(NULL, "open", URL_BLOG, NULL, NULL, SW_SHOWNORMAL);
         }
         { // atualizar por ICONE (seta circular, igual ao da galeria)
             ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 36, 18));
@@ -5727,12 +5908,11 @@ static void DesenhaUI(HWND hwnd) {
                 // fundo BRANCO como no blog; no hover so ganha uma sombra por baixo
                 if (hovP) SombraSuave(ml, ImVec2(ca.x + 5, ca.y + 8), ImVec2(cb2.x - 5, cb2.y + 5), 16.0f, 40);
                 ml->AddRectFilled(ca, cb2, IM_COL32(255, 255, 255, 255), 14.0f);
-                bool novoP = gModsVistoAteOrdem > 0 && gMods[i].ordem > gModsVistoAteOrdem; // publicado depois da ultima visita
-                float recuo = novoP ? 22.0f : 0.0f; // abre espaco pra bolinha de post novo
+                // (a bolinha de post novo saiu dos cards - pedido dele; o aviso fica so no icone da aba)
                 { // titulo encostado na data; a data fica sempre na mesma altura em todos os cards
                     char t1[224], t2[224];
-                    float larg = CWM - PADM * 2 - recuo;
-                    float cxT = ca.x + (CWM - recuo) * 0.5f;
+                    float larg = CWM - PADM * 2;
+                    float cxT = ca.x + CWM * 0.5f;
                     ImGui::PushFont(gFtPostTit);
                     int nlin = TextoDuasLinhas(t1, t2, sizeof(t1), gMods[i].titulo, larg);
                     float ty = ca.y + 14.0f + (maxLin - nlin) * altT; // titulos curtos descem ate a data
@@ -5743,11 +5923,6 @@ static void DesenhaUI(HWND hwnd) {
                     TextoTruncadoCentro(ml, ca.x + CWM * 0.5f, ca.y + 14.0f + maxLin * altT + 3.0f,
                                         CWM - PADM * 2, IM_COL32(124, 124, 130, 255), gMods[i].data);
                     ImGui::PopFont();
-                }
-                if (novoP) {
-                    float pulso2 = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 5.0f);
-                    ml->AddCircleFilled(ImVec2(cb2.x - 18, ca.y + 25), 5.0f,
-                                        ComAlpha(AC.cor, 0.45f + 0.55f * pulso2), 14);
                 }
                 // capa 16:9 abaixo dos textos: pedida a fila de imagens SO quando o card esta na tela
                 // (download + decode fora da UI); cards que ficaram longe devolvem a textura
@@ -5869,6 +6044,23 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushFont(gFtBotao);
         ImGui::TextColored(ImColor(Cinza(245)), T("CONFIGURAÇÕES"));
         ImGui::PopFont();
+        { // "Reportar problema": canto de cima, mesmo lugar do "Localizar datas no PC" da aba Datas
+            char rotRep[80];
+            _snprintf(rotRep, sizeof(rotRep) - 1, "     %s", T("Reportar problema")); // espaco pro icone
+            rotRep[sizeof(rotRep) - 1] = 0;
+            ImGui::PushFont(gFtBold);
+            float wRep = ImGui::CalcTextSize(rotRep).x + 30.0f;
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wRep, 22));
+            bool clR = BotaoSec(rotRep, ImVec2(wRep, 34));
+            ImGui::PopFont();
+            { // bandeirinha dentro do botao, como nos botoes de backup
+                ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
+                IconeBandeira(ImGui::GetWindowDrawList(), ImVec2(ra.x + 22, (ra.y + rb.y) * 0.5f),
+                              Cinza(ImGui::IsItemHovered() ? 230 : 165), 16.0f);
+            }
+            Dica(T("Fala com a gente no Discord da TrokMods"));
+            if (clR) ShellExecuteA(NULL, "open", URL_REPORTAR, NULL, NULL, SW_SHOWNORMAL);
+        }
         // nick saiu daqui: mora nas CONTAS (avatar/nick do topo); a conta 0 e a do samp padrão
         ImGui::PushFont(gFtMini);
         ImGui::SetCursorPos(ImVec2(26, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("C O R   D E   D E S T A Q U E"));
@@ -5981,7 +6173,7 @@ static void DesenhaUI(HWND hwnd) {
         }
         // opcoes em LINHAS de lista (hover + divisoria), switch a direita no destaque
         {
-            float wLin = pb.x - pa.x - 48;
+            float wLin = pb.x - pa.x - 48; // UMA coluna (ele prefere assim; se crescer, o painel rola)
             ImGui::PushFont(gFtBody);
             ImGui::SetCursorPos(ImVec2(24, 150));
             if (LinhaOpcao(T("Fechar o launcher ao entrar no jogo"), &gFecharAoJogar, wLin)) SalvarConfig();
@@ -5997,28 +6189,31 @@ static void DesenhaUI(HWND hwnd) {
             if (LinhaOpcao(T("Iniciar com o Windows"), &iniciarWin, wLin)) DefinirIniciarComWindows(iniciarWin);
             Dica(T("Abre sozinho quando o computador liga"));
             ImGui::SetCursorPos(ImVec2(24, 346));
+            if (LinhaOpcao(T("Notificações no Windows"), &gNotifWin, wLin)) SalvarConfig();
+            Dica(T("Avisa perto do relógio quando sai post novo no blog TrokMods"));
+            ImGui::SetCursorPos(ImVec2(24, 395));
             if (LinhaOpcao("Discord Rich Presence", &gDiscordRP, wLin)) SalvarConfig();
             Dica(T("Mostra no seu perfil do Discord o servidor em que você está jogando"));
-            ImGui::SetCursorPos(ImVec2(24, 395));
+            ImGui::SetCursorPos(ImVec2(24, 444));
             if (LinhaOpcao(T("Lembrar o último servidor selecionado"), &gLembrarUlt, wLin)) SalvarConfig();
             Dica(T("Ao abrir, a Home já vem no servidor em que você parou"));
-            ImGui::SetCursorPos(ImVec2(24, 444));
+            ImGui::SetCursorPos(ImVec2(24, 493));
             if (LinhaOpcao(T("Mover o último jogado para o início dos favoritos"), &gUltimoPrimeiro, wLin)) SalvarConfig();
             Dica(T("Ao entrar num servidor, o card dele vai pra frente da fila dos favoritos"));
             // opções do SA-MP ORIGINAL (mesmo registro: mudar aqui muda la, e vice-versa)
-            ImGui::SetCursorPos(ImVec2(24, 493));
+            ImGui::SetCursorPos(ImVec2(24, 542));
             if (LinhaOpcao(T("Salvar senhas de servidor automaticamente"), &gSalvarSenhaServ, wLin))
                 GravarOpcaoSampRegistro("SaveServPasses", gSalvarSenhaServ);
             Dica(T("Opcao do proprio SA-MP: a senha digitada fica guardada (texto puro) no USERDATA.DAT"));
-            ImGui::SetCursorPos(ImVec2(24, 542));
+            ImGui::SetCursorPos(ImVec2(24, 591));
             if (LinhaOpcao(T("Salvar senhas de RCON"), &gSalvarSenhaRcon, wLin))
                 GravarOpcaoSampRegistro("SaveRconPasses", gSalvarSenhaRcon);
             Dica(T("Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original"));
-            ImGui::SetCursorPos(ImVec2(26, 602));
+            ImGui::SetCursorPos(ImVec2(26, 651));
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(156)), T("B A C K U P"));
             ImGui::PopFont();
-            ImGui::SetCursorPos(ImVec2(24, 624));
+            ImGui::SetCursorPos(ImVec2(24, 673));
             if (BotaoSec(T("     Exportar configurações..."), ImVec2(232, 38))) gPedirExportCfg = true;
             Dica(T("Gera um arquivo único com contas, favoritos, opções e as imagens que você subiu"));
             { // icone lucide: exportar (upload)
@@ -6673,7 +6868,15 @@ static void DesenhaUI(HWND hwnd) {
     {
         if (gAttBaixa == 3) { // baixou (modal aberto ou nao): roda o setup --atualizar e fecha
             gAttBaixa = 4; // dispara UMA vez
-            ShellExecuteA(NULL, "open", gAttArquivo, "--atualizar", NULL, SW_SHOWNORMAL);
+            // manda a pasta ONDE EU ESTOU: sem isso o setup instala no destino padrao e quem
+            // escolheu outra pasta continuava abrindo a versao velha (aviso de update sem fim)
+            char eu[MAX_PATH], arg[MAX_PATH + 24];
+            GetModuleFileNameA(NULL, eu, MAX_PATH);
+            char* b = strrchr(eu, '\\');
+            if (b) *b = 0;
+            _snprintf(arg, sizeof(arg) - 1, "--atualizar \"%s\"", eu);
+            arg[sizeof(arg) - 1] = 0;
+            ShellExecuteA(NULL, "open", gAttArquivo, arg, NULL, SW_SHOWNORMAL);
             gRodando = false;
         }
         if (gAttPopup && !ImGui::IsPopupOpen(T("Atualização##trok"))) ImGui::OpenPopup(T("Atualização##trok"));
@@ -7415,10 +7618,23 @@ static void DesenhaUI(HWND hwnd) {
         ImVec2 e1 = ImGui::CalcTextSize(T("C O N E C T A N D O"));
         ov->AddText(ImVec2((ds.x - e1.x) * 0.5f, ds.y * 0.38f), AccentAtual().hi, T("C O N E C T A N D O"));
         ImGui::PopFont();
-        ImGui::PushFont(gFtDisplay);
-        ImVec2 e2 = ImGui::CalcTextSize(nomeUp);
-        ov->AddText(ImVec2((ds.x - e2.x) * 0.5f, ds.y * 0.42f), Cinza(245), nomeUp);
-        ImGui::PopFont();
+        // servidor com logo entra com a MARCA no lugar do nome (igual a Home)
+        IDirect3DTexture9* logoConn = NULL;
+        for (int q = 0; q < gNumSrv; q++)
+            if (gSrv[q].texLogo && _stricmp(gSrv[q].ip, gConnIp) == 0) { logoConn = gSrv[q].texLogo; break; }
+        D3DSURFACE_DESC ldC;
+        if (logoConn && SUCCEEDED(logoConn->GetLevelDesc(0, &ldC)) && ldC.Height) {
+            float lh = 86.0f, lw = lh * (float)ldC.Width / (float)ldC.Height;
+            float lwMax = ds.x * 0.42f;
+            if (lw > lwMax) { lw = lwMax; lh = lw * (float)ldC.Height / (float)ldC.Width; }
+            float lx = (ds.x - lw) * 0.5f, ly = ds.y * 0.42f;
+            ov->AddImage((ImTextureID)logoConn, ImVec2(lx, ly), ImVec2(lx + lw, ly + lh));
+        } else {
+            ImGui::PushFont(gFtDisplay);
+            ImVec2 e2 = ImGui::CalcTextSize(nomeUp);
+            ov->AddText(ImVec2((ds.x - e2.x) * 0.5f, ds.y * 0.42f), Cinza(245), nomeUp);
+            ImGui::PopFont();
+        }
         float frac = gConnT / 1.6f; if (frac > 1) frac = 1;
         float bx0 = ds.x * 0.5f - 150, bx1 = ds.x * 0.5f + 150, by = ds.y * 0.56f;
         ov->AddRectFilled(ImVec2(bx0, by), ImVec2(bx1, by + 5), Cinza(34), 3);
@@ -7482,6 +7698,106 @@ static void CriarTray(HWND h) {
     if (!gNid.hIcon) gNid.hIcon = LoadIconA(NULL, (LPCSTR)IDI_APPLICATION);
     strcpy(gNid.szTip, "Trok Launcher");
     Shell_NotifyIconA(NIM_ADD, &gNid);
+    // versao 3: liga as mensagens NIN_* (precisamos do NIN_BALLOONUSERCLICK pra abrir o post
+    // quando clicam no balao) sem mudar o formato do lParam dos cliques normais
+    gNid.uVersion = NOTIFYICON_VERSION;
+    Shell_NotifyIconA(NIM_SETVERSION, &gNid);
+}
+
+// Balao perto do relogio (atualizacao nova, post novo). Usa a versao WIDE: o fonte e UTF-8 e a
+// ANSI estragaria acento (e nem representa russo). O icone foi criado com a versao A, mas quem
+// identifica o balao e o par hWnd+uID, entao o NIM_MODIFY em W chega no mesmo icone.
+// Transforma uma imagem do disco (a capa do post) em HICON pro balao: recorte quadrado central
+// + escala. Sem isso o Windows usaria o icone do exe, e a capa e o que identifica o post.
+static HICON IconeDeImagem(const char* caminho, int lado) {
+    if (!caminho || !caminho[0]) return NULL;
+    wchar_t w[MAX_PATH];
+    MultiByteToWideChar(CP_ACP, 0, caminho, -1, w, MAX_PATH);
+    IWICImagingFactory* fab = NULL;
+    IWICBitmapDecoder* dec = NULL;
+    IWICBitmapFrameDecode* frame = NULL;
+    IWICBitmapClipper* rec = NULL;
+    IWICBitmapScaler* esc = NULL;
+    IWICBitmapSource* src = NULL;
+    HICON ico = NULL;
+    if (FAILED(CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER,
+                                IID_IWICImagingFactory, (void**)&fab))) return NULL;
+    do {
+        if (FAILED(fab->CreateDecoderFromFilename(w, NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &dec))) break;
+        if (FAILED(dec->GetFrame(0, &frame))) break;
+        UINT ow = 0, oh = 0;
+        frame->GetSize(&ow, &oh);
+        if (!ow || !oh) break;
+        IWICBitmapSource* fonte = frame;
+        UINT l = ow < oh ? ow : oh;                       // quadrado central (capa e 16:9)
+        WICRect r = { (INT)((ow - l) / 2), (INT)((oh - l) / 2), (INT)l, (INT)l };
+        if (SUCCEEDED(fab->CreateBitmapClipper(&rec)) && SUCCEEDED(rec->Initialize(fonte, &r))) fonte = rec;
+        if (SUCCEEDED(fab->CreateBitmapScaler(&esc)) &&
+            SUCCEEDED(esc->Initialize(fonte, lado, lado, WICBitmapInterpolationModeFant))) fonte = esc;
+        if (FAILED(WICConvertBitmapSource(GUID_WICPixelFormat32bppPBGRA, fonte, &src))) break;
+        BITMAPINFO bi;
+        memset(&bi, 0, sizeof(bi));
+        bi.bmiHeader.biSize = sizeof(bi.bmiHeader);
+        bi.bmiHeader.biWidth = lado;
+        bi.bmiHeader.biHeight = -lado; // top-down
+        bi.bmiHeader.biPlanes = 1;
+        bi.bmiHeader.biBitCount = 32;
+        bi.bmiHeader.biCompression = BI_RGB;
+        void* bits = NULL;
+        HDC dc = GetDC(NULL);
+        HBITMAP cor = CreateDIBSection(dc, &bi, DIB_RGB_COLORS, &bits, NULL, 0);
+        ReleaseDC(NULL, dc);
+        if (!cor || !bits) { if (cor) DeleteObject(cor); break; }
+        if (SUCCEEDED(src->CopyPixels(NULL, lado * 4, lado * lado * 4, (BYTE*)bits))) {
+            HBITMAP mascara = CreateBitmap(lado, lado, 1, 1, NULL); // tudo 0 = opaco (o alpha manda)
+            ICONINFO ii;
+            memset(&ii, 0, sizeof(ii));
+            ii.fIcon = TRUE;
+            ii.hbmColor = cor;
+            ii.hbmMask = mascara;
+            ico = CreateIconIndirect(&ii);
+            if (mascara) DeleteObject(mascara);
+        }
+        DeleteObject(cor);
+    } while (0);
+    if (src) src->Release();
+    if (esc) esc->Release();
+    if (rec) rec->Release();
+    if (frame) frame->Release();
+    if (dec) dec->Release();
+    if (fab) fab->Release();
+    return ico;
+}
+
+static void NotificarWindows(const char* titulo, const char* texto, const char* imagem = NULL) {
+    if (!gNotifWin || !gHwnd) return;
+    static HICON icoBalao = NULL; // vive ate a notificacao seguinte (o balao usa enquanto aparece)
+    NOTIFYICONDATAW n;
+    memset(&n, 0, sizeof(n));
+    n.cbSize = sizeof(n);
+    n.hWnd = gHwnd;
+    n.uID = 1;
+    n.uFlags = NIF_INFO;
+    n.dwInfoFlags = NIIF_USER | NIIF_LARGE_ICON; // icone grande: o do exe ou a capa do post
+    if (imagem && imagem[0]) {
+        HICON novo = IconeDeImagem(imagem, 64);
+        if (novo) {
+            if (icoBalao) DestroyIcon(icoBalao);
+            icoBalao = novo;
+            n.hBalloonIcon = icoBalao;
+            n.uFlags |= NIF_ICON; // hBalloonIcon so vale com o flag de icone
+            n.hIcon = gNid.hIcon; // mantem o icone da bandeja como esta
+        }
+    }
+    MultiByteToWideChar(CP_UTF8, 0, titulo, -1, n.szInfoTitle, sizeof(n.szInfoTitle) / sizeof(wchar_t));
+    MultiByteToWideChar(CP_UTF8, 0, texto, -1, n.szInfo, sizeof(n.szInfo) / sizeof(wchar_t));
+    BOOL ok = Shell_NotifyIconW(NIM_MODIFY, &n);
+    { // fica no log: se o Windows recusar (notificacoes desligadas), da pra saber por que
+        char d[160];
+        _snprintf(d, sizeof(d) - 1, "notificacao \"%.60s\": %s", titulo, ok ? "enviada" : "RECUSADA pelo Windows");
+        d[sizeof(d) - 1] = 0;
+        RegistrarNoLog(d);
+    }
 }
 
 // Carrega uma fonte da pasta de fontes do Windows. Se o arquivo nao existir, devolve
@@ -7522,7 +7838,11 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
         }
         return 0;
     case WM_TROK_TRAY:
-        if (l == WM_LBUTTONUP || l == WM_LBUTTONDBLCLK) {
+        if (l == NIN_BALLOONUSERCLICK) { // clicou no balao do post: abre o post no navegador
+            { char d[360]; _snprintf(d, sizeof(d) - 1, "clique no balao -> %s", gNotifPostUrl[0] ? gNotifPostUrl : "(sem url)"); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); }
+            if (UrlWebOk(gNotifPostUrl)) ShellExecuteA(NULL, "open", gNotifPostUrl, NULL, NULL, SW_SHOWNORMAL);
+            else { ShowWindow(h, SW_SHOW); SetForegroundWindow(h); }
+        } else if (l == WM_LBUTTONUP || l == WM_LBUTTONDBLCLK) {
             ShowWindow(h, SW_SHOW);
             SetForegroundWindow(h);
         } else if (l == WM_RBUTTONUP) {
@@ -7924,6 +8244,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                 ultimaVersao = GetTickCount();
                 RodarThread(ThreadAtualizacao, NULL);
             }
+            // balao na bandeja: aqui em cima, ANTES do "escondido nao renderiza" - quem vive na
+            // bandeja e justamente quem precisa do aviso
+            if (InterlockedExchange(&gNotifPost, 0)) // titulo = o do post; corpo = o resumo; icone = a capa
+                NotificarWindows(gNotifPostTit, gNotifPostDesc[0] ? gNotifPostDesc : T("Post novo no TrokMods"), gNotifPostImg);
         }
         if (!IsWindowVisible(hwnd)) { Sleep(60); continue; } // escondido na bandeja: nao renderiza
         // render preguicoso: parado (sem input ha 1,5s e sem animacao correndo), cai p/ ~12 fps

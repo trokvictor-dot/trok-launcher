@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JAN_W 880
 #define JAN_H 540
-#define VERSAO_INST "1.8"
+#define VERSAO_INST "1.9"
 
 static const ImU32 COR_ACCENT = IM_COL32(242, 97, 29, 255);
 static const ImU32 COR_ACCENT_HI = IM_COL32(255, 138, 77, 255);
@@ -211,6 +211,32 @@ static void AvisoJanela(const char* txt, UINT icone) {
     wchar_t w[512];
     MultiByteToWideChar(CP_UTF8, 0, txt ? txt : "", -1, w, 512);
     MessageBoxW(NULL, w, L"Trok Launcher", icone);
+}
+
+// Pasta do launcher que AINDA ESTA RODANDO (ele nos chamou e esta fechando). E a fonte mais
+// confiavel numa atualizacao: vale mesmo pra quem ja sofreu a atualizacao errada e ficou com o
+// registro apontando pro destino padrao em vez da pasta escolhida.
+static BOOL CALLBACK AcharPastaDoLauncher(HWND h, LPARAM lp) {
+    char cls[64];
+    if (!GetClassNameA(h, cls, sizeof(cls)) || strcmp(cls, "TrokLauncher") != 0) return TRUE;
+    DWORD pid = 0;
+    GetWindowThreadProcessId(h, &pid);
+    if (!pid) return TRUE;
+    HANDLE pr = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!pr) return TRUE;
+    typedef BOOL(WINAPI* FnQ)(HANDLE, DWORD, LPSTR, PDWORD);
+    FnQ Q = (FnQ)GetProcAddress(GetModuleHandleA("kernel32.dll"), "QueryFullProcessImageNameA");
+    char caminho[MAX_PATH] = "";
+    DWORD tam = MAX_PATH;
+    bool ok = Q && Q(pr, 0, caminho, &tam) && caminho[0];
+    CloseHandle(pr);
+    if (!ok) return TRUE;
+    char* b = strrchr(caminho, '\\');
+    if (!b) return TRUE;
+    *b = 0;
+    strncpy((char*)lp, caminho, MAX_PATH - 1);
+    ((char*)lp)[MAX_PATH - 1] = 0;
+    return FALSE; // achou
 }
 
 static BOOL CALLBACK PedirSaidaDoLauncher(HWND h, LPARAM) {
@@ -833,6 +859,42 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     }
     if (gEtapa == ET_IDIOMA && strstr(linha, "--atualizar")) { // atualizacao silenciosa
         gModoAtt = true;
+        // A atualizacao tem que cair NA PASTA ONDE O LAUNCHER ESTA, nao no destino padrao: quem
+        // escolheu outra pasta na instalacao recebia a versao nova em %LOCALAPPDATA%, continuava
+        // abrindo a antiga pelo atalho e o aviso de atualizacao voltava pra sempre.
+        // 1a fonte: a pasta que o proprio launcher mandou (--atualizar "<pasta>").
+        {
+            char pasta[MAX_PATH] = "";
+            const char* asp = strchr(strstr(linha, "--atualizar"), '"');
+            if (asp) {
+                const char* fim = strchr(asp + 1, '"');
+                if (fim && fim - asp - 1 < MAX_PATH) { memcpy(pasta, asp + 1, fim - asp - 1); pasta[fim - asp - 1] = 0; }
+            }
+            // 2a fonte: o proprio launcher que esta fechando agora (cura quem ja ficou com o
+            // registro errado por causa da atualizacao que instalava sempre no destino padrao)
+            if (!pasta[0]) EnumWindows(AcharPastaDoLauncher, (LPARAM)pasta);
+            if (!pasta[0]) { // 3a fonte: onde o desinstalador diz que a instalacao mora
+                HKEY k;
+                if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\TrokLauncher",
+                                  0, KEY_QUERY_VALUE, &k) == ERROR_SUCCESS) {
+                    DWORD tam = MAX_PATH - 1, tipo = 0;
+                    if (RegQueryValueExA(k, "InstallLocation", NULL, &tipo, (BYTE*)pasta, &tam) != ERROR_SUCCESS || tipo != REG_SZ)
+                        pasta[0] = 0;
+                    else pasta[tam < MAX_PATH ? tam : MAX_PATH - 1] = 0;
+                    RegCloseKey(k);
+                }
+            }
+            if (pasta[0]) { // so aceita se o launcher realmente estiver la
+                size_t L = strlen(pasta);
+                while (L > 3 && (pasta[L - 1] == '\\' || pasta[L - 1] == '/')) pasta[--L] = 0;
+                char exe[MAX_PATH];
+                _snprintf(exe, MAX_PATH - 1, "%s\\Trok Launcher.exe", pasta); exe[MAX_PATH - 1] = 0;
+                if (GetFileAttributesA(exe) != INVALID_FILE_ATTRIBUTES) {
+                    strncpy(gPastaDestino, pasta, MAX_PATH - 1);
+                    gPastaDestino[MAX_PATH - 1] = 0;
+                }
+            }
+        }
         Sleep(500); // o launcher que nos chamou esta fechando
         FecharLauncherEm(gPastaDestino);
         gArqAtual = 0;
