@@ -541,6 +541,8 @@ static char gModsUltimo[300] = "";   // guid do post mais recente (legado; a bol
 // Bolinha de post novo por DATA DE PUBLICACAO. Antes comparava o guid do primeiro item da
 // lista: bastava a ordem mudar (Mais vistos, post editado) pra bolinha acender de novo.
 static unsigned long long gModsUltimoOrdem = 0;   // publicacao mais nova que o usuario JA VIU (persistido)
+static unsigned long long gModsNotificadoOrdem = 0; // publicacao mais nova que JA VIROU BALAO (persistido).
+// Separado do de cima de proposito: a bolinha na aba fica ate a pessoa LER, o balao toca uma vez so.
 static unsigned long long gModsVistoAteOrdem = 0; // marco da visita ATUAL: posts mais novos que isso ganham bolinha
 // "Mais vistos": ordem do widget de posts populares do blog (o Blogger conta as visualizacoes;
 // o launcher so copia a ordem e casa com os posts do feed pela url)
@@ -564,6 +566,7 @@ static char gNotifPostTit[200] = "";                // titulo do post que acende
 static char gNotifPostDesc[240] = "";               // resumo do post (corpo do balao)
 static char gNotifPostImg[MAX_PATH] = "";           // capa ja baixada (vira o icone do balao)
 static char gNotifPostUrl[300] = "";                // clicar no balao abre este post
+static unsigned long long gNotifPostOrdem = 0;      // ordem do post do balao (marca como notificado ao disparar)
 static bool gFocarBusca = false;   // Ctrl+F: foca a busca da aba Servidores
 static bool gBoasVindas = false;   // 1a execucao sem SA-MP detectado: guia a pessoa
 static bool gSampOk = true;        // a data em uso tem samp.exe? (reavaliado a cada ~1s; esconde os botoes Jogar)
@@ -955,6 +958,9 @@ static void LerConfig() {
     GetPrivateProfileStringA("config", "mods_feed", gModsFeed, gModsFeed, sizeof(gModsFeed), gIniPath);
     GetPrivateProfileStringA("config", "mods_ultimo", gModsUltimo, gModsUltimo, sizeof(gModsUltimo), gIniPath);
     { char vo[32] = "0"; GetPrivateProfileStringA("config", "mods_ultimo_ordem", "0", vo, sizeof(vo), gIniPath); gModsUltimoOrdem = _strtoui64(vo, NULL, 10); }
+    { char vo[32] = "0"; GetPrivateProfileStringA("config", "mods_notificado_ordem", "0", vo, sizeof(vo), gIniPath); gModsNotificadoOrdem = _strtoui64(vo, NULL, 10); }
+    // ini de antes desta versao nao tem a chave: vale o que ja foi visto, para nao renotificar post velho
+    if (gModsNotificadoOrdem < gModsUltimoOrdem) gModsNotificadoOrdem = gModsUltimoOrdem;
     {
         int cc = GetPrivateProfileIntA("config", "accent_custom", 0x3A5EFC, gIniPath); // 0xBBGGRR (#FC5E3A)
         int r = cc & 255, g = (cc >> 8) & 255, b = (cc >> 16) & 255;
@@ -1161,6 +1167,7 @@ static void SalvarConfig() {
     WritePrivateProfileStringA("config", "mods_feed", gModsFeed, gIniPath);
     WritePrivateProfileStringA("config", "mods_ultimo", gModsUltimo, gIniPath);
     { char vo[32]; _snprintf(vo, sizeof(vo) - 1, "%I64u", gModsUltimoOrdem); vo[sizeof(vo) - 1] = 0; WritePrivateProfileStringA("config", "mods_ultimo_ordem", vo, gIniPath); }
+    { char vo[32]; _snprintf(vo, sizeof(vo) - 1, "%I64u", gModsNotificadoOrdem); vo[sizeof(vo) - 1] = 0; WritePrivateProfileStringA("config", "mods_notificado_ordem", vo, gIniPath); }
 }
 
 // ===================== imagens das datas (WIC - decodificador nativo do Windows) =====================
@@ -2666,7 +2673,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
         for (int k = 0; k < n; k++) if (gMods[k].ordem > maisNovo) { maisNovo = gMods[k].ordem; idxNovo = k; }
         if (maisNovo > gModsUltimoOrdem && gTela != 5) {
             gModsNovo = true;
-            if (gModsUltimoOrdem > 0) { // 1a leitura do feed nao e "post novo": nao notifica
+            if (gModsUltimoOrdem > 0 && maisNovo > gModsNotificadoOrdem) { // 1a leitura nao notifica; cada post toca UMA vez
                 strncpy(gNotifPostTit, gMods[idxNovo].titulo, sizeof(gNotifPostTit) - 1);
                 gNotifPostTit[sizeof(gNotifPostTit) - 1] = 0;
                 { // resumo curto: o balao do Windows corta no meio da palavra depois de ~3 linhas
@@ -2681,6 +2688,7 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                         strcpy(gNotifPostDesc + c, "...");
                     }
                 }
+                gNotifPostOrdem = maisNovo; // o loop principal grava isso ao disparar o balao
                 strncpy(gNotifPostUrl, gMods[idxNovo].url, sizeof(gNotifPostUrl) - 1); // clique no balao
                 gNotifPostUrl[sizeof(gNotifPostUrl) - 1] = 0;
                 gNotifPostImg[0] = 0;
@@ -4266,9 +4274,27 @@ static void Jogar() {
     char gtaExe[MAX_PATH];
     sprintf(gtaExe, "%s\\gta_sa.exe", gPastaGta);
     HKEY k;
-    if (RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, NULL, 0, KEY_SET_VALUE, NULL, &k, NULL) == ERROR_SUCCESS) {
-        RegSetValueExA(k, "gta_sa_exe", 0, REG_SZ, (BYTE*)gtaExe, (DWORD)strlen(gtaExe) + 1);
+    bool regOk = false;
+    if (RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE, NULL, &k, NULL) == ERROR_SUCCESS) {
+        regOk = (RegSetValueExA(k, "gta_sa_exe", 0, REG_SZ, (BYTE*)gtaExe, (DWORD)strlen(gtaExe) + 1) == ERROR_SUCCESS);
         RegCloseKey(k);
+    }
+    { // o jogo que abre e o do registro, nao o da pasta: registra o que REALMENTE ficou gravado.
+      // Sem isso, "abriu a data errada" vira adivinhacao - e ja virou uma vez.
+        char lido[MAX_PATH] = "";
+        DWORD tam = sizeof(lido), tipo = 0;
+        HKEY kq;
+        if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, KEY_QUERY_VALUE, &kq) == ERROR_SUCCESS) {
+            if (RegQueryValueExA(kq, "gta_sa_exe", NULL, &tipo, (BYTE*)lido, &tam) != ERROR_SUCCESS || tipo != REG_SZ) lido[0] = 0;
+            RegCloseKey(kq);
+        }
+        lido[MAX_PATH - 1] = 0;
+        char d[MAX_PATH * 2 + 200];
+        _snprintf(d, sizeof(d) - 1, "jogar: data %d \"%s\" | pasta %s | registro %s | lido de volta: %s",
+                  gDataSel, (gDataSel >= 0 && gDataSel < gNumDatas) ? gDatas[gDataSel].nome : "?",
+                  gPastaGta, regOk ? "gravado" : "FALHOU AO GRAVAR", lido[0] ? lido : "(vazio)");
+        d[sizeof(d) - 1] = 0;
+        RegistrarNoLog(d);
     }
     char sampExe[MAX_PATH];
     sprintf(sampExe, "%s\\samp.exe", gPastaGta);
@@ -4414,6 +4440,9 @@ static void ImagemCapa(ImDrawList* d, IDirect3DTexture9* tex, ImVec2 a, ImVec2 b
 static bool BotaoSec(const char* rotulo, ImVec2 tam, ImU32 cor = 0) {
     ImGui::PushID(rotulo);
     bool cl = ImGui::InvisibleButton("##sec", tam);
+    // mao aqui dentro, e nao so no gancho global do fim do frame: dentro do dropdown de contas o
+    // gancho fica desligado (o card por baixo tambem esta "hovered"), e o "+ Adicionar conta" ficava de seta
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     ImGui::PopID();
     ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
     bool hov = ImGui::IsItemHovered();
@@ -4504,6 +4533,7 @@ static void BotaoJanela(ImDrawList* dl, HWND hwnd) {
         ImVec2 mp = ioJ.MousePos;
         bool sobreMin = mp.x >= ds.x - 76 && mp.x <= ds.x - 46 && mp.y >= 10 && mp.y <= 36;
         bool sobreX   = mp.x >= ds.x - 42 && mp.x <= ds.x - 12 && mp.y >= 10 && mp.y <= 36;
+        if (sobreMin || sobreX) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         ImDrawList* fgJ = ImGui::GetForegroundDrawList();
         if (sobreMin) {
             fgJ->AddRectFilled(ImVec2(ds.x - 76, 10), ImVec2(ds.x - 46, 36), Cinza(255, 26), 6);
@@ -4979,6 +5009,7 @@ static void DesenhaUI(HWND hwnd) {
             // "..." do card: editar apelido/imagem/remover
             ImVec2 ma(cb.x - 36, ca.y + 8), mb(cb.x - 10, ca.y + 28);
             mhc = ImGui::IsMouseHoveringRect(ma, mb);
+            if (mhc && !gMouseNoDrop) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
             DesenhaReticencias(rl, ma, mb, mhc);
             if (mhc && !gMouseNoDrop) ImGui::SetTooltip(T("Editar servidor"));
             if (mhc && !gMouseNoDrop && ImGui::IsMouseClicked(0)) {
@@ -5531,10 +5562,12 @@ static void DesenhaUI(HWND hwnd) {
             // imune a briga de itens sobrepostos do imgui
             ImVec2 ma(cb.x - 38, ca.y + 8), mb(cb.x - 8, ca.y + 32);
             bool mh = ImGui::IsMouseHoveringRect(ma, mb);
+            if (mh && !gMouseNoDrop) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
             DesenhaReticencias(wl, ma, mb, mh);
             // atalho: abrir a pasta raiz da data no explorador
             ImVec2 fa2(cb.x - 72, ca.y + 8), fb2(cb.x - 44, ca.y + 32);
             bool fh2 = ImGui::IsMouseHoveringRect(fa2, fb2);
+            if (fh2 && !gMouseNoDrop) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
             if (fh2) wl->AddRectFilled(fa2, fb2, Cinza(255, 22), 7);
             {
                 float fcx2 = (fa2.x + fb2.x) * 0.5f, fcy2 = (fa2.y + fb2.y) * 0.5f;
@@ -7408,6 +7441,7 @@ static void DesenhaUI(HWND hwnd) {
                     bool hovL = ImGui::IsItemHovered();
                     ImVec2 ma(lb.x - 34, la.y + 16), mb(lb.x - 8, la.y + 38);
                     bool mh = ImGui::IsMouseHoveringRect(ma, mb);
+                    if (hovL || mh) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
                     if (hovL && !mh) ml->AddRectFilled(la, lb, Cinza(255, 14), 10);
                     if (i == gPerfilSel) ml->AddRect(la, lb, ComAlpha(AC.cor, 0.85f), 10, 0, 1.6f);
                     DesenhaAvatar(ml, ImVec2(la.x + 8, la.y + 8), ImVec2(la.x + 46, la.y + 46),
@@ -8051,6 +8085,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
         gBoasVindas = true; gEsperandoPasta = 0; // amostra: sempre simula PC sem SA-MP
 #endif
         gSampOk = (est == PASTA_PRONTA); // sem samp.exe, os botoes Jogar somem ate apontar um
+        { // estado com que o launcher NASCEU: compare com a linha "jogar:" para ver se algo mudou no meio
+            char d[MAX_PATH + 160];
+            _snprintf(d, sizeof(d) - 1, "arranque: data %d \"%s\" | pasta %s | %s", gDataSel,
+                      (gDataSel >= 0 && gDataSel < gNumDatas) ? gDatas[gDataSel].nome : "?", gPastaGta,
+                      est == PASTA_PRONTA ? "pasta pronta" : (est == PASTA_SEM_SAMP ? "pasta sem samp.exe" : "pasta nao responde"));
+            d[sizeof(d) - 1] = 0;
+            RegistrarNoLog(d);
+        }
         if (gBoasVindas) IniciarLocalizarDatas(true); // 1a abertura sem SA-MP: ja sai procurando as datas sozinho
 #ifdef TROK_TESTE_AVISO_LIMITE // exe de AMOSTRA: mostra o aviso do limite de datas pra avaliar o texto
         { for (int i = gNumDatas; i < MAX_DATAS; i++) { gDatas[i] = gDatas[0]; gDatas[i].tex = NULL; _snprintf(gDatas[i].nome, sizeof(gDatas[i].nome) - 1, "Data de teste %d", i + 1); }
@@ -8286,8 +8328,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
             }
             // balao na bandeja: aqui em cima, ANTES do "escondido nao renderiza" - quem vive na
             // bandeja e justamente quem precisa do aviso
-            if (InterlockedExchange(&gNotifPost, 0)) // titulo = o do post; corpo = o resumo; icone = a capa
+            if (InterlockedExchange(&gNotifPost, 0)) { // titulo = o do post; corpo = o resumo; icone = a capa
                 NotificarWindows(gNotifPostTit, gNotifPostDesc[0] ? gNotifPostDesc : T("Post novo no TrokMods"), gNotifPostImg);
+                if (gNotifPostOrdem > gModsNotificadoOrdem) { gModsNotificadoOrdem = gNotifPostOrdem; SalvarConfig(); }
+            }
         }
         if (!IsWindowVisible(hwnd)) { Sleep(60); continue; } // escondido na bandeja: nao renderiza
         // render preguicoso: parado (sem input ha 1,5s e sem animacao correndo), cai p/ ~12 fps
@@ -8336,6 +8380,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
         io.DisplaySize = ImVec2(jw / gEscala, jh / gEscala); // a UI enxerga o tamanho LOGICO
         ImGui::NewFrame();
         DesenhaUI(hwnd);
+        { // partes clicaveis recebem o cursor de MAO. "Item hovered e o cursor ainda e a seta" = botao,
+          // card, link ou toggle; campo de texto ja pediu o I-beam e continua com ele. Com o dropdown
+          // de contas aberto, o card por baixo dele continua "hovered" pro imgui: ai a mao vem so
+          // das linhas do proprio dropdown, por ponto (hovL), nao daqui.
+            if (!gMouseNoDrop && ImGui::IsAnyItemHovered() && ImGui::GetMouseCursor() == ImGuiMouseCursor_Arrow)
+                ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        }
         ImGui::EndFrame();
         gDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(10, 10, 10, 255), 1.0f, 0);
         if (gDev->BeginScene() >= 0) {

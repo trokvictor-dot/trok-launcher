@@ -349,6 +349,7 @@ static void RectGradV(ImDrawList* dl, ImVec2 a, ImVec2 b, ImU32 topo, ImU32 base
 static bool BotaoSec(const char* rotulo, ImVec2 tam) {
     ImGui::PushID(rotulo);
     bool cl = ImGui::InvisibleButton("##sec", tam);
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); // parte clicavel: cursor de mao
     ImGui::PopID();
     ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
     bool hov = ImGui::IsItemHovered();
@@ -364,6 +365,7 @@ static bool BotaoSec(const char* rotulo, ImVec2 tam) {
 static bool BotaoPrimario(const char* rotulo, ImVec2 tam) {
     ImGui::PushID(rotulo);
     bool cl = ImGui::InvisibleButton("##pri", tam);
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     ImGui::PopID();
     ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
     bool hov = ImGui::IsItemHovered();
@@ -378,6 +380,7 @@ static bool BotaoPrimario(const char* rotulo, ImVec2 tam) {
 static bool LinhaCheck(const char* rot, bool* v, float w) {
     ImGui::PushID(rot);
     bool cl = ImGui::InvisibleButton("##lc", ImVec2(w, S(32)));
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
     ImGui::PopID();
     if (cl) *v = !*v;
     ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
@@ -549,6 +552,7 @@ static void DesenhaUI(HWND hwnd) {
         gRodando = false;
     {
         ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+        if (ImGui::IsItemHovered() && gEtapa != ET_INSTALANDO && gEtapa != ET_REMOVENDO) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         if (ImGui::IsItemHovered()) dl->AddRectFilled(a, b, IM_COL32(200, 60, 54, 230), S(6));
         dl->AddLine(ImVec2(a.x + S(10), a.y + S(8)), ImVec2(b.x - S(10), b.y - S(8)), Cinza(220), S(1.6f));
         dl->AddLine(ImVec2(a.x + S(10), b.y - S(8)), ImVec2(b.x - S(10), a.y + S(8)), Cinza(220), S(1.6f));
@@ -574,6 +578,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::SetCursorScreenPos(ImVec2(px + (k % 2) * (wOp + S(10)), S(184) + (k / 2) * S(54)));
             char idi[12]; sprintf(idi, "##idi%d", k);
             bool cli = ImGui::InvisibleButton(idi, ImVec2(wOp, S(46)));
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
             ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
             bool sel = (gLangI == k), hov = ImGui::IsItemHovered();
             dl->AddRectFilled(a, b, sel ? Cinza(30) : Cinza(hov ? 24 : 18), S(10));
@@ -717,6 +722,7 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::SetCursorScreenPos(ImVec2(px, ds.y - S(96)));
         ImGui::PushID("rm");
         bool rm = ImGui::InvisibleButton("##rm", ImVec2(S(180), S(52)));
+        if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         ImGui::PopID();
         {
             ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
