@@ -1,4 +1,4 @@
-v1.10
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.10/TrokLauncher-Setup.exe
-Quem guarda as datas no OneDrive, em HD externo ou em pasta de rede podia abrir o launcher logo depois de ligar o PC e cair em outra data, que ainda ficava gravada assim. Agora ele espera a pasta responder antes de concluir qualquer coisa.
-sha256=98b23ef7665f39851c2f8b4a0e5a947e750ee791df910b61e59d91a85fe7e8c4
+v1.11
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.11/TrokLauncher-Setup.exe
+O cursor vira a maozinha em tudo que da para clicar, no launcher e no instalador. E o aviso de post novo no Windows agora aparece uma vez so por post - antes ele repetia toda vez que o launcher abria, pra quem nao tinha aberto a aba TrokMods.
+sha256=88d8217330b1628f93f7940bfa1087fa16619196515ca164180c29ee0cf65193
