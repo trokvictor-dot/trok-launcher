@@ -1,4 +1,4 @@
-v1.11
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.11/TrokLauncher-Setup.exe
-O cursor vira a maozinha em tudo que da para clicar, no launcher e no instalador. E o aviso de post novo no Windows agora aparece uma vez so por post - antes ele repetia toda vez que o launcher abria, pra quem nao tinha aberto a aba TrokMods.
-sha256=88d8217330b1628f93f7940bfa1087fa16619196515ca164180c29ee0cf65193
+v1.12
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.12/TrokLauncher-Setup.exe
+Visual novo com a identidade do site TrokMods: cores, fonte e o menu lateral de vidro. Na Home as setas do teclado trocam o servidor, a aba TrokMods mostra 4 posts por linha e o "Mais vistos" voltou. Instalador mais seguro, com menos alarme falso de antivirus, e varias correcoes.
+sha256=2793e17a42c6cb6ac9aa2a2da610717321f5b62ec7f049f0888dc87d5876222e
