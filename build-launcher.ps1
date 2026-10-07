@@ -8,6 +8,7 @@ $dir = $PSScriptRoot
 $obj = Join-Path $dir 'build\launcher'
 New-Item -ItemType Directory -Force $obj | Out-Null
 # /GS LIGADO (protecao de pilha): seguranca real e menos falso positivo de antivirus
+# /DEPENDENTLOADFLAG:0x800 = as DLLs importadas (d3d9, dwmapi...) so vem do System32: dll plantada ao lado do exe nao carrega
 $flags = if ($Simbolos) { '/Od /Zi' } else { '/O2' }
 if ($Define) { $flags += " /D$Define" } # ex.: TROK_TESTE_SEM_SAMP (exes de amostra)
 $fontes = @(
@@ -27,7 +28,7 @@ $cmd = @"
 call "$vcvars" >nul 2>&1
 if errorlevel 1 exit /b 1
 $(if ($res) { "rc /nologo /fo $res `"$dir\TrokLauncher.rc`"`r`nif errorlevel 1 exit /b 1" })
-cl /nologo /utf-8 /MT $flags /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista $res /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /OPT:REF /OPT:ICF /MAP:"$obj\TrokLauncher.map" /MANIFEST:EMBED /MANIFESTINPUT:"$dir\TrokLauncher.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+cl /nologo /utf-8 /MT $flags /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista $res /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /DEPENDENTLOADFLAG:0x800 /OPT:REF /OPT:ICF /MAP:"$obj\TrokLauncher.map" /MANIFEST:EMBED /MANIFESTINPUT:"$dir\TrokLauncher.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 "@
 $bat = Join-Path $env:TEMP ("build-launcher-" + [guid]::NewGuid().ToString('N') + '.bat')
 Set-Content -Path $bat -Value $cmd -Encoding ASCII

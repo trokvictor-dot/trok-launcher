@@ -46,11 +46,14 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JANELA_W 1420
 #define JANELA_H 800
+// medidas do mockup do launcher (1280 x 720) passadas para os 1420 logicos: x 1,11
+#define RAIL_W 71.0f   // trilho de icones da esquerda (64 no mockup)
+#define TOPO_H 71.0f   // faixa de cima: atualizacao, conta e janela (64 no mockup)
 #define MAX_SERVIDORES 16
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.11"
+#define VERSAO "v1.12"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -60,6 +63,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #else
 #define URL_VERSAO "https://raw.githubusercontent.com/trokvictor-dot/trok-launcher/main/versao.txt"
 #endif
+// o setup novo so e baixado daqui (as releases do nosso repositorio): link de outro lugar no versao.txt e recusado
+#define URL_RELEASES "https://github.com/trokvictor-dot/trok-launcher/releases/download/"
 
 // Discord Rich Presence: crie um Application em discord.com/developers (gratis),
 // cole o Application ID aqui. "0" = desligado.
@@ -73,6 +78,23 @@ static int gIdiomaCfg = 0; // 0 automatico (Windows), 1 pt, 2 en, 3 es, 4 ru, 5 
 static int gLang = 0; // efetivo: 0 pt-BR, 1 en, 2 es, 3 ru, 4 id, 5 tr
 struct Traducao { const char* t[6]; }; // pt, en, es, ru, id, tr (coluna vazia cai pro ingles)
 static const Traducao TRADUCOES[] = {
+    { { "Lista", "List", "Lista", "Список", "Daftar", "Liste" } },
+    { { "Tutorial", "Tutorial", "Tutorial", "Гайд", "Tutorial", "Rehber" } },
+    { { "Fix", "Fix", "Fix", "Фикс", "Fix", "Düzeltme" } },
+    { { "Mod", "Mod", "Mod", "Мод", "Mod", "Mod" } },
+    { { "Sobre", "About", "Acerca de", "О программе", "Tentang", "Hakkında" } },
+    { { "Nova atualização", "New update", "Nueva actualización", "Новое обновление", "Pembaruan baru", "Yeni güncelleme" } },
+    { { "Bem-vindo ao Trok Launcher", "Welcome to Trok Launcher", "Bienvenido a Trok Launcher", "Добро пожаловать в Trok Launcher", "Selamat datang di Trok Launcher", "Trok Launcher'a hoş geldiniz" } },
+    { { "Adicionar pelo IP", "Add by IP", "Añadir por IP", "Добавить по IP", "Tambah via IP", "IP ile ekle" } },
+    { { "Servidor com senha", "Passworded server", "Servidor con contraseña", "Сервер с паролем", "Server berpassword", "Şifreli sunucu" } },
+    { { " jogadores", " players", " jugadores", " игроков", " pemain", " oyuncu" } },
+    { { " de ping", " ping", " de ping", " пинг", " ping", " ping" } },
+    { { "SEM RESPOSTA", "NO RESPONSE", "SIN RESPUESTA", "НЕТ ОТВЕТА", "TIDAK MERESPONS", "YANIT YOK" } },
+    { { "Todos os servidores", "All servers", "Todos los servidores", "Все серверы", "Semua server", "Tüm sunucular" } },
+    { { "Abrir o menu lateral", "Open the side menu", "Abrir el menú lateral", "Открыть боковое меню", "Buka menu samping", "Yan menüyü aç" } },
+    { { "consultando servidor...", "querying server...", "consultando servidor...", "опрос сервера...", "memeriksa server...", "sunucu sorgulanıyor..." } },
+    { { "Nosso mod", "Our mod", "Nuestro mod", "Наш мод", "Mod kami", "Modumuz" } },
+    { { "Nosso app", "Our app", "Nuestra app", "Наше приложение", "Aplikasi kami", "Uygulamamız" } },
     { { "Selecionar várias (ou Ctrl+clique; Ctrl+A marca todas)", "Select several (or Ctrl+click; Ctrl+A selects all)", "Seleccionar varias (o Ctrl+clic; Ctrl+A marca todas)", "Выбрать несколько (или Ctrl+клик; Ctrl+A — все)", "Pilih beberapa (atau Ctrl+klik; Ctrl+A pilih semua)", "Birden çok seç (veya Ctrl+tık; Ctrl+A tümünü seçer)" } },
     { { "%d selecionadas", "%d selected", "%d seleccionadas", "выбрано: %d", "%d dipilih", "%d seçildi" } },
     { { "Excluir %d", "Delete %d", "Borrar %d", "Удалить %d", "Hapus %d", "%d öğeyi sil" } },
@@ -223,7 +245,7 @@ static const Traducao TRADUCOES[] = {
     { { "O launcher abre já escondido, só o ícone perto do relógio", "The launcher opens hidden, only the icon near the clock", "El launcher abre oculto, solo el icono junto al reloj", "Лаунчер запускается скрытым, только значок у часов", "Launcher terbuka tersembunyi, hanya ikon dekat jam", "Launcher gizli açılır, yalnızca saat yanında simge" } },
     { { "O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods.", "The launcher is free and always will be. Questions, ideas and bugs: on the TrokMods Discord.", "El launcher es gratis y siempre lo será. Dudas, ideas y errores: en el Discord de TrokMods.", "Лаунчер бесплатный и останется таким. Вопросы, идеи и баги — в Discord TrokMods.", "Launcher ini gratis dan akan selalu gratis. Pertanyaan, saran, dan bug: di Discord TrokMods.", "Launcher ücretsizdir ve hep öyle kalacak. Sorular, öneriler ve hatalar: TrokMods Discord'unda." } },
     { { "O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho.", "The server goes to your favorites and the launcher fetches its name and mode by itself.", "El servidor entra a favoritos y el launcher obtiene solo el nombre y el modo.", "Сервер попадёт в избранное, а лаунчер сам получит название и режим.", "Server masuk ke favorit dan launcher mengambil nama dan mode sendiri.", "Sunucu favorilere eklenir; adı ve modu launcher kendi bulur." } },
-    { { "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o samp.exe original da instalacao que voce escolher.", "Trok Launcher is a modern, free SA-MP launcher: accounts with avatars, several game installs, favorites with covers, a gallery of your screenshots and automatic updates. It does NOT replace any game file - it opens the original samp.exe of the install you choose.", "Trok Launcher es un launcher de SA-MP moderno y gratis: cuentas con avatar, varias instalaciones del juego, favoritos con portada, galería de tus capturas y actualización automática. NO reemplaza ningún archivo del juego: abre el samp.exe original de la instalación que elijas.", "Trok Launcher — современный бесплатный лаунчер SA-MP: аккаунты с аватаром, несколько установок игры, избранное с обложками, галерея скриншотов и автообновление. Он НЕ заменяет файлы игры — запускает оригинальный samp.exe выбранной установки.", "Trok Launcher adalah launcher SA-MP modern dan gratis: akun dengan avatar, beberapa instalasi game, favorit dengan sampul, galeri tangkapan layar, dan pembaruan otomatis. TIDAK mengganti file game apa pun - membuka samp.exe asli dari instalasi yang kamu pilih.", "Trok Launcher modern ve ücretsiz bir SA-MP launcher'ıdır: avatarlı hesaplar, birden çok oyun kurulumu, kapaklı favoriler, ekran görüntüsü galerisi ve otomatik güncelleme. Hiçbir oyun dosyasını DEĞİŞTİRMEZ; seçtiğiniz kurulumun orijinal samp.exe'sini açar." } },
+    { { "O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o samp.exe original da instalação que você escolher.", "Trok Launcher is a modern, free SA-MP launcher: accounts with avatars, several game installs, favorites with covers, a gallery of your screenshots and automatic updates. It does NOT replace any game file - it opens the original samp.exe of the install you choose.", "Trok Launcher es un launcher de SA-MP moderno y gratis: cuentas con avatar, varias instalaciones del juego, favoritos con portada, galería de tus capturas y actualización automática. NO reemplaza ningún archivo del juego: abre el samp.exe original de la instalación que elijas.", "Trok Launcher — современный бесплатный лаунчер SA-MP: аккаунты с аватаром, несколько установок игры, избранное с обложками, галерея скриншотов и автообновление. Он НЕ заменяет файлы игры — запускает оригинальный samp.exe выбранной установки.", "Trok Launcher adalah launcher SA-MP modern dan gratis: akun dengan avatar, beberapa instalasi game, favorit dengan sampul, galeri tangkapan layar, dan pembaruan otomatis. TIDAK mengganti file game apa pun - membuka samp.exe asli dari instalasi yang kamu pilih.", "Trok Launcher modern ve ücretsiz bir SA-MP launcher'ıdır: avatarlı hesaplar, birden çok oyun kurulumu, kapaklı favoriler, ekran görüntüsü galerisi ve otomatik güncelleme. Hiçbir oyun dosyasını DEĞİŞTİRMEZ; seçtiğiniz kurulumun orijinal samp.exe'sini açar." } },
     { { "O Windows nao conseguiu abrir o samp.exe desta data.", "Windows couldn't open this install's samp.exe.", "Windows no pudo abrir el samp.exe de esta instalación.", "Windows не смог открыть samp.exe этой установки.", "Windows tidak bisa membuka samp.exe instalasi ini.", "Windows bu kurulumun samp.exe dosyasını açamadı." } },
     { { "O X esconde o launcher perto do relógio em vez de encerrar de vez", "The X hides the launcher near the clock instead of quitting", "La X oculta el launcher junto al reloj en vez de cerrarlo", "Крестик сворачивает лаунчер к часам вместо выхода", "Tombol X menyembunyikan launcher di dekat jam, bukan menutup", "X, kapatmak yerine launcher'ı saatin yanına gizler" } },
     { { "Ocultar cheios", "Hide full", "Ocultar llenos", "Скрыть полные", "Sembunyikan penuh", "Doluları gizle" } },
@@ -526,6 +548,9 @@ struct ModPost {
     // SEM CAPA, calado. Agora sobra folga pra nome longo, e o que nao couber vai pro crash.log.
     char imgUrl[512];        // de onde baixar a capa (so quando o card aparece na tela)
     char guid[96];           // id estavel do post no Blogger (a URL muda se o titulo mudar)
+    char rotulo[48];         // rotulo curto do cartao, a regra do site: Nosso app, Nosso mod, Lista, Tutorial, Fix, categoria
+    char dataCurta[24];      // "06 out 2026", como nos cartoes do site
+    unsigned char nosso;     // 1 = nosso (mod ou app): o rotulo sai na cor de destaque
     unsigned long long ordem; // AAAAMMDDhhmm da publicacao (UTC): "mais novo" sem depender da ordem da lista
 };
 static ModPost gMods[MAX_MODS];
@@ -559,6 +584,10 @@ static char gRPServidor[96] = "";
 static long long gRPDesde = 0;
 static HWND gHwnd = NULL;
 static float gEscala = 1.0f; // janela fisica / 1420 logico: a UI inteira escala junto
+static bool gModoFoto = false; // exe de teste fotografando as telas: nunca fecha nem abre jogo
+#ifdef TROK_TESTE_LIVRE
+static int gFotoAbrir = 0; // modo foto: 1 = menu de idioma, 2 = conta do servidor, 3 = data do servidor
+#endif
 
 static bool gNotifWin = true;      // avisa perto do relogio (atualizacao nova, post novo)
 static volatile LONG gNotifPost = 0; // pedido vindo da thread do feed; o loop dispara o balao
@@ -672,6 +701,29 @@ static ImFont *gFtPostTit;                // titulo do post na aba Mods (mesmo p
 static ImFont *gFtMiniLeve;              // Segoe UI Regular pequena (texto discreto, tipo a url do link)
 static ImFont *gFtBotaoPost;              // rotulo do botao ABRIR O POST (peso 800 do blog)
 static ImFont *gFtIco = NULL, *gFtIcoG = NULL; // fonte de icones LUCIDE (embutida no exe)
+static ImFont *gFtTitulo = NULL;          // titulo das telas e dos paineis (Montserrat Bold 26)
+static ImFont *gFtMicro = NULL;           // rotulo maiusculo com espaco entre as letras (TODOS OS POSTS do site)
+
+// ===================== identidade do site (trokmods.blogspot.com) =====================
+// Os mesmos valores do :root do tema do blog (06/10/2026): o launcher e o site falam a mesma lingua.
+namespace Tk {
+    static const ImU32 Fundo    = IM_COL32( 11,  11,  12, 255); // --fundo
+    static const ImU32 Sup      = IM_COL32( 17,  17,  19, 255); // --sup (paineis, campos)
+    static const ImU32 Sup2     = IM_COL32( 22,  22,  24, 255); // --sup-2 (hover de linha e de cartao)
+    static const ImU32 Ativo    = IM_COL32( 31,  31,  34, 255); // --ativo
+    static const ImU32 Linha    = IM_COL32(255, 255, 255,  23); // --linha (.09)
+    static const ImU32 Linha2   = IM_COL32(255, 255, 255,  38); // --linha-2 (.15)
+    static const ImU32 Linha3   = IM_COL32(255, 255, 255,  61); // --linha-3 (.24)
+    static const ImU32 Texto    = IM_COL32(242, 242, 243, 255); // --texto
+    static const ImU32 Texto2   = IM_COL32(201, 201, 206, 255); // --texto-2
+    static const ImU32 Texto3   = IM_COL32(166, 166, 172, 255); // --texto-3
+    static const ImU32 Texto4   = IM_COL32(129, 129, 136, 255); // --texto-4
+    static const ImU32 Verde    = IM_COL32( 70, 199, 116, 255); // --verde
+    static const ImU32 Vermelho = IM_COL32(240, 106,  95, 255); // --vermelho
+    static const ImU32 Ambar    = IM_COL32(242, 163,  58, 255); // com senha (o amarelo do mockup)
+    static const ImU32 SobreAcento = IM_COL32(23, 10, 5, 255);  // --sobre-laranja (texto em cima do laranja)
+    static const ImU32 Realce   = IM_COL32( 26,  26,  29, 255); // hover das linhas dos menus (.nav-col li a:hover)
+}
 
 // icones LUCIDE (codepoints da release 1.39.0) - adeus PathLineTo fragmentado
 #define I_CASA         u8"\uE0F5" // house
@@ -702,6 +754,17 @@ static void Icone(ImDrawList* d, ImVec2 centro, const char* gl, ImU32 cor, float
 
 // ===================== util =====================
 
+// DLL do Windows carregada pelo caminho do System32: uma dll de mesmo nome largada ao lado do exe
+// (Downloads, pasta do jogo) nunca entra no lugar dela
+static HMODULE CarregarDllDoSistema(const char* nome) {
+    char cam[MAX_PATH];
+    UINT n = GetSystemDirectoryA(cam, MAX_PATH);
+    if (!n || n + strlen(nome) + 2 >= MAX_PATH) return NULL;
+    _snprintf(cam + n, MAX_PATH - n - 1, "\\%s", nome);
+    cam[MAX_PATH - 1] = 0;
+    return LoadLibraryA(cam);
+}
+
 static ImU32 ComAlpha(ImU32 c, float a) {
     return (c & 0x00FFFFFF) | ((ImU32)(a * 255.0f) << 24);
 }
@@ -709,12 +772,21 @@ static ImU32 Cinza(int v, int a = 255) { return IM_COL32(v, v, v, a); }
 
 // so endereco web vai pro navegador: file://, javascript: e afins vindos de ini, backup ou feed nao abrem nada
 static bool UrlWebOk(const char* u) { return u && (_strnicmp(u, "http://", 7) == 0 || _strnicmp(u, "https://", 8) == 0); }
+// "abrir a pasta" so abre PASTA: um caminho vindo do ini (ou de um backup importado) apontando para um
+// programa nao pode virar "executar" pelo ShellExecute
+static void AbrirPasta(const char* p) {
+    if (!p || !p[0]) return;
+    DWORD a = GetFileAttributesA(p);
+    if (a == INVALID_FILE_ATTRIBUTES || !(a & FILE_ATTRIBUTE_DIRECTORY)) return;
+    ShellExecuteA(NULL, "open", p, NULL, NULL, SW_SHOWNORMAL);
+}
 
 // texto sobre a cor de destaque: escuro em cor clara, branco em cor escura (contraste sempre)
 static ImU32 TextoSobreAccent(ImU32 c) {
+    // como no site: texto quase preto (#170A05) em cima do laranja e das cores claras; branco nas escuras
     int r = c & 255, g = (c >> 8) & 255, b = (c >> 16) & 255;
     int lum = (r * 299 + g * 587 + b * 114) / 1000;
-    return lum > 150 ? Cinza(12) : Cinza(255);
+    return lum > 125 ? Tk::SobreAcento : Cinza(255);
 }
 
 // brilho suave na cor de destaque ao redor de um retangulo (halo do botao Jogar)
@@ -741,7 +813,7 @@ static void SombraSuave(ImDrawList* d, ImVec2 a, ImVec2 b, float esp, int forca)
 
 // "..." padrao do app: sem fundo chapado - sombra espalhada e sutil sob os pontos p/ leitura
 static void DesenhaReticencias(ImDrawList* d, ImVec2 ma, ImVec2 mb, bool hov) {
-    if (hov) d->AddRectFilled(ma, mb, Cinza(255, 22), 7);
+    if (hov) d->AddRectFilled(ma, mb, Cinza(255, 16), 8);
     float cx = (ma.x + mb.x) * 0.5f, cy = (ma.y + mb.y) * 0.5f;
     for (int pt = -1; pt <= 1; pt++) {
         ImVec2 c(cx + pt * 6.5f, cy);
@@ -758,10 +830,9 @@ static void Dica(const char* t) {
 
 // bolinha de status: verde online, amarela com senha, vermelha sem resposta
 // (com texto no hover - cor sozinha nao comunica p/ daltonicos)
-static void BolaStatus(ImDrawList* d, ImVec2 c, int ping, int senha) {
-    ImU32 cor = (ping < 0) ? IM_COL32(226, 82, 79, 235)
-              : (senha ? IM_COL32(238, 200, 80, 235) : IM_COL32(96, 214, 116, 235));
-    d->AddCircleFilled(c, 3.0f, cor, 20);
+static void BolaStatus(ImDrawList* d, ImVec2 c, int ping, int senha, float raio = 3.5f) {
+    ImU32 cor = (ping < 0) ? Tk::Texto4 : (senha ? Tk::Ambar : Tk::Verde); // as cores do site
+    d->AddCircleFilled(c, raio, cor, 20);
     if (ImGui::IsMouseHoveringRect(ImVec2(c.x - 7, c.y - 7), ImVec2(c.x + 7, c.y + 7)))
         ImGui::SetTooltip("%s", ping < 0 ? T("sem resposta") : (senha ? T("online, com senha") : "online"));
 }
@@ -783,10 +854,10 @@ static int CmpNatural(const char* a, const char* b) {
 }
 
 static ImU32 CorPing(int ping) {
-    if (ping < 0)   return Cinza(90);
-    if (ping < 70)  return Cinza(255);
-    if (ping < 110) return Cinza(171);
-    return Cinza(110);
+    if (ping < 0)   return Tk::Texto4;
+    if (ping < 70)  return Tk::Texto;
+    if (ping < 110) return Tk::Texto2;
+    return Tk::Texto3;
 }
 
 static void LerNickRegistro();
@@ -1230,6 +1301,107 @@ static IDirect3DTexture9* CarregarImagem(LPDIRECT3DDEVICE9 dev, const char* cami
 // logo do TrokMods embutida no exe (recurso RCDATA) - o simbolo da sidebar
 static IDirect3DTexture9* gLogoTrok = NULL;
 static IDirect3DTexture9* gLogoBlogger = NULL; // marca do Blogger em silhueta (da pra tingir)
+static IDirect3DTexture9* gLogoDiscord = NULL; // o logo oficial do Discord, silhueta branca (da pra tingir)
+
+// ---- o destaque do INICIO do site (.destaque-fundo) no fundo da Home ----
+// granulado: o --grao do site (feTurbulence 180x180 em "mix-blend-mode: overlay"). Na parte escura o overlay
+// e 2 x grao x fundo, entao a textura guarda um cinza em volta de 0.5 e o desenho usa blend DESTCOLOR/SRCCOLOR
+// (resultado = fundo x 2 x textura). Trama: radial-gradient(rgba(0,0,0,.2) 1px, transparent 1.3px) a cada 3 px
+static IDirect3DTexture9* gTexGrao = NULL;
+static IDirect3DTexture9* gTexPontos = NULL;
+static void CbBlendDobroMultiplica(const ImDrawList*, const ImDrawCmd*) {
+    gDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
+    gDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+}
+static void CriarTexturasDoDestaque(LPDIRECT3DDEVICE9 dev) {
+    const int G = 180;
+    if (SUCCEEDED(dev->CreateTexture(G, G, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &gTexGrao, NULL))) {
+        static float base[180 * 180];
+        unsigned int s = 0x9E3779B9u; // semente fixa: o mesmo grao em toda abertura
+        for (int i = 0; i < G * G; i++) { s ^= s << 13; s ^= s >> 17; s ^= s << 5; base[i] = (s & 0xFFFF) / 65535.0f; }
+        D3DLOCKED_RECT lr;
+        if (SUCCEEDED(gTexGrao->LockRect(0, &lr, NULL, 0))) {
+            for (int y = 0; y < G; y++) {
+                DWORD* lin = (DWORD*)((BYTE*)lr.pBits + y * lr.Pitch);
+                for (int x = 0; x < G; x++) {
+                    // um tico de desfoque (o fractalNoise e mais macio que ruido puro); media 0.5, desvio ~0.16
+                    float v = base[y * G + x] * 0.5f + 0.125f * (base[y * G + (x + 1) % G] + base[y * G + (x + G - 1) % G] +
+                                                               base[((y + 1) % G) * G + x] + base[((y + G - 1) % G) * G + x]);
+                    // o grao do site mexe ~4% no brilho (opacidade .4 do svg x alfa do proprio ruido): desvio de 4.5% aqui
+                    // 2%: o 4.5% do site ficou forte demais no launcher ("esse ruido ta muito forte", 06/10)
+                    float g = 0.5f + 0.5f * 0.02f * ((v - 0.5f) / 0.16f);
+                    int gi = (int)(g * 255.0f + 0.5f);
+                    if (gi < 0) gi = 0;
+                    if (gi > 255) gi = 255;
+                    lin[x] = 0xFF000000u | ((DWORD)gi << 16) | ((DWORD)gi << 8) | (DWORD)gi;
+                }
+            }
+            gTexGrao->UnlockRect(0);
+        }
+    } else gTexGrao = NULL;
+    if (SUCCEEDED(dev->CreateTexture(3, 3, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &gTexPontos, NULL))) {
+        D3DLOCKED_RECT lr;
+        if (SUCCEEDED(gTexPontos->LockRect(0, &lr, NULL, 0))) {
+            for (int y = 0; y < 3; y++) {
+                DWORD* lin = (DWORD*)((BYTE*)lr.pBits + y * lr.Pitch);
+                for (int x = 0; x < 3; x++) // centro + vizinhos a 1 px (o raio de 1px do site); quinas fora
+                    lin[x] = (abs(x - 1) + abs(y - 1) <= 1) ? 0x14000000u : 0x00000000u; // preto a 8% (o site usa 20%: forte demais aqui)
+            }
+            gTexPontos->UnlockRect(0);
+        }
+    } else gTexPontos = NULL;
+}
+
+// ---- VIDRO do menu lateral: o topo do site quando rola (fundo a 86% + blur de 14 px) ----
+// Um callback na lista do menu copia o back buffer (tudo que ja foi desenhado ATRAS dele neste quadro)
+// e reduz a metade quatro vezes com filtro linear: 1/16 esticado de volta = desfoque macio e barato.
+// As texturas sao D3DPOOL_DEFAULT: saem antes de todo Reset e voltam sozinhas no quadro seguinte.
+static IDirect3DTexture9* gVidroTex[4] = { NULL, NULL, NULL, NULL };
+static int gVidroBBW = 0, gVidroBBH = 0;
+static bool gVidroFalhou = false; // driver recusou: o menu fica opaco e nao tenta a cada quadro
+static void VidroLiberar() {
+    for (int i = 0; i < 4; i++) if (gVidroTex[i]) { gVidroTex[i]->Release(); gVidroTex[i] = NULL; }
+    gVidroBBW = gVidroBBH = 0;
+}
+static bool VidroGarantir() {
+    if (!gDev || gVidroFalhou) return false;
+    IDirect3DSurface9* bb = NULL;
+    if (FAILED(gDev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &bb)) || !bb) return false;
+    D3DSURFACE_DESC d;
+    HRESULT hr = bb->GetDesc(&d);
+    bb->Release();
+    if (FAILED(hr) || !d.Width || !d.Height) return false;
+    if (gVidroTex[3] && (int)d.Width == gVidroBBW && (int)d.Height == gVidroBBH) return true;
+    VidroLiberar();
+    UINT w = d.Width, h = d.Height;
+    for (int i = 0; i < 4; i++) {
+        w = w > 1 ? w / 2 : 1; h = h > 1 ? h / 2 : 1;
+        if (FAILED(gDev->CreateTexture(w, h, 1, D3DUSAGE_RENDERTARGET, D3DFMT_X8R8G8B8, D3DPOOL_DEFAULT, &gVidroTex[i], NULL))) {
+            gVidroTex[i] = NULL;
+            VidroLiberar();
+            gVidroFalhou = true;
+            RegistrarNoLog("vidro do menu: o driver recusou a textura de desfoque; menu lateral opaco");
+            return false;
+        }
+    }
+    gVidroBBW = (int)d.Width; gVidroBBH = (int)d.Height;
+    return true;
+}
+static void CbVidro(const ImDrawList*, const ImDrawCmd*) {
+    if (!gVidroTex[3]) return;
+    IDirect3DSurface9* rt = NULL;
+    if (FAILED(gDev->GetRenderTarget(0, &rt)) || !rt) return;
+    IDirect3DSurface9* ant = rt;
+    for (int i = 0; i < 4; i++) {
+        IDirect3DSurface9* s = NULL;
+        if (FAILED(gVidroTex[i]->GetSurfaceLevel(0, &s)) || !s) break;
+        gDev->StretchRect(ant, NULL, s, NULL, D3DTEXF_LINEAR);
+        if (ant != rt) ant->Release();
+        ant = s;
+    }
+    if (ant != rt) ant->Release();
+    rt->Release();
+}
 static IDirect3DTexture9* CarregarImagemRecurso(LPDIRECT3DDEVICE9 dev, int id, int maxLado) {
     HRSRC r = FindResourceA(NULL, MAKEINTRESOURCEA(id), (LPCSTR)RT_RCDATA);
     if (!r) return NULL;
@@ -1509,9 +1681,11 @@ static bool QueryServidor(Servidor& s) {
     for (int tent = 0; tent < 3; tent++) {
         DWORD t0 = GetTickCount();
         sendto(sk, (char*)pac, 11, 0, (sockaddr*)&addr, sizeof(addr));
-        r = recvfrom(sk, (char*)buf, sizeof(buf), 0, NULL, NULL);
+        sockaddr_in de; int deTam = sizeof(de);
+        r = recvfrom(sk, (char*)buf, sizeof(buf), 0, (sockaddr*)&de, &deTam);
         dt = GetTickCount() - t0;
-        if (r >= 16 && memcmp(buf, "SAMP", 4) == 0) break;
+        // so vale a resposta do proprio servidor (pacote de outro endereco nao vira contagem de jogadores)
+        if (r >= 16 && memcmp(buf, "SAMP", 4) == 0 && de.sin_addr.s_addr == addr.sin_addr.s_addr && de.sin_port == addr.sin_port) break;
         r = -1;
     }
     closesocket(sk);
@@ -1644,7 +1818,12 @@ static bool PegaStr(const char* o, int n, const char* chave, char* out, int outs
                         else if (hc >= 'A' && hc <= 'F') cp |= hc - 'A' + 10;
                     }
                     p += 5;
-                    out[w++] = (cp > 31 && cp < 256) ? (char)cp : '?';
+                    // a tela e UTF-8: "\u00e9" tem que virar os 2 bytes do "e" com acento (era 1 byte Latin-1 = "?")
+                    if (cp >= 0xD800 && cp <= 0xDFFF) cp = '?'; // emoji (par substituto) nao cabe na fonte
+                    if (cp < 32) cp = ' ';
+                    if (cp < 0x80) out[w++] = (char)cp;
+                    else if (cp < 0x800) { if (w + 2 >= outsz) break; out[w++] = (char)(0xC0 | (cp >> 6)); out[w++] = (char)(0x80 | (cp & 0x3F)); }
+                    else { if (w + 3 >= outsz) break; out[w++] = (char)(0xE0 | (cp >> 12)); out[w++] = (char)(0x80 | ((cp >> 6) & 0x3F)); out[w++] = (char)(0x80 | (cp & 0x3F)); }
                     continue;
                 }
                 if (e == 'n' || e == 't' || e == 'r') { out[w++] = ' '; p++; continue; }
@@ -2079,6 +2258,23 @@ static bool UrlParaCaminhoLocal(const char* url, char* out, int outsz) {
     return true;
 }
 
+// "v1.11" -> 1011000, "v2.0.3" -> 2000003. Texto que nao e versao devolve -1 (nunca vira "mais nova")
+static long NumeroDaVersao(const char* v) {
+    if (!v) return -1;
+    while (*v == ' ' || *v == 'v' || *v == 'V') v++;
+    long partes[3] = { 0, 0, 0 };
+    int n = 0;
+    while (n < 3) {
+        if (*v < '0' || *v > '9') return -1;
+        long x = 0;
+        while (*v >= '0' && *v <= '9') { x = x * 10 + (*v - '0'); v++; if (x > 999) return -1; }
+        partes[n++] = x;
+        if (*v != '.') break;
+        v++;
+    }
+    return partes[0] * 1000000 + partes[1] * 1000 + partes[2];
+}
+
 static DWORD WINAPI ThreadAtualizacao(LPVOID) {
     char txt[4096];
     DWORD tam = 0;
@@ -2112,7 +2308,8 @@ static DWORD WINAPI ThreadAtualizacao(LPVOID) {
     if (nl) { *nl = 0; ctx = nl + 1; } else ctx = ctx + strlen(ctx);
     for (char* c = l1; *c; c++) if (*c == '\r') *c = 0;
     for (char* c = l2; *c; c++) if (*c == '\r') *c = 0;
-    if (!l1[0] || _stricmp(l1, VERSAO) == 0) return 0; // ja esta na ultima
+    // so oferece versao MAIS NOVA: um versao.txt velho (cache de CDN, release desfeita) nao vira "atualizacao" para tras
+    if (!l1[0] || NumeroDaVersao(l1) <= NumeroDaVersao(VERSAO)) return 0;
     strncpy(gAttVersao, l1, sizeof(gAttVersao) - 1);
     strncpy(gAttUrl, l2, sizeof(gAttUrl) - 1);
     strncpy(gAttNotas, ctx, sizeof(gAttNotas) - 1);
@@ -2199,6 +2396,16 @@ static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
     }
 #endif
     if (_strnicmp(gAttUrl, "https://", 8) != 0) { gAttBaixa = 2; return 0; } // update so por TLS
+    // so das releases do nosso repositorio, e so com a digital: o versao.txt traz o sha256 do setup e o
+    // arquivo baixado tem que bater byte a byte. Sem "sha256=" nao ha como saber que o exe e o nosso
+    if (_strnicmp(gAttUrl, URL_RELEASES, strlen(URL_RELEASES)) != 0) {
+        RegistrarNoLog("atualizacao: o link do versao.txt nao e das releases do launcher; nao baixei");
+        gAttBaixa = 2; return 0;
+    }
+    if (strlen(gAttSha) != 64) {
+        RegistrarNoLog("atualizacao: o versao.txt veio sem sha256; nao baixei");
+        gAttBaixa = 2; return 0;
+    }
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
     if (!h) { gAttBaixa = 2; return 0; }
     DWORD flagsB = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
@@ -2231,8 +2438,9 @@ static DWORD WINAPI ThreadBaixarUpdate(LPVOID) {
         char mz[2] = { 0, 0 };
         DWORD l2 = 0;
         if (v != INVALID_HANDLE_VALUE) { ReadFile(v, mz, 2, &l2, NULL); CloseHandle(v); }
-        bool hashOk = true; // com sha256= no versao.txt, o arquivo baixado tem que bater byte a byte
-        if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z' && gAttSha[0]) { char hx[65]; hashOk = Sha256Arquivo(tmp, hx) && _stricmp(hx, gAttSha) == 0; }
+        bool hashOk = false; // o arquivo baixado tem que bater byte a byte com o sha256 do versao.txt
+        if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z') { char hx[65]; hashOk = Sha256Arquivo(tmp, hx) && _stricmp(hx, gAttSha) == 0; }
+        if (!hashOk) RegistrarNoLog("atualizacao: o setup baixado nao bateu com o sha256 do versao.txt; apagado");
         if (l2 == 2 && mz[0] == 'M' && mz[1] == 'Z' && hashOk) {
             strncpy(gAttArquivo, tmp, MAX_PATH - 1);
             gAttPct = 100;
@@ -2445,7 +2653,7 @@ static bool UrlMesmoPost(const char* a, const char* b) {
     return la == lb && _strnicmp(pa, pb, la) == 0;
 }
 
-// le a lista "Mais vistos" (widget PopularPosts) na home do blog: <div class='bloco populares'>
+// le a lista "Mais vistos" (widget PopularPosts1) na home do blog
 static void BuscarMaisVistos() {
     gPopEstado = 1;
     HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
@@ -2462,8 +2670,13 @@ static void BuscarMaisVistos() {
     InternetCloseHandle(u);
     InternetCloseHandle(h);
     int nP = 0;
-    const char* bl = strstr(html, "class='bloco populares'");
-    if (!bl) bl = strstr(html, "class=\"bloco populares\"");
+    // pelo id do widget, que e do Blogger e nao muda com o tema. A classe do bloco mudou no tema escuro de
+    // 05/10 ('bloco populares' virou 'populares') e o Mais vistos do launcher passou a dizer que nao havia
+    // ranking. As classes antigas ficam de reserva
+    static const char* MARCAS[] = { "id='PopularPosts1'", "id=\"PopularPosts1\"",
+                                    "class='bloco populares'", "class=\"bloco populares\"" };
+    const char* bl = NULL;
+    for (int m = 0; m < 4 && !bl; m++) bl = strstr(html, MARCAS[m]);
     if (bl) {
         const char* fim = strstr(bl, "</ul>");
         const char* p = bl;
@@ -2570,6 +2783,14 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                 offMin = (hz * 60 + mz) * (z[1] == '-' ? -1 : 1);
             }
             gModsTmp[n].data[0] = 0;
+            gModsTmp[n].dataCurta[0] = 0;
+            static const char* MESC_PT[12] = { "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez" };
+            static const char* MESC_EN[12] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+            static const char* MESC_ES[12] = { "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic" };
+            static const char* MESC_RU[12] = { "янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек" };
+            static const char* MESC_ID[12] = { "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des" };
+            static const char* MESC_TR[12] = { "Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara" };
+            const char** MESC = gLang == 1 ? MESC_EN : gLang == 2 ? MESC_ES : gLang == 3 ? MESC_RU : gLang == 4 ? MESC_ID : gLang == 5 ? MESC_TR : MESC_PT;
             gModsTmp[n].ordem = (dia > 0 && mi >= 0 && ano > 1900)
                 ? (unsigned long long)ano * 100000000ULL + (unsigned long long)(mi + 1) * 1000000ULL
                   + (unsigned long long)dia * 10000ULL + (unsigned long long)hh * 100ULL + (unsigned long long)mm
@@ -2587,15 +2808,62 @@ static DWORD WINAPI ThreadMods(LPVOID) {
                     ft.dwLowDateTime = u.LowPart; ft.dwHighDateTime = u.HighPart;
                     if (FileTimeToSystemTime(&ft, &utc) &&
                         SystemTimeToTzSpecificLocalTime(NULL, &utc, &loc))
+                    {
                         sprintf(gModsTmp[n].data, comDe ? "%s, %d de %s de %d" : "%s, %d %s %d", DIA[loc.wDayOfWeek % 7],
                                 loc.wDay, MES[(loc.wMonth - 1) % 12], loc.wYear);
+                        _snprintf(gModsTmp[n].dataCurta, sizeof(gModsTmp[n].dataCurta) - 1, "%02d %s %d", loc.wDay, MESC[(loc.wMonth - 1) % 12], loc.wYear);
+                        gModsTmp[n].dataCurta[sizeof(gModsTmp[n].dataCurta) - 1] = 0;
+                    }
                 }
                 if (!gModsTmp[n].data[0])
                     sprintf(gModsTmp[n].data, comDe ? "%d de %s de %d" : "%d %s %d", dia, MES[mi], ano);
+                if (!gModsTmp[n].dataCurta[0])
+                    _snprintf(gModsTmp[n].dataCurta, sizeof(gModsTmp[n].dataCurta) - 1, "%02d %s %d", dia, MESC[mi], ano);
             }
             if (!gModsTmp[n].data[0]) { strncpy(gModsTmp[n].data, v, 11); gModsTmp[n].data[11] = 0; }
         }
         DecodificarEntidades(gModsTmp[n].titulo);
+        { // rotulo do cartao, a MESMA regra do site (rotuloDe no tema): Nosso app e Nosso mod no destaque; depois
+          // Lista, Tutorial e Fix; senao o primeiro marcador que nao e de sistema (Em Destaque, PC, Mobile, SAMP...)
+            char cats[12][64];
+            int nc = 0;
+            const char* q = bloco;
+            while (nc < 12 && (q = strstr(q, "<category")) != NULL) {
+                const char* ab = strchr(q, '>');
+                if (!ab) break;
+                ab++;
+                const char* fe = strstr(ab, "</category>");
+                if (!fe) break;
+                int ln = (int)(fe - ab);
+                if (ln > 63) ln = 63;
+                memcpy(cats[nc], ab, ln); cats[nc][ln] = 0;
+                DecodificarEntidades(cats[nc]);
+                nc++;
+                q = fe;
+            }
+            const char* rot = NULL;
+            bool nosso = false;
+            for (int k = 0; k < nc && !rot; k++) if (!_stricmp(cats[k], "Trok Launcher")) { rot = "Nosso app"; nosso = true; }
+            for (int k = 0; k < nc && !rot; k++) if (!_stricmp(cats[k], "Nossos Mods")) { rot = "Nosso mod"; nosso = true; }
+            for (int k = 0; k < nc && !rot; k++) if (!_stricmp(cats[k], "Listas")) rot = "Lista";
+            for (int k = 0; k < nc && !rot; k++) if (!_stricmp(cats[k], "Tutoriais")) rot = "Tutorial";
+            for (int k = 0; k < nc && !rot; k++) if (!_stricmp(cats[k], "Fixes e Melhorias")) rot = "Fix";
+            static const char* SIST[] = { "Em Destaque", "PC", "Mobile", "SAMP", "So PC", "Só PC", "So Mobile", "Só Mobile", "PC e Mobile" };
+            static const char* ACENTO[][2] = { { "Veiculos", "Veículos" }, { "Animacoes", "Animações" },
+                { "Objetos e Cenario", "Objetos e Cenário" }, { "Graficos", "Gráficos" }, { "Traducao", "Tradução" },
+                { "Vegetacao", "Vegetação" }, { "Programas e Utilitarios", "Programas e Utilitários" } };
+            for (int k = 0; k < nc && !rot; k++) {
+                bool sist = !_strnicmp(cats[k], "Fixado", 6);
+                for (int s = 0; s < (int)(sizeof(SIST) / sizeof(SIST[0])) && !sist; s++) if (!_stricmp(cats[k], SIST[s])) sist = true;
+                if (sist) continue;
+                rot = cats[k];
+                for (int a = 0; a < (int)(sizeof(ACENTO) / sizeof(ACENTO[0])); a++) if (!_stricmp(cats[k], ACENTO[a][0])) rot = ACENTO[a][1];
+            }
+            if (!rot) rot = "Mod";
+            strncpy(gModsTmp[n].rotulo, rot, sizeof(gModsTmp[n].rotulo) - 1);
+            gModsTmp[n].rotulo[sizeof(gModsTmp[n].rotulo) - 1] = 0;
+            gModsTmp[n].nosso = nosso ? 1 : 0;
+        }
         // capa + resumo saem do corpo do post (<description> vem como HTML escapado)
         gModsTmp[n].resumo[0] = 0;
         gModsTmp[n].imgCache[0] = 0;
@@ -3939,6 +4207,7 @@ static bool ProcessoEhDeUmaData(DWORD pid) {
 }
 
 static void FecharJogoAnterior() {
+    if (gModoFoto) return; // fotografando: nao mexe em processo nenhum
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (snap == INVALID_HANDLE_VALUE) return;
     PROCESSENTRY32 pe = { sizeof(pe) };
@@ -4241,10 +4510,11 @@ static void IniciarConexao(const char* nome, const char* ip, int comSenha = -1) 
 }
 
 static void Jogar() {
+    if (gModoFoto) return; // fotografando: o "conectando" aparece, o samp.exe nao abre
     // datas mudam de PC para PC: valida ANTES e avisa em vez de falhar mudo
     {
         char sampChk[MAX_PATH];
-        sprintf(sampChk, "%s\\samp.exe", gPastaGta);
+        _snprintf(sampChk, MAX_PATH - 1, "%s\\samp.exe", gPastaGta); sampChk[MAX_PATH - 1] = 0;
         if (GetFileAttributesA(sampChk) == INVALID_FILE_ATTRIBUTES) {
             char m[200];
             _snprintf(m, sizeof(m) - 1, T("samp.exe nao encontrado na data em uso - confira a pasta na aba de datas"));
@@ -4272,7 +4542,7 @@ static void Jogar() {
     GravarNickRegistro(); // garante que o samp.exe abre com o nick atual
     // o samp.exe decide QUAL gta_sa.exe abrir pelo registro - aponta para a DATA selecionada
     char gtaExe[MAX_PATH];
-    sprintf(gtaExe, "%s\\gta_sa.exe", gPastaGta);
+    _snprintf(gtaExe, MAX_PATH - 1, "%s\\gta_sa.exe", gPastaGta); gtaExe[MAX_PATH - 1] = 0;
     HKEY k;
     bool regOk = false;
     if (RegCreateKeyExA(HKEY_CURRENT_USER, "Software\\SAMP", 0, NULL, 0, KEY_SET_VALUE | KEY_QUERY_VALUE, NULL, &k, NULL) == ERROR_SUCCESS) {
@@ -4297,7 +4567,7 @@ static void Jogar() {
         RegistrarNoLog(d);
     }
     char sampExe[MAX_PATH];
-    sprintf(sampExe, "%s\\samp.exe", gPastaGta);
+    _snprintf(sampExe, MAX_PATH - 1, "%s\\samp.exe", gPastaGta); sampExe[MAX_PATH - 1] = 0;
     char args[128];
     if (gConnSenha[0]) sprintf(args, "%s %s", gConnIp, gConnSenha); // senha vai na linha de comando
     else strcpy(args, gConnIp);
@@ -4417,7 +4687,7 @@ static void DesenhaAvatar(ImDrawList* d, ImVec2 a, ImVec2 b, const char* arquivo
 
 // textura cobrindo o retangulo (corte central, sem distorcer) + mascara escura p/ leitura;
 // zoom > 1 fecha o corte no centro (miniatura com a imagem inteira vira ruido)
-static void ImagemCapa(ImDrawList* d, IDirect3DTexture9* tex, ImVec2 a, ImVec2 b, float raio, int mascara, float zoom = 1.0f) {
+static void ImagemCapa(ImDrawList* d, IDirect3DTexture9* tex, ImVec2 a, ImVec2 b, float raio, int mascara, float zoom = 1.0f, ImDrawFlags cantos = 0) {
     if (!tex) return;
     D3DSURFACE_DESC td;
     if (FAILED(tex->GetLevelDesc(0, &td)) || !td.Width || !td.Height) return;
@@ -4431,12 +4701,106 @@ static void ImagemCapa(ImDrawList* d, IDirect3DTexture9* tex, ImVec2 a, ImVec2 b
         uv0.x = cxu + (uv0.x - cxu) / zoom; uv1.x = cxu + (uv1.x - cxu) / zoom;
         uv0.y = cyu + (uv0.y - cyu) / zoom; uv1.y = cyu + (uv1.y - cyu) / zoom;
     }
-    d->AddImageRounded((ImTextureID)tex, a, b, uv0, uv1, IM_COL32(255, 255, 255, 255), raio);
-    if (mascara > 0) d->AddRectFilled(a, b, IM_COL32(8, 8, 8, mascara), raio);
+    d->AddImageRounded((ImTextureID)tex, a, b, uv0, uv1, IM_COL32(255, 255, 255, 255), raio, cantos);
+    if (mascara > 0) d->AddRectFilled(a, b, IM_COL32(8, 8, 8, mascara), raio, cantos);
 }
 
-// botao secundario padrao do app: mesmo look do card "Adicionar data" — fundo escuro sutil,
-// contorno cinza que acende no hover (cor opcional p/ acoes destrutivas)
+// retangulo (com cantos) cuja opacidade varia em linha reta de cima (alfaTopo) para baixo (alfaBase): UMA
+// primitiva so, com o alfa escrito nos vertices. Duas faixas encostadas deixavam uma risca na emenda
+// (a "linha" que atravessava os cards de data de capa clara)
+static void RectFadeVertical(ImDrawList* d, ImVec2 a, ImVec2 b, int cinza, int alfaTopo, int alfaBase, float raio, ImDrawFlags cantos) {
+    int v0 = d->VtxBuffer.Size;
+    d->AddRectFilled(a, b, IM_COL32(cinza, cinza, cinza, 255), raio, cantos);
+    float h = b.y - a.y;
+    for (int i = v0; i < d->VtxBuffer.Size; i++) {
+        ImDrawVert& v = d->VtxBuffer[i];
+        float tt = h > 0.0f ? (v.pos.y - a.y) / h : 0.0f;
+        if (tt < 0.0f) tt = 0.0f;
+        if (tt > 1.0f) tt = 1.0f;
+        int aOrig = (int)((v.col >> 24) & 255);
+        int al = (int)((alfaTopo + (alfaBase - alfaTopo) * tt) * aOrig / 255.0f);
+        v.col = (v.col & 0x00FFFFFF) | ((ImU32)al << 24);
+    }
+}
+
+// maiusculas em UTF-8 (o text-transform do site): latim com acento e cirilico tambem, nao so a..z
+static void MaiusculasUtf8(char* s) {
+    for (unsigned char* p = (unsigned char*)s; *p; ) {
+        if (*p < 0x80) { if (*p >= 'a' && *p <= 'z') *p = (unsigned char)(*p - 32); p++; continue; }
+        if ((*p & 0xE0) == 0xC0 && p[1]) {
+            unsigned int c = ((p[0] & 0x1Fu) << 6) | (p[1] & 0x3Fu), u = c;
+            if (c >= 0xE0 && c <= 0xFE && c != 0xF7) u = c - 0x20;      // a com crase .. thorn
+            else if (c >= 0x430 && c <= 0x44F) u = c - 0x20;            // cirilico a .. ya
+            else if (c >= 0x450 && c <= 0x45F) u = c - 0x50;            // cirilico io ..
+            if (u != c) { p[0] = (unsigned char)(0xC0 | (u >> 6)); p[1] = (unsigned char)(0x80 | (u & 0x3F)); }
+            p += 2; continue;
+        }
+        p++;
+    }
+}
+
+// Rotulo do site (TODOS OS POSTS, FAVORITOS): maiusculo pequeno com espaco entre as letras, o
+// letter-spacing do CSS. Aceita o formato antigo das traducoes ("F A V O R I T O S": letras separadas por
+// um espaco, palavras por tres). Devolve a largura; desenhar = false so mede.
+static float TextoMicro(ImDrawList* d, ImVec2 p, ImU32 cor, const char* txt, float espEm = 0.3f,
+                        ImFont* f = NULL, bool desenhar = true) {
+    if (!f) f = gFtMicro ? gFtMicro : gFtMini;
+    if (!f || !txt || !txt[0]) return 0.0f;
+    const float tam = f->FontSize / gEscala, esp = tam * espEm;
+    bool antigo = txt[0] && txt[1] == ' ' && txt[2] && txt[2] != ' ' && txt[3] == ' ';
+    float x = p.x;
+    const char* s = txt;
+    while (*s) {
+        if (*s == ' ') {
+            int n = 0;
+            while (s[n] == ' ') n++;
+            if (antigo && n == 1) { s += 1; continue; } // espaco entre letras do formato antigo
+            x += f->CalcTextSizeA(tam, FLT_MAX, 0.0f, " ").x + esp;
+            s += n;
+            continue;
+        }
+        unsigned int c = 0;
+        int nb = ImTextCharFromUtf8(&c, s, NULL);
+        if (nb <= 0) break;
+        if (desenhar && d) d->AddText(f, tam, ImVec2(floorf(x), p.y), cor, s, s + nb);
+        x += f->CalcTextSizeA(tam, FLT_MAX, 0.0f, s, s + nb).x + esp;
+        s += nb;
+    }
+    return x - p.x - esp;
+}
+static float LarguraMicro(const char* txt, float espEm = 0.3f, ImFont* f = NULL) {
+    return TextoMicro(NULL, ImVec2(0, 0), 0, txt, espEm, f, false);
+}
+
+// botao principal do site (.tk-btn-primario): chapado na cor de destaque, canto 8, texto escuro em
+// negrito; no hover, 8% mais claro (o filter:brightness(1.08) do CSS). icone = glifo Lucide opcional
+static bool BotaoPrimario(const char* rotulo, ImVec2 tam, const char* icone = NULL, ImFont* f = NULL) {
+    const Accent& ac = AccentAtual();
+    ImGui::PushID(rotulo);
+    bool cl = ImGui::InvisibleButton("##pri", tam);
+    bool hov = ImGui::IsItemHovered();
+    if (hov) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    ImGui::PopID();
+    ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+    ImDrawList* d = ImGui::GetWindowDrawList();
+    bool desligado = (ImGui::GetItemFlags() & ImGuiItemFlags_Disabled) != 0;
+    ImU32 fundo = hov ? LerpCor(ac.cor, IM_COL32(255, 255, 255, 255), 0.08f) : ac.cor;
+    if (desligado) fundo = ComAlpha(fundo, 0.45f);
+    d->AddRectFilled(a, b, fundo, 8.0f);
+    if (f) ImGui::PushFont(f);
+    const char* fim = strstr(rotulo, "##");
+    ImVec2 tsz = ImGui::CalcTextSize(rotulo, fim);
+    float wIco = icone ? 22.0f : 0.0f;
+    float x0 = (a.x + b.x - tsz.x - wIco) * 0.5f;
+    ImU32 ct = TextoSobreAccent(ac.cor);
+    if (icone) Icone(d, ImVec2(x0 + 8.0f, (a.y + b.y) * 0.5f), icone, ct, 16.0f);
+    d->AddText(ImVec2(x0 + wIco, (a.y + b.y - tsz.y) * 0.5f), ct, rotulo, fim);
+    if (f) ImGui::PopFont();
+    return cl && !desligado;
+}
+
+// botao secundario do site (.tk-btn-sec): vazado, contorno branco a 24%, canto 8; no hover ganha o
+// fundo #161618 e o contorno acende. cor = acao destrutiva (contorno e texto naquela cor)
 static bool BotaoSec(const char* rotulo, ImVec2 tam, ImU32 cor = 0) {
     ImGui::PushID(rotulo);
     bool cl = ImGui::InvisibleButton("##sec", tam);
@@ -4447,14 +4811,92 @@ static bool BotaoSec(const char* rotulo, ImVec2 tam, ImU32 cor = 0) {
     ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
     bool hov = ImGui::IsItemHovered();
     ImDrawList* d = ImGui::GetWindowDrawList();
-    if (hov) d->AddRectFilled(a, b, Cinza(255, 12), 9.0f); // vazado: so um veu leve no hover
-    ImU32 tra = cor ? ComAlpha(cor, hov ? 1.0f : 0.55f) : (hov ? Cinza(200) : Cinza(120));
-    d->AddRect(a, b, tra, 9.0f, 0, 1.5f);
+    if (hov) d->AddRectFilled(a, b, cor ? ComAlpha(cor, 0.08f) : Tk::Sup2, 8.0f);
+    ImU32 tra = cor ? ComAlpha(cor, hov ? 0.95f : 0.55f) : (hov ? Cinza(255, 87) : Tk::Linha3);
+    d->AddRect(a, b, tra, 8.0f, 0, 1.0f);
     const char* fim = strstr(rotulo, "##"); // NULL = texto inteiro
     ImVec2 tsz = ImGui::CalcTextSize(rotulo, fim);
     d->AddText(ImVec2((a.x + b.x - tsz.x) * 0.5f, (a.y + b.y - tsz.y) * 0.5f),
-               cor ? tra : (hov ? Cinza(230) : Cinza(165)), rotulo, fim);
+               cor ? ComAlpha(cor, hov ? 1.0f : 0.85f) : Tk::Texto, rotulo, fim);
     return cl;
+}
+
+// item de menu no estilo do dropdown do site (a lista de categorias do topo): texto a esquerda,
+// detalhe apagado a direita (a contagem, no site), fundo sup-2 no hover e a escolha atual em negrito
+// branco - sem contorno de destaque em volta (pedido de 06/10)
+static bool ItemMenu(const char* id, const char* rotulo, const char* direita, bool atual, float w, float h = 38.0f) {
+    bool cl = ImGui::InvisibleButton(id, ImVec2(w, h));
+    bool hv = ImGui::IsItemHovered();
+    if (hv) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+    ImDrawList* d = ImGui::GetWindowDrawList();
+    if (hv) d->AddRectFilled(a, b, Tk::Realce, 8.0f);
+    float dirW = 0.0f;
+    if (direita && direita[0]) { // a contagem do site: 11px 600 em --texto-4
+        ImGui::PushFont(gFtMini);
+        ImVec2 dsz = ImGui::CalcTextSize(direita);
+        d->AddText(ImVec2(b.x - 14.0f - dsz.x, (a.y + b.y - dsz.y) * 0.5f), Tk::Texto4, direita);
+        ImGui::PopFont();
+        dirW = dsz.x + 12.0f;
+    }
+    ImGui::PushFont(atual ? gFtBold : gFtBody);
+    ImVec2 tsz = ImGui::CalcTextSize(rotulo);
+    TextoTruncado(d, ImVec2(a.x + 14.0f, (a.y + b.y - tsz.y) * 0.5f), (b.x - 14.0f - dirW) - (a.x + 14.0f),
+                  Tk::Texto, rotulo);
+    ImGui::PopFont();
+    return cl;
+}
+
+// rotulo maiusculo espacado na posicao do cursor (substitui o "F I L T R O S" em cinza): avanca o cursor
+static void RotuloMicro(const char* txt, ImU32 cor = 0) {
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float w = TextoMicro(ImGui::GetWindowDrawList(), p, cor ? cor : Tk::Texto3, txt, 0.3f);
+    ImGui::Dummy(ImVec2(w > 1.0f ? w : 1.0f, (gFtMicro ? gFtMicro->FontSize / gEscala : 12.0f) + 4.0f));
+}
+
+// o controle segmentado do site (.trilho + .seg: "Recentes | Mais vistos", "Grade | Lista"): uma pilula com
+// contorno fino e a opcao ativa preenchida. pos = cursor da janela atual; devolve o indice clicado (ou o ativo)
+static int Segmentado(const char* id, const char* const* rotulos, int n, int ativo, ImVec2 pos, float alt = 38.0f) {
+    ImDrawList* d = ImGui::GetWindowDrawList();
+    if (n > 8) n = 8;
+    ImGui::PushFont(gFtBold);
+    float ws[8], total = 6.0f;
+    for (int k = 0; k < n; k++) { ws[k] = ImGui::CalcTextSize(rotulos[k]).x + 30.0f; total += ws[k]; }
+    ImGui::SetCursorPos(pos);
+    ImVec2 a = ImGui::GetCursorScreenPos(), b(a.x + total, a.y + alt);
+    d->AddRectFilled(a, b, Cinza(255, 6), 10.0f);
+    d->AddRect(a, b, Tk::Linha, 10.0f, 0, 1.0f);
+    float x = 3.0f;
+    int novo = ativo;
+    for (int k = 0; k < n; k++) {
+        ImGui::SetCursorPos(ImVec2(pos.x + x, pos.y + 3.0f));
+        char idk[48];
+        _snprintf(idk, sizeof(idk) - 1, "##seg%s%d", id, k); idk[sizeof(idk) - 1] = 0;
+        if (ImGui::InvisibleButton(idk, ImVec2(ws[k], alt - 6.0f))) novo = k;
+        bool hov = ImGui::IsItemHovered();
+        ImVec2 sa = ImGui::GetItemRectMin(), sb = ImGui::GetItemRectMax();
+        if (k == ativo) { d->AddRectFilled(sa, sb, Tk::Ativo, 7.0f); d->AddRect(sa, sb, Tk::Linha2, 7.0f, 0, 1.0f); }
+        ImVec2 tsz = ImGui::CalcTextSize(rotulos[k]);
+        d->AddText(ImVec2(floorf((sa.x + sb.x - tsz.x) * 0.5f), floorf((sa.y + sb.y - tsz.y) * 0.5f)),
+                   k == ativo ? Tk::Texto : (hov ? Tk::Texto2 : Tk::Texto3), rotulos[k]);
+        x += ws[k];
+    }
+    ImGui::PopFont();
+    return novo;
+}
+
+// cabecalho das telas: titulo grande (Montserrat Bold) e, embaixo, a linha de descricao em cinza
+static void TituloTela(const char* titulo, const char* desc, float x = 0.0f, float y = 0.0f) {
+    ImGui::SetCursorPos(ImVec2(x, y));
+    ImGui::PushFont(gFtTitulo ? gFtTitulo : gFtBotao);
+    ImGui::TextColored(ImColor(Tk::Texto), "%s", titulo);
+    ImGui::PopFont();
+    if (desc && desc[0]) {
+        ImGui::SetCursorPos(ImVec2(x, y + 38.0f));
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::TextColored(ImColor(Tk::Texto3), "%s", desc);
+        ImGui::PopFont();
+    }
 }
 
 // linha de opcao estilo lista de servidores: hover, divisoria e SWITCH a direita
@@ -4468,8 +4910,9 @@ static bool LinhaOpcao(const char* rot, bool* v, float w) {
     bool hov = ImGui::IsItemHovered();
     ImDrawList* d = ImGui::GetWindowDrawList();
     const Accent& ac = AccentAtual();
-    if (hov) d->AddRectFilled(a, b, Cinza(30, 165), 8);
-    d->AddText(ImVec2(a.x + 10, (a.y + b.y) * 0.5f - 9), Cinza(hov ? 240 : 222), rot);
+    if (hov) d->AddRectFilled(a, b, Tk::Sup2, 8);
+    ImVec2 rsz = ImGui::CalcTextSize(rot);
+    d->AddText(ImVec2(a.x + 12, (a.y + b.y - rsz.y) * 0.5f), hov ? Tk::Texto : Tk::Texto2, rot);
     // switch com deslize animado (anim guardada por variavel; ate 8 na tela)
     static const bool* chaves[24]; static float anims[24]; static int nT = 0; // 24: sobra p/ opcoes novas
     int slot = -1;
@@ -4477,12 +4920,15 @@ static bool LinhaOpcao(const char* rot, bool* v, float w) {
     if (slot < 0 && nT < 24) { chaves[nT] = v; anims[nT] = *v ? 1.0f : 0.0f; slot = nT++; }
     float t = *v ? 1.0f : 0.0f;
     if (slot >= 0) { anims[slot] += (t - anims[slot]) * 0.35f; t = anims[slot]; }
-    ImVec2 ta(b.x - 10 - 46, (a.y + b.y) * 0.5f - 12), tb(ta.x + 46, ta.y + 24);
-    d->AddRectFilled(ta, tb, *v ? ac.cor : Cinza(hov ? 64 : 52), 12.0f);
+    ImVec2 ta(b.x - 12 - 42, (a.y + b.y) * 0.5f - 11), tb(ta.x + 42, ta.y + 22);
+    if (*v || t > 0.02f) d->AddRectFilled(ta, tb, ComAlpha(ac.cor, 0.15f + 0.85f * t), 11.0f);
+    if (t < 0.98f) d->AddRectFilled(ta, tb, ComAlpha(hov ? Cinza(52) : Tk::Ativo, 1.0f - t), 11.0f);
+    d->AddRect(ta, tb, ComAlpha(Tk::Linha2, 1.0f - t), 11.0f, 0, 1.0f);
     // miolo com contraste automatico: em destaque claro (mostarda, branco) ele vira escuro
-    d->AddCircleFilled(ImVec2(ta.x + 12.0f + 22.0f * t, (ta.y + tb.y) * 0.5f),
-                       9.0f, *v ? TextoSobreAccent(ac.cor) : Cinza(hov ? 235 : 208), 24);
-    d->AddLine(ImVec2(a.x, b.y + 1), ImVec2(b.x, b.y + 1), Cinza(31), 1.0f); // divisoria
+    d->AddCircleFilled(ImVec2(ta.x + 11.0f + 20.0f * t, (ta.y + tb.y) * 0.5f),
+                       8.0f, *v ? ((((ac.cor & 255) * 299 + ((ac.cor >> 8) & 255) * 587 + ((ac.cor >> 16) & 255) * 114) / 1000) > 175 ? Tk::SobreAcento : Cinza(255))
+                                : (hov ? Tk::Texto : Tk::Texto2), 24);
+    d->AddLine(ImVec2(a.x, b.y + 1), ImVec2(b.x, b.y + 1), Tk::Linha, 1.0f); // divisoria
     return cl;
 }
 
@@ -4496,7 +4942,7 @@ static bool LinhaFiltro(const char* rot, bool* v) {
     bool hov = ImGui::IsItemHovered();
     ImDrawList* d = ImGui::GetWindowDrawList();
     const Accent& ac = AccentAtual();
-    if (hov) d->AddRectFilled(a, b, Cinza(255, 14), 8.0f);
+    if (hov) d->AddRectFilled(a, b, Tk::Realce, 8.0f); // o hover das linhas dos menus do site
     ImVec2 ka(a.x + 8, (a.y + b.y) * 0.5f - 9), kb(ka.x + 18, ka.y + 18);
     if (*v) {
         d->AddRectFilled(ka, kb, ac.cor, 5.0f);
@@ -4505,55 +4951,52 @@ static bool LinhaFiltro(const char* rot, bool* v) {
         d->PathLineTo(ImVec2(ka.x + 14.0f, ka.y + 5.0f));
         d->PathStroke(TextoSobreAccent(ac.cor), 0, 2.2f);
     } else {
-        d->AddRect(ka, kb, hov ? Cinza(180) : Cinza(110), 5.0f, 0, 1.5f);
+        d->AddRect(ka, kb, hov ? Cinza(255, 110) : Tk::Linha3, 5.0f, 0, 1.2f);
     }
     ImVec2 tsz = ImGui::CalcTextSize(rot);
-    d->AddText(ImVec2(ka.x + 28, (a.y + b.y - tsz.y) * 0.5f), (hov || *v) ? Cinza(235) : Cinza(185), rot);
+    d->AddText(ImVec2(ka.x + 28, (a.y + b.y - tsz.y) * 0.5f), (hov || *v) ? Tk::Texto : Tk::Texto2, rot);
     return cl;
 }
 
+// minimizar e fechar como no mockup (.tk-icone-topo): quadrados de 38 com canto 8, icone cinza claro que
+// acende no hover, com uma linha fina separando do resto do topo
 static void BotaoJanela(ImDrawList* dl, HWND hwnd) {
     ImVec2 ds = ImGui::GetIO().DisplaySize;
-    // minimizar
-    ImGui::SetCursorScreenPos(ImVec2(ds.x - 76, 10));
-    if (ImGui::InvisibleButton("##min", ImVec2(30, 26))) ShowWindow(hwnd, SW_MINIMIZE);
-    ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
-    if (ImGui::IsItemHovered()) dl->AddRectFilled(a, b, Cinza(255, 26), 6);
-    Icone(dl, ImVec2((a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f), I_MENOS, Cinza(200), 17.0f);
-    // fechar (com a opcao ligada: esconde p/ bandeja; o icone do relogio traz de volta)
-    ImGui::SetCursorScreenPos(ImVec2(ds.x - 42, 10));
-    if (ImGui::InvisibleButton("##close", ImVec2(30, 26))) {
+    const float L = 38.0f, Y = floorf(TOPO_H * 0.5f - L * 0.5f);
+    const ImVec2 xa(ds.x - 18.0f - L, Y), xb(xa.x + L, Y + L);
+    const ImVec2 ma(xa.x - 2.0f - L, Y), mb(ma.x + L, Y + L);
+    dl->AddLine(ImVec2(ma.x - 11.0f, Y + 4.0f), ImVec2(ma.x - 11.0f, Y + L - 4.0f), Cinza(255, 20), 1.0f);
+    ImGui::SetCursorScreenPos(ma);
+    if (ImGui::InvisibleButton("##min", ImVec2(L, L))) ShowWindow(hwnd, SW_MINIMIZE);
+    bool hMin = ImGui::IsItemHovered();
+    ImGui::SetCursorScreenPos(xa);
+    if (ImGui::InvisibleButton("##close", ImVec2(L, L))) {
         if (gFecharBandeja) ShowWindow(hwnd, SW_HIDE);
         else gRodando = false;
     }
+    bool hX = ImGui::IsItemHovered();
     // modal de boas-vindas aberto = imgui bloqueia os botoes acima; hit-test manual
     // garante que minimizar/fechar SEMPRE funcionam, mesmo sem GTA instalado
+    ImDrawList* alvo = dl;
     if (gBoasVindas) {
         ImGuiIO& ioJ = ImGui::GetIO();
         ImVec2 mp = ioJ.MousePos;
-        bool sobreMin = mp.x >= ds.x - 76 && mp.x <= ds.x - 46 && mp.y >= 10 && mp.y <= 36;
-        bool sobreX   = mp.x >= ds.x - 42 && mp.x <= ds.x - 12 && mp.y >= 10 && mp.y <= 36;
-        if (sobreMin || sobreX) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-        ImDrawList* fgJ = ImGui::GetForegroundDrawList();
-        if (sobreMin) {
-            fgJ->AddRectFilled(ImVec2(ds.x - 76, 10), ImVec2(ds.x - 46, 36), Cinza(255, 26), 6);
-            Icone(fgJ, ImVec2(ds.x - 61, 23), I_MENOS, Cinza(230), 17.0f);
-        }
-        if (sobreX) {
-            fgJ->AddRectFilled(ImVec2(ds.x - 42, 10), ImVec2(ds.x - 12, 36), IM_COL32(200, 60, 60, 220), 6);
-            Icone(fgJ, ImVec2(ds.x - 27, 23), I_FECHAR, Cinza(235), 17.0f);
-        }
+        hMin = mp.x >= ma.x && mp.x <= mb.x && mp.y >= ma.y && mp.y <= mb.y;
+        hX = mp.x >= xa.x && mp.x <= xb.x && mp.y >= xa.y && mp.y <= xb.y;
+        if (hMin || hX) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+        alvo = ImGui::GetForegroundDrawList();
         if (ImGui::IsMouseClicked(0)) {
-            if (sobreMin) ShowWindow(hwnd, SW_MINIMIZE);
-            else if (sobreX) {
+            if (hMin) ShowWindow(hwnd, SW_MINIMIZE);
+            else if (hX) {
                 if (gFecharBandeja) ShowWindow(hwnd, SW_HIDE);
                 else gRodando = false;
             }
         }
     }
-    a = ImGui::GetItemRectMin(); b = ImGui::GetItemRectMax();
-    if (ImGui::IsItemHovered()) dl->AddRectFilled(a, b, IM_COL32(200, 60, 60, 190), 6);
-    Icone(dl, ImVec2((a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f), I_FECHAR, Cinza(220), 17.0f);
+    if (hMin) alvo->AddRectFilled(ma, mb, Cinza(255, 16), 8.0f);
+    if (hX) alvo->AddRectFilled(xa, xb, Cinza(255, 16), 8.0f);
+    Icone(alvo, ImVec2((ma.x + mb.x) * 0.5f, (ma.y + mb.y) * 0.5f), I_MENOS, hMin ? Tk::Texto : Tk::Texto2, 16.0f);
+    Icone(alvo, ImVec2((xa.x + xb.x) * 0.5f, (xa.y + xb.y) * 0.5f), I_FECHAR, hX ? Tk::Texto : Tk::Texto2, 16.0f);
 }
 
 // desenha um icone LUCIDE centralizado (tam em px logicos; nitido em qualquer escala)
@@ -4582,9 +5025,14 @@ static void IconeBandeira(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
     #undef BPT
 }
 
-// logo do Discord desenhado a mao: a fonte Lucide nao tem marcas, e o logo oficial
-// (Clyde) e simples o bastante pra sair limpo com bezier + circulos
+// logo do Discord: o oficial (recurso 13, rasterizado do SVG da marca, quadrado com o logo na largura
+// toda). O desenho a mao abaixo so fica de reserva se o recurso faltar
 static void IconeDiscord(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    if (gLogoDiscord) {
+        float m = tam * 0.5f;
+        d->AddImage((ImTextureID)gLogoDiscord, ImVec2(c.x - m, c.y - m), ImVec2(c.x + m, c.y + m), ImVec2(0, 0), ImVec2(1, 1), cor);
+        return;
+    }
     const float e = tam / 71.0f;              // o desenho abaixo usa a caixa 71x55 do SVG oficial
     const float ox = c.x - 35.5f * e, oy = c.y - 27.5f * e;
     #define DPT(X, Y) ImVec2(ox + (X) * e, oy + (Y) * e)
@@ -4606,10 +5054,28 @@ static void IconeDiscord(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
     #undef DPT
 }
 
+// seta de "abre fora" (o external-link do mockup): caixa 24x24 do Lucide, traco 2.2
+static void IconeAbreFora(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.2f * e * 1.25f;
+    #define XPT(X, Y) ImVec2(ox + (X) * e, oy + (Y) * e)
+    d->PathLineTo(XPT(14, 4)); d->PathLineTo(XPT(20, 4)); d->PathLineTo(XPT(20, 10)); d->PathStroke(cor, 0, w);
+    d->AddLine(XPT(20, 4), XPT(11, 13), cor, w);
+    d->PathLineTo(XPT(18, 14)); d->PathLineTo(XPT(18, 19)); d->PathLineTo(XPT(5, 19)); d->PathLineTo(XPT(5, 6));
+    d->PathLineTo(XPT(10, 6)); d->PathStroke(cor, 0, w);
+    #undef XPT
+}
+// seta para a direita (o "Todos os servidores ->" do mockup)
+static void IconeSetaDir(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.2f * e * 1.25f;
+    d->AddLine(ImVec2(ox + 5 * e, oy + 12 * e), ImVec2(ox + 19 * e, oy + 12 * e), cor, w);
+    d->PathLineTo(ImVec2(ox + 13 * e, oy + 6 * e)); d->PathLineTo(ImVec2(ox + 19 * e, oy + 12 * e));
+    d->PathLineTo(ImVec2(ox + 13 * e, oy + 18 * e)); d->PathStroke(cor, 0, w);
+}
+
 static void IconeNav(ImDrawList* dl, ImVec2 c, int tipo, ImU32 cor) {
     // a aba TrokMods usa o globo: o conteudo vem do blog, na web
     static const char* GL[7] = { I_CASA, I_SERVIDORES, I_PASTA, I_ENGRENAGEM, I_GALERIA, I_GLOBO, I_INFO };
-    if (tipo >= 0 && tipo < 7) Icone(dl, c, GL[tipo], cor, 19.0f);
+    if (tipo >= 0 && tipo < 7) Icone(dl, c, GL[tipo], cor, 21.0f);
 }
 
 static void DesenhaUI(HWND hwnd) {
@@ -4663,10 +5129,11 @@ static void DesenhaUI(HWND hwnd) {
                  ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollWithMouse);
     dl = ImGui::GetWindowDrawList();
 
-    // fundo limpo; se o servidor selecionado tem imagem de exibicao, ela cobre o palco
-    ImVec2 cen0(76, 0), cen1(ds.x, ds.y);
-    dl->AddRectFilled(ImVec2(0, 0), ds, Cinza(10));
-    // imagem so na Home, com CROSSFADE ao trocar de favorito
+    // fundo do site (#0B0B0C). Na Home, a imagem do servidor fica ANCORADA NA DIREITA, com a altura da janela
+    // (o mockup do launcher), escurecida a 82% e com os tres degrades do site: o da esquerda (texto em cima),
+    // o do topo e o da base. Trocar de favorito faz crossfade entre as duas imagens.
+    ImVec2 cen0(RAIL_W, 0), cen1(ds.x, ds.y);
+    dl->AddRectFilled(ImVec2(0, 0), ds, Tk::Fundo);
     IDirect3DTexture9* alvoF = (gTela == 0) ? gSrv[gSel].tex : NULL;
     if (alvoF != gFundoAtual) { gFundoAnt = gFundoAtual; gFundoAtual = alvoF; gFundoFade = 0.0f; }
     gFundoFade += dt * 3.0f;
@@ -4679,93 +5146,111 @@ static void DesenhaUI(HWND hwnd) {
         if (!fundo || alphasF[fz] <= 0.004f) continue;
         D3DSURFACE_DESC dsc;
         if (SUCCEEDED(fundo->GetLevelDesc(0, &dsc)) && dsc.Width && dsc.Height) {
-            float arTela = (cen1.x - cen0.x) / (cen1.y - cen0.y);
+            // a arte vai ate a borda esquerda da janela: passa por baixo do menu de vidro (os degrades
+            // continuam comecando no fim do trilho, como antes)
+            float hA = cen1.y - cen0.y, wA = cen1.x;
             float arImg = (float)dsc.Width / (float)dsc.Height;
-            ImVec2 uv0(0, 0), uv1(1, 1); // recorte "cover" centralizado
-            if (arImg > arTela) { float f = arTela / arImg; uv0.x = 0.5f - f * 0.5f; uv1.x = 0.5f + f * 0.5f; }
-            else                { float f = arImg / arTela; uv0.y = 0.5f - f * 0.5f; uv1.y = 0.5f + f * 0.5f; }
-            dl->AddImage((ImTextureID)fundo, cen0, cen1, uv0, uv1, IM_COL32(255, 255, 255, (int)(alphasF[fz] * 255.0f)));
+            float wImg = hA * arImg; // altura cheia, largura proporcional
+            ImVec2 a(cen1.x - wImg, cen0.y), b = cen1, uv0(0, 0), uv1(1, 1);
+            if (wImg > wA) { uv0.x = 1.0f - wA / wImg; a.x = 0.0f; } // mais larga que a janela: corta a esquerda
+            dl->AddImage((ImTextureID)fundo, a, b, uv0, uv1, IM_COL32(179, 179, 179, (int)(alphasF[fz] * 255.0f))); // brightness(.7) do site
+            if (a.x > 0.5f) // imagem estreita: a borda esquerda dela some no fundo
+                dl->AddRectFilledMultiColor(ImVec2(a.x, 0), ImVec2(a.x + 60.0f, ds.y), Tk::Fundo, Cinza(11, 0), Cinza(11, 0), Tk::Fundo);
             desenhouFundo = true;
         }
     }
     if (desenhouFundo) {
-        // sobreposicao preta translucida na capa INTEIRA: garante contraste em qualquer fundo
-        dl->AddRectFilled(cen0, cen1, Cinza(4, 56));
-        // veu de leitura esquerdo em CURVA (cosseno): escuro pleno ate ~1/3 da largura e
-        // rolagem suave ate ~88% - sem o degrau que o linear deixava na emenda
-        {
-            float wTela = cen1.x - cen0.x;
-            const int NF = 12;
-            const float FIM = 0.88f, INI = 0.36f; // pleno ate INI, zero em FIM
-            const float AMAX = 178.0f; // "um pouco mais fraco" (era 215)
-            float aAnt = AMAX;
-            for (int sg = 0; sg < NF; sg++) {
-                float t1 = (float)(sg + 1) / NF;
-                float a1;
-                if (t1 * FIM <= INI) a1 = AMAX;
-                else {
-                    float u = (t1 * FIM - INI) / (FIM - INI);
-                    a1 = AMAX * (0.5f + 0.5f * cosf(3.14159f * u)); // easing: sem quina no inicio nem no fim
-                }
-                // bordas EXATAS no pixel: sem sobreposicao (escurece em dobro) e sem fresta de AA
-                float px0 = floorf(cen0.x + wTela * FIM * sg / NF);
-                float px1 = floorf(cen0.x + wTela * FIM * t1);
-                dl->AddRectFilledMultiColor(ImVec2(px0, cen0.y), ImVec2(px1, cen1.y),
-                    Cinza(10, (int)aAnt), Cinza(10, (int)a1), Cinza(10, (int)a1), Cinza(10, (int)aAnt));
-                aAnt = a1;
-            }
+        // o destaque do INICIO do site, camada por camada: a imagem a 70% (acima), o granulado em overlay, a
+        // trama de pontos de 3 px e os tres degrades - na janela INTEIRA, por baixo do menu de vidro tambem.
+        // O granulado e a trama escondem as faixas do degrade escuro e a resolucao esticada da capa
+        const float W = ds.x, H = ds.y;
+        if (gTexGrao) { // overlay na parte escura = 2 x grao x fundo (blend so neste desenho; depois volta ao normal)
+            dl->AddCallback(CbBlendDobroMultiplica, NULL);
+            dl->AddImage((ImTextureID)gTexGrao, ImVec2(0, 0), ImVec2(W, H), ImVec2(0, 0), ImVec2(W * gEscala / 180.0f, H * gEscala / 180.0f));
+            dl->AddCallback(ImDrawCallback_ResetRenderState, NULL);
         }
-        dl->AddRectFilledMultiColor(ImVec2(cen0.x, cen1.y * 0.58f), cen1,
-            Cinza(10, 0), Cinza(10, 0), Cinza(10, 172), Cinza(10, 172));
-        dl->AddRectFilledMultiColor(cen0, ImVec2(cen1.x, 92), // topo legivel (nick/avatar/pill de update)
-            Cinza(8, 212), Cinza(8, 212), Cinza(8, 0), Cinza(8, 0));
+        if (gTexPontos) // 3 px de TELA (fisicos): a textura casa pixel a pixel, sem moire em escala nenhuma
+            dl->AddImage((ImTextureID)gTexPontos, ImVec2(0, 0), ImVec2(W, H), ImVec2(0, 0), ImVec2(W * gEscala / 3.0f, H * gEscala / 3.0f));
+        // emendas com a MESMA coordenada dos dois lados: sobrepor 1 px escurecia em dobro (risca visivel)
+        // esquerda -> direita: .90 em 0%, .60 em 32%, 0 em 64%
+        float x32 = floorf(W * 0.32f), x64 = floorf(W * 0.64f);
+        dl->AddRectFilledMultiColor(ImVec2(0, 0), ImVec2(x32, H),
+            IM_COL32(11, 11, 12, 230), IM_COL32(11, 11, 12, 153), IM_COL32(11, 11, 12, 153), IM_COL32(11, 11, 12, 230));
+        dl->AddRectFilledMultiColor(ImVec2(x32, 0), ImVec2(x64, H),
+            IM_COL32(11, 11, 12, 153), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 153));
+        // topo: .72 -> 0 em 190 px
+        dl->AddRectFilledMultiColor(ImVec2(0, 0), ImVec2(W, 190.0f),
+            IM_COL32(11, 11, 12, 184), IM_COL32(11, 11, 12, 184), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0));
+        // base, de baixo para cima: 1 em 0%, .85 em 15%, .30 em 40%, 0 em 60%
+        float y60 = floorf(H * 0.40f), y40 = floorf(H * 0.60f), y15 = floorf(H * 0.85f);
+        dl->AddRectFilledMultiColor(ImVec2(0, y60), ImVec2(W, y40),
+            IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 77), IM_COL32(11, 11, 12, 77));
+        dl->AddRectFilledMultiColor(ImVec2(0, y40), ImVec2(W, y15),
+            IM_COL32(11, 11, 12, 77), IM_COL32(11, 11, 12, 77), IM_COL32(11, 11, 12, 217), IM_COL32(11, 11, 12, 217));
+        dl->AddRectFilledMultiColor(ImVec2(0, y15), ImVec2(W, H),
+            IM_COL32(11, 11, 12, 217), IM_COL32(11, 11, 12, 217), Tk::Fundo, Tk::Fundo);
     }
 
-    // (a sidebar agora e desenhada no FIM do frame: expandida, ela cobre o conteudo
-    //  como no launcher da Rockstar - so a faixa recolhida de 76px reserva o espaco)
-    dl->AddRectFilled(ImVec2(0, 0), ImVec2(76, ds.y), IM_COL32(6, 6, 6, 250));
+    // (o trilho e desenhado no FIM do frame: expandido, ele cobre o conteudo como no launcher da
+    //  Rockstar - so a faixa recolhida reserva o espaco. O fundo dele e o vidro, desenhado la)
 
-    // ===== topo direita: nick + avatar = UM controle so (abre/fecha o dropdown de contas) =====
+    // ===== topo direita (mockup): [Atualizacao vX] [nick + avatar] | [minimizar] [fechar] =====
+    // nick + avatar sao UM controle so: abre/fecha o dropdown de contas
     gMouseNoDrop = gContasAnim > 0.01f &&
         io.MousePos.x >= gContasA.x && io.MousePos.x <= gContasB.x &&
         io.MousePos.y >= gContasA.y && io.MousePos.y <= gContasB.y;
-    ImGui::PushFont(gFtBold);
-    ImVec2 nsz = ImGui::CalcTextSize(gNick);
-    gCtTopA = ImVec2(ds.x - 160 - nsz.x, 6); gCtTopB = ImVec2(ds.x - 84, 54);
-    if (gAttEstado == 1) { // atualizacao disponivel: botao com icone de download antes do avatar
-        char rotA[48];
-        sprintf(rotA, T("Atualização %s"), gAttVersao);
-        ImVec2 asz = ImGui::CalcTextSize(rotA);
-        float bwA = asz.x + 44, bxA = gCtTopA.x - 12 - bwA;
-        ImGui::SetCursorScreenPos(ImVec2(bxA, 14));
-        if (ImGui::InvisibleButton("##attbtn", ImVec2(bwA, 32))) gAttPopup = true;
-        ImVec2 aba = ImGui::GetItemRectMin(), abb = ImGui::GetItemRectMax();
-        bool ahov = ImGui::IsItemHovered();
-        dl->AddRectFilled(aba, abb, ComAlpha(AC.cor, ahov ? 0.30f : 0.16f), 10);
-        dl->AddRect(aba, abb, AC.cor, 10, 0, 1.4f);
-        Icone(dl, ImVec2(aba.x + 17, (aba.y + abb.y) * 0.5f), I_BAIXAR, AC.hi, 16.0f);
-        dl->AddText(ImVec2(aba.x + 30, (aba.y + abb.y - asz.y) * 0.5f), AC.hi, rotA);
+    {
+        const float cyT = TOPO_H * 0.5f;
+        const float xDiv = ds.x - 18.0f - 38.0f - 2.0f - 38.0f - 11.0f; // a linha antes do minimizar
+        const float LAV = 35.0f;                                        // avatar (32 no mockup)
+        ImVec2 avB(floorf(xDiv - 15.5f), floorf(cyT + LAV * 0.5f)), avA(avB.x - LAV, avB.y - LAV);
+        ImGui::PushFont(gFtBold);
+        ImVec2 nsz = ImGui::CalcTextSize(gNick);
+        ImGui::PopFont();
+        gCtTopA = ImVec2(avA.x - 11.0f - nsz.x - 8.0f, avA.y - 2.0f); gCtTopB = ImVec2(avB.x + 2.0f, avB.y + 2.0f);
+        if (gAttEstado == 1) { // atualizacao disponivel: o .tk-btn-atualiza do mockup antes da conta
+            char rotA[48];
+            _snprintf(rotA, sizeof(rotA) - 1, T("Atualização %s"), gAttVersao); rotA[sizeof(rotA) - 1] = 0;
+            ImGui::PushFont(gFtBotaoPost);
+            ImVec2 asz = ImGui::CalcTextSize(rotA);
+            float bwA = 13.0f + 17.0f + 8.0f + asz.x + 13.0f, bxA = floorf(gCtTopA.x - 15.5f - bwA);
+            ImGui::SetCursorScreenPos(ImVec2(bxA, floorf(cyT - 19.0f)));
+            if (ImGui::InvisibleButton("##attbtn", ImVec2(bwA, 38))) gAttPopup = true;
+            ImVec2 aba = ImGui::GetItemRectMin(), abb = ImGui::GetItemRectMax();
+            bool ahov = ImGui::IsItemHovered();
+            dl->AddRectFilled(aba, abb, ComAlpha(AC.cor, ahov ? 0.16f : 0.09f), 8.0f);
+            dl->AddRect(aba, abb, ComAlpha(AC.cor, ahov ? 1.0f : 0.72f), 8.0f, 0, 1.5f);
+            Icone(dl, ImVec2(aba.x + 13.0f + 8.5f, (aba.y + abb.y) * 0.5f), I_BAIXAR, AC.cor, 16.0f);
+            dl->AddText(ImVec2(aba.x + 13.0f + 17.0f + 8.0f, (aba.y + abb.y - asz.y) * 0.5f), AC.cor, rotA);
+            ImGui::PopFont();
+        }
+        ImGui::SetCursorScreenPos(gCtTopA);
+        if (ImGui::InvisibleButton("##contatopo", ImVec2(gCtTopB.x - gCtTopA.x, gCtTopB.y - gCtTopA.y))) {
+            gEscolherAvatar = !gEscolherAvatar;
+            if (gEscolherAvatar) gContaEdit = -1;
+        }
+        bool ctHov = ImGui::IsItemHovered() || gEscolherAvatar;
+        ImGui::PushFont(gFtBold);
+        dl->AddText(ImVec2(avA.x - 11.0f - nsz.x, floorf(cyT - nsz.y * 0.5f)), ctHov ? Cinza(255) : Tk::Texto, gNick);
+        ImGui::PopFont();
+        dl->AddRectFilled(avA, avB, Tk::Ativo, 8.0f);
+        DesenhaAvatar(dl, ImVec2(avA.x + 1, avA.y + 1), ImVec2(avB.x - 1, avB.y - 1), gPerfis[gPerfilSel].avatar, gAvatarCor, 7.0f);
+        dl->AddRect(avA, avB, gEscolherAvatar ? AC.cor : (ctHov ? Cinza(255, 120) : Cinza(255, 26)), 8.0f, 0, gEscolherAvatar ? 1.6f : 1.0f);
     }
-    ImGui::SetCursorScreenPos(gCtTopA);
-    if (ImGui::InvisibleButton("##contatopo", ImVec2(gCtTopB.x - gCtTopA.x, gCtTopB.y - gCtTopA.y))) {
-        gEscolherAvatar = !gEscolherAvatar;
-        if (gEscolherAvatar) gContaEdit = -1;
-    }
-    bool ctHov = ImGui::IsItemHovered() || gEscolherAvatar;
-    dl->AddRectFilled(gCtTopA, gCtTopB, Cinza(255, ctHov ? 20 : 14), 13); // pill sempre visivel
-    dl->AddText(ImVec2(ds.x - 148 - nsz.x, 22), ctHov ? Cinza(255) : Cinza(245), gNick);
-    ImGui::PopFont();
-    ImVec2 avA(ds.x - 133, 8), avB(ds.x - 88, 53); // 45 px
-    DesenhaAvatar(dl, avA, avB, gPerfis[gPerfilSel].avatar, gAvatarCor, 13.0f);
-    if (gEscolherAvatar) dl->AddRect(avA, avB, AC.cor, 12, 0, 2.0f); // aberto: circulo no destaque
-    else if (ctHov) dl->AddRect(avA, avB, Cinza(255), 12, 0, 2.0f);
-    // sem iniciais: o quadrado de cor e o avatar (imagens do usuario entram depois)
     BotaoJanela(dl, hwnd);
 
     // lembra o ultimo servidor selecionado (persiste na troca, nao no fechamento)
     {
         static int selAnt = -1;
         if (gSel != selAnt) { if (selAnt >= 0) SalvarConfig(); selAnt = gSel; }
+    }
+
+    // Home: as setas do teclado trocam o servidor, como o destaque do inicio do site (que tambem nao tem
+    // setinhas na tela). Sem Ctrl/Alt/Shift, fora de campo de texto e sem janela/menu aberto por cima
+    if (gTela == 0 && gNumSrv > 1 && !io.KeyCtrl && !io.KeyAlt && !io.KeyShift && !io.WantTextInput && !gConectando &&
+        gContasAnim <= 0.01f && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel)) {
+        if (ImGui::IsKeyPressed(ImGuiKey_RightArrow)) gSel = (gSel + 1) % gNumSrv;
+        else if (ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) gSel = (gSel + gNumSrv - 1) % gNumSrv;
     }
 
     // ===== telas =====
@@ -4776,73 +5261,84 @@ static void DesenhaUI(HWND hwnd) {
     const char* modoSel = sSel.modoQ[0] ? sSel.modoQ : sSel.modo;
 
     if (gTela == 0) {
-        // ---- HOME ----
-        float hx = 116, hy = ds.y * 0.20f;
-        float yMeta = hy + 72; // FIXO: os botoes nao mudam de lugar com/sem logo
-        // slide estilo Rockstar: ao ENTRAR na home ou TROCAR de servidor, o conteudo
-        // do heroi desliza da direita pra esquerda (o rail fica parado sob o mouse)
+        // ---- HOME (mockup "Trok Launcher - inicio") ----
+        // De baixo para cima: as abas dos FAVORITOS (fio em cima, jogadores e ping, nome), o titulo da secao e,
+        // acima, o bloco do servidor: selo, nome grande (ou a logo), ip com copiar, jogadores e ping, Jogar e os
+        // links do servidor. Medidas do mockup x 1,11.
+        const float XL = RAIL_W + 44.0f, XR = ds.x - 44.0f, WCont = XR - XL;
+        const float GAPV = 13.3f; // o gap de 12 do bloco do servidor
+        // slide estilo Rockstar: ao ENTRAR na home ou TROCAR de servidor, o bloco do servidor desliza um tico
         {
             static int telaAnt = -9, selAnt = -9;
             if (telaAnt != 0 || selAnt != gSel) gHomeSlide = 0.0f;
             telaAnt = 0;
             selAnt = gSel;
         }
-        gHomeSlide += dt * 1.1f; // ~900ms: bem devagar, deslizada preguicosa
+        gHomeSlide += dt * 1.6f;
         if (gHomeSlide > 1.0f) gHomeSlide = 1.0f;
         float invH = 1.0f - gHomeSlide;
         float easeH = 1.0f - invH * invH * invH * invH * invH; // quint out: pousa de leve
-        float offH = 7.0f * (1.0f - easeH); // deslocamento minimo, assenta macio
-        hx += offH;
-        int vtxHero0 = dl->VtxBuffer.Size; // fade de entrada aplicado nos vertices do heroi
+        float offH = 8.0f * (1.0f - easeH);
+
+        // ---- geometria de baixo para cima ----
+        const float hAba = 56.0f;                      // fio + meta + nome
+        const float yAbas = ds.y - 33.0f - hAba;
+        const float yFav = yAbas - 4.4f - 15.0f;       // linha "FAVORITOS ... Todos os servidores"
+        const float hBotoes = 11.0f + 53.0f;           // padding-top + Jogar (48 no mockup)
+        float hNome = 42.5f;                           // 38 px com line-height 1,12
+        float lhLogo = 0, lwLogo = 0;
         if (sSel.texLogo) {
-            // logo do servidor (discreta) + nome pequeno e sutil embaixo
             D3DSURFACE_DESC ld;
             if (SUCCEEDED(sSel.texLogo->GetLevelDesc(0, &ld)) && ld.Height) {
-                float lh = 60.0f, lw = lh * (float)ld.Width / (float)ld.Height;
-                float lwMax = ds.x * 0.34f;
-                if (lw > lwMax) { lw = lwMax; lh = lw * (float)ld.Height / (float)ld.Width; }
-                dl->AddImage((ImTextureID)sSel.texLogo, ImVec2(hx, hy - 8), ImVec2(hx + lw, hy - 8 + lh));
-                // yMeta fica FIXO: Jogar/Copiar IP nao mudam de lugar com ou sem logo
+                lhLogo = 58.0f; lwLogo = lhLogo * (float)ld.Width / (float)ld.Height;
+                if (lwLogo > 520.0f) { lwLogo = 520.0f; lhLogo = lwLogo * (float)ld.Height / (float)ld.Width; }
+                hNome = lhLogo;
             }
+        }
+        const float hBloco = 14.0f + GAPV + hNome + GAPV + 29.0f + GAPV + 16.0f + GAPV + hBotoes;
+        float y = yFav - 62.0f - hBloco;               // margin-top 56 do mockup antes dos FAVORITOS
+        float hx = XL + offH;
+        int vtxHero0 = dl->VtxBuffer.Size;             // fade de entrada aplicado nos vertices do bloco
+
+        // selo: o modo do servidor em maiusculas espacadas (o "Brasil - HZRP v1.8.1" do mockup)
+        {
+            char selo[96];
+            const char* fonteSelo = (modoSel && modoSel[0]) ? modoSel : "SA-MP";
+            int si = 0;
+            for (const char* pc = fonteSelo; *pc && si < 94; pc++) selo[si++] = (*pc >= 'a' && *pc <= 'z') ? *pc - 32 : *pc;
+            selo[si] = 0;
+            ImGui::PushClipRect(ImVec2(hx, y - 2), ImVec2(hx + 640.0f, y + 18), true);
+            TextoMicro(dl, ImVec2(hx, y), Tk::Texto2, selo, 0.3f);
+            ImGui::PopClipRect();
+        }
+        y += 14.0f + GAPV;
+        // nome grande (Montserrat Bold 38) ou a logo do servidor no lugar dele
+        if (sSel.texLogo && lhLogo > 0) {
+            dl->AddImage((ImTextureID)sSel.texLogo, ImVec2(hx, y), ImVec2(hx + lwLogo, y + lhLogo));
         } else {
             ImGui::PushFont(gFtDisplay);
-            char nomeUp[96];
-            int ni = 0;
-            for (const char* pc = nomeSel; *pc && ni < 94; pc++) nomeUp[ni++] = (*pc >= 'a' && *pc <= 'z') ? *pc - 32 : *pc;
-            nomeUp[ni] = 0;
-            ImVec2 nUpSz = ImGui::CalcTextSize(nomeUp);
-            dl->AddText(ImVec2(hx, hy + 10), Cinza(245), nomeUp);
+            ImGui::PushClipRect(ImVec2(hx, y - 4), ImVec2(XR, y + hNome + 6), true);
+            dl->AddText(ImVec2(hx - 1.0f, y), Tk::Texto, nomeSel);
+            ImGui::PopClipRect();
             ImGui::PopFont();
         }
-
-        float metaX = hx + 2;
-        if (sSel.texLogo) { // com logo, o nome abre a linha de infos em BOLD
-            ImGui::PushFont(gFtBold);
-            ImVec2 nmSz = ImGui::CalcTextSize(nomeSel);
-            dl->AddText(ImVec2(metaX, yMeta - 1), Cinza(238), nomeSel);
-            ImGui::PopFont();
-            metaX += nmSz.x + 14;
-        }
-        ImGui::PushFont(gFtMono);
-        ImVec2 ipSz = ImGui::CalcTextSize(sSel.ip);
-        char resto[220];
-        if (sSel.ping >= 0)
-            sprintf(resto, T("jogadores %d/%d   ping %d ms   %s"), sSel.online, sSel.maxp, sSel.ping, modoSel);
-        else
-            sprintf(resto, T("consultando servidor...   %s"), modoSel);
-        ImVec2 rSz = ImGui::CalcTextSize(resto);
-        dl->AddText(ImVec2(metaX, yMeta), Cinza(182), sSel.ip);
-        // icone COPIAR colado no ip (respiro maior antes do resto, p/ ler como par ip+copiar)
+        y += hNome + GAPV;
+        // ip + copiar (o .tk-copiar do mockup)
         {
             static float tCopiado = 0;
             if (tCopiado > 0) tCopiado -= dt;
-            float icoX = metaX + ipSz.x + 6;
-            ImGui::SetCursorScreenPos(ImVec2(icoX - 3, yMeta - 4));
-            bool cpc = ImGui::InvisibleButton("##copiaip", ImVec2(24, 26));
+            ImGui::PushFont(gFtMono);
+            ImVec2 ipSz = ImGui::CalcTextSize(sSel.ip);
+            dl->AddText(ImVec2(hx, floorf(y + (29.0f - ipSz.y) * 0.5f)), IM_COL32(210, 210, 214, 255), sSel.ip);
+            ImGui::PopFont();
+            ImGui::SetCursorScreenPos(ImVec2(hx + ipSz.x + 6.0f, y));
+            bool cpc = ImGui::InvisibleButton("##copiaip", ImVec2(29, 29));
             bool cph = ImGui::IsItemHovered();
-            float ccx = icoX + 7, ccy = yMeta + ipSz.y * 0.5f;
-            if (tCopiado > 0) Icone(dl, ImVec2(ccx, ccy), I_CHECK, AC.hi, 16.0f);
-            else Icone(dl, ImVec2(ccx, ccy), I_COPIAR, Cinza(cph ? 250 : 150), 15.0f);
+            ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
+            if (cph) dl->AddRectFilled(ca, cb, Cinza(255, 16), 6.7f);
+            ImVec2 cc((ca.x + cb.x) * 0.5f, (ca.y + cb.y) * 0.5f);
+            if (tCopiado > 0) Icone(dl, cc, I_CHECK, AC.cor, 15.5f);
+            else Icone(dl, cc, I_COPIAR, cph ? Tk::Texto : Tk::Texto3, 15.5f);
             Dica(tCopiado > 0 ? T("Copiado!") : T("Copiar o IP"));
             if (cpc && OpenClipboard(hwnd)) {
                 EmptyClipboard();
@@ -4852,62 +5348,76 @@ static void DesenhaUI(HWND hwnd) {
                 tCopiado = 1.4f;
             }
         }
-        // 2a linha de info: jogadores/ping/modo abaixo do ip (respira melhor)
-        dl->AddText(ImVec2(hx + 2, yMeta + 26), Cinza(170), resto);
-        ImGui::PopFont();
-
-        // botao Jogar - retangulo arredondado, gradiente limpo, sem luz nem sombra
+        y += 29.0f + GAPV;
+        // jogadores (bolinha verde) e ping, numeros em negrito
         {
-        ImGui::SetCursorScreenPos(ImVec2(hx, yMeta + 62)); // desceu: a info agora tem 2 linhas
-        ImGui::PushFont(gFtBotao);
-        bool clicou = ImGui::InvisibleButton("##jogar", ImVec2(256, 62));
-        ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
-        bool hov = ImGui::IsItemHovered();
-        // formato original (raio 16); fade LEVE (cor -> um passo em direcao ao hi) e halo bem sutil
-        ImU32 gTopo = hov ? LerpCor(AC.cor, IM_COL32(255, 255, 255, 255), 0.08f) : AC.cor;
-        ImU32 gBase = LerpCor(gTopo, AC.hi, 0.55f);
-        BrilhoSuave(dl, a, b, AC.cor, hov ? 12.0f : 9.0f, hov ? 38 : 22); // hover = o "normal" de antes
-        RectGradVertical(dl, a, b, gTopo, gBase, 16.0f);
-        ImVec2 jsz = ImGui::CalcTextSize(T("Jogar"));
-        float cxm = (a.x + b.x) * 0.5f + 12.0f;
-        dl->AddText(ImVec2(cxm - jsz.x * 0.5f, (a.y + b.y - jsz.y) * 0.5f - 1), TextoSobreAccent(AC.cor), T("Jogar"));
-        float ty = (a.y + b.y) * 0.5f, tx = cxm - jsz.x * 0.5f - 30.0f;
-        dl->AddTriangleFilled(ImVec2(tx, ty - 9), ImVec2(tx, ty + 9), ImVec2(tx + 15, ty), TextoSobreAccent(AC.cor));
-        ImGui::PopFont();
-        if (clicou && !gConectando) IniciarConexao(nomeSel, sSel.ip);
+            float sx = hx;
+            float cyS = y + 8.0f;
+            BolaStatus(dl, ImVec2(sx + 3.9f, cyS), sSel.ping, sSel.senha, 3.9f);
+            sx += 7.8f + 7.8f;
+            if (sSel.ping >= 0) {
+                char nJ[32], nP[24];
+                _snprintf(nJ, sizeof(nJ) - 1, "%d/%d", sSel.online, sSel.maxp); nJ[sizeof(nJ) - 1] = 0;
+                _snprintf(nP, sizeof(nP) - 1, "%d ms", sSel.ping); nP[sizeof(nP) - 1] = 0;
+                const char* rotJ = T(" jogadores");
+                const char* rotP = T(" de ping");
+                ImGui::PushFont(gFtBotaoPost); ImVec2 s1 = ImGui::CalcTextSize(nJ); ImGui::PopFont();
+                ImGui::PushFont(gFtMono);      ImVec2 s2 = ImGui::CalcTextSize(rotJ); ImGui::PopFont();
+                ImGui::PushFont(gFtBotaoPost); dl->AddText(ImVec2(sx, cyS - s1.y * 0.5f), Tk::Texto, nJ); ImGui::PopFont();
+                ImGui::PushFont(gFtMono);      dl->AddText(ImVec2(sx + s1.x, cyS - s2.y * 0.5f), Tk::Texto3, rotJ); ImGui::PopFont();
+                sx += s1.x + s2.x + 17.8f;
+                ImGui::PushFont(gFtBotaoPost); ImVec2 s3 = ImGui::CalcTextSize(nP); dl->AddText(ImVec2(sx, cyS - s3.y * 0.5f), Tk::Texto, nP); ImGui::PopFont();
+                ImGui::PushFont(gFtMono);      ImVec2 s4 = ImGui::CalcTextSize(rotP); dl->AddText(ImVec2(sx + s3.x, cyS - s4.y * 0.5f), Tk::Texto3, rotP); ImGui::PopFont();
+            } else {
+                ImGui::PushFont(gFtMono);
+                const char* rotC = T("consultando servidor...");
+                ImVec2 s1 = ImGui::CalcTextSize(rotC);
+                dl->AddText(ImVec2(sx, cyS - s1.y * 0.5f), Tk::Texto3, rotC);
+                ImGui::PopFont();
+            }
         }
-        // (o Copiar IP virou icone sutil na linha de infos, ao lado do ip)
-
-        // links oficiais do servidor (configurados no Editar servidor)
+        y += 16.0f + GAPV + 11.0f;
+        // Jogar (o .tk-btn-primario de 48) e os links oficiais do servidor (.tk-btn-sec com a seta de abrir fora)
         {
-            float sx = hx + 2;
-            ImGui::PushFont(gFtBold);
+            ImGui::PushFont(gFtBotao);
+            float wJ = 33.0f + 15.5f + 11.0f + ImGui::CalcTextSize(T("Jogar")).x + 33.0f;
+            ImGui::PopFont();
+            ImGui::SetCursorScreenPos(ImVec2(hx, y));
+            ImGui::PushID("jogarhome");
+            bool clicou = ImGui::InvisibleButton("##jogar", ImVec2(wJ, 53));
+            ImGui::PopID();
+            ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+            bool hov = ImGui::IsItemHovered();
+            dl->AddRectFilled(a, b, hov ? LerpCor(AC.cor, IM_COL32(255, 255, 255, 255), 0.08f) : AC.cor, 8.0f);
+            ImU32 ctJ = TextoSobreAccent(AC.cor);
+            float tx = a.x + 33.0f, ty = (a.y + b.y) * 0.5f;
+            dl->AddTriangleFilled(ImVec2(tx + 2.0f, ty - 7.5f), ImVec2(tx + 2.0f, ty + 7.5f), ImVec2(tx + 14.0f, ty), ctJ);
+            ImGui::PushFont(gFtBotao);
+            ImVec2 jsz = ImGui::CalcTextSize(T("Jogar"));
+            dl->AddText(ImVec2(tx + 15.5f + 11.0f, ty - jsz.y * 0.5f), ctJ, T("Jogar"));
+            ImGui::PopFont();
+            if (clicou && !gConectando) IniciarConexao(nomeSel, sSel.ip);
+            float sx = b.x + 11.0f;
+            ImGui::PushFont(gFtBotaoPost);
             for (int q = 0; q < 4; q++) {
                 if (!sSel.sites[q][0]) continue;
                 char rotL[24], urlL[150];
                 SepararLink(sSel.sites[q], q, rotL, sizeof(rotL), urlL, sizeof(urlL));
                 ImVec2 ssz = ImGui::CalcTextSize(rotL);
-                ImGui::SetCursorScreenPos(ImVec2(sx, yMeta + 140)); // acompanha as 2 linhas de info
+                float wL = 15.5f + ssz.x + 6.7f + 13.3f + 15.5f;
+                ImGui::SetCursorScreenPos(ImVec2(sx, y + 4.5f));
                 char sid[16]; sprintf(sid, "##lnk%d", q);
-                bool clL = ImGui::InvisibleButton(sid, ImVec2(ssz.x + 8, 28));
-                ImVec2 lba = ImGui::GetItemRectMin();
+                bool clL = ImGui::InvisibleButton(sid, ImVec2(wL, 44));
+                ImVec2 la = ImGui::GetItemRectMin(), lb = ImGui::GetItemRectMax();
                 bool lbh = ImGui::IsItemHovered();
-                // sem borda: so o texto; sublinhado no hover
-                dl->AddText(ImVec2(lba.x + 4, lba.y + 4), Cinza(lbh ? 255 : 205), rotL);
-                if (lbh) dl->AddRectFilled(ImVec2(lba.x + 4, lba.y + 25), ImVec2(lba.x + 4 + ssz.x, lba.y + 26.5f), Cinza(235));
-                if (lbh) { // pra onde o link vai, como a barra de status do navegador.
-                    char dica[224];  // texto solto em cinza claro, sem caixa (o tooltip padrao
+                if (lbh) dl->AddRectFilled(la, lb, Cinza(255, 18), 8.0f); // link sem contorno (pedido): so o realce no hover
+                dl->AddText(ImVec2(la.x + 15.5f, (la.y + lb.y - ssz.y) * 0.5f), Tk::Texto, rotL);
+                IconeAbreFora(dl, ImVec2(la.x + 15.5f + ssz.x + 6.7f + 6.7f, (la.y + lb.y) * 0.5f), Tk::Texto, 13.3f);
+                if (lbh) { // pra onde o link vai, como a barra de status do navegador
+                    char dica[224];
                     if (strstr(urlL, "://")) { strncpy(dica, urlL, sizeof(dica) - 1); dica[sizeof(dica) - 1] = 0; }
-                    else sprintf(dica, "https://%.190s", urlL);          // sairia sem respiro: a tela roda com padding 0)
-                    ImGui::PushFont(gFtMiniLeve);      // so o texto, seguindo o mouse (sem caixa)
-                    ImVec2 tsz = ImGui::CalcTextSize(dica);
-                    ImVec2 mp = ImGui::GetMousePos(), tela = ImGui::GetIO().DisplaySize;
-                    float px = mp.x + 18, py = mp.y + 20;
-                    if (px + tsz.x > tela.x - 12) px = mp.x - 18 - tsz.x;  // vira pro outro lado na borda
-                    if (px < 12) px = 12;
-                    if (py + tsz.y > tela.y - 10) py = mp.y - 10 - tsz.y;
-                    ImGui::GetForegroundDrawList()->AddText(ImVec2(px, py), Cinza(175), dica);
-                    ImGui::PopFont();
+                    else sprintf(dica, "https://%.190s", urlL);
+                    ImGui::SetTooltip("%s", dica);
                 }
                 if (clL) {
                     char url[224];
@@ -4916,13 +5426,11 @@ static void DesenhaUI(HWND hwnd) {
                     else sprintf(url, "https://%.190s", urlL);
                     if (url[0]) ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
                 }
-                sx += ssz.x + 8 + 20;
+                sx += wL + 11.0f;
             }
             ImGui::PopFont();
         }
-
-        // fade de ENTRADA do heroi: comeca em 35% e fecha rapido (em ~60% do slide) -
-        // alto o bastante pra nao "descolar" as camadas de sombra (o artefato de antes)
+        // fade de ENTRADA do bloco do servidor (comeca em 35% e fecha rapido)
         if (gHomeSlide < 0.6f) {
             float fT = gHomeSlide / 0.6f;
             int fA = (int)(255.0f * (0.35f + 0.65f * fT));
@@ -4933,164 +5441,155 @@ static void DesenhaUI(HWND hwnd) {
                 dl->VtxBuffer[vv].col = (c & 0x00FFFFFF) | (a << 24);
             }
         }
-        // ---- rail de favoritos (com scroll horizontal) ----
-        hx -= offH; // o slide e SO do conteudo de cima: o rail nao sai do lugar
-        float ry = ds.y - 202;
-        ImGui::PushFont(gFtMini);
-        ImVec2 favSz = ImGui::CalcTextSize(T("F A V O R I T O S"));
-        dl->AddText(ImVec2(hx, ry - 22), Cinza(156), T("F A V O R I T O S"));
-        ImGui::PopFont();
-        ImGui::SetCursorScreenPos(ImVec2(hx, ry));
+
+        // ---- FAVORITOS: titulo da secao + "Todos os servidores" ----
+        TextoMicro(dl, ImVec2(XL, yFav), Tk::Texto3, T("F A V O R I T O S"), 0.3f);
+        {
+            const char* rotT = T("Todos os servidores");
+            ImGui::PushFont(gFtMini);
+            ImVec2 tsz = ImGui::CalcTextSize(rotT);
+            float wT = tsz.x + 6.7f + 14.4f;
+            ImGui::SetCursorScreenPos(ImVec2(XR - wT, yFav - 3.0f));
+            bool clT = ImGui::InvisibleButton("##todossrv", ImVec2(wT, tsz.y + 6.0f));
+            bool hT = ImGui::IsItemHovered();
+            ImU32 cT = hT ? Tk::Texto : Tk::Texto2;
+            dl->AddText(ImVec2(XR - wT, yFav - 1.0f), cT, rotT);
+            IconeSetaDir(dl, ImVec2(XR - 7.2f, yFav - 1.0f + tsz.y * 0.5f), cT, 14.4f);
+            ImGui::PopFont();
+            if (clT) { gTela = 1; gSubAba = 0; }
+        }
+        // ---- abas dos favoritos (o .tk-aba-hero do mockup): 5 por vez; com mais, a fileira rola ----
+        const float GAPA = 22.2f;
+        const float wAba = floorf((WCont - 4.0f * GAPA) / 5.0f);
+        ImGui::SetCursorScreenPos(ImVec2(XL, yAbas - 2.0f));
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 9.0f);
-        ImGui::BeginChild("##rail", ImVec2(ds.x - hx - 36, 170), false, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 4.0f);
+        ImGui::BeginChild("##abasfav", ImVec2(WCont, hAba + 10.0f), false,
+                          ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         ImDrawList* rl = ImGui::GetWindowDrawList();
-        float cx = 0;
         for (int i = 0; i < gNumSrv; i++) {
             EnterCriticalSection(&gLock);
             Servidor sc = gSrv[i];
             LeaveCriticalSection(&gLock);
-            ImGui::SetCursorPos(ImVec2(cx, 6));
+            ImGui::SetCursorPos(ImVec2(i * (wAba + GAPA), 2.0f));
             char id[12]; sprintf(id, "##card%d", i);
-            bool cl = ImGui::InvisibleButton(id, ImVec2(274, 144));
+            bool cl = ImGui::InvisibleButton(id, ImVec2(wAba, hAba));
             if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) { // botao direito = opcoes
                 gEditSrv = i;
                 strncpy(gEditApelido, sc.apelido, sizeof(gEditApelido) - 1);
             }
-            // arrastar o card: ele some daqui e o card completo segue o mouse (ghost global)
+            // arrastar a aba: ela some daqui e uma copia segue o mouse (ghost global)
             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip)) {
                 ImGui::SetDragDropPayload("TROK_FAV", &i, sizeof(int));
                 ImGui::EndDragDropSource();
             }
             ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
             bool ch = ImGui::IsItemHovered();
-            // hover animado: zoom da capa, logo e o levantar do card interpolam suave
             float velH = dt * 10.0f; if (velH > 1.0f) velH = 1.0f;
             gHovCard[i] += ((ch ? 1.0f : 0.0f) - gHovCard[i]) * velH;
             float ha = gHovCard[i];
-            ca.y -= 4.0f * ha; cb.y -= 4.0f * ha;
             const ImGuiPayload* payAtivo = ImGui::GetDragDropPayload();
             bool euArrastado = payAtivo && payAtivo->IsDataType("TROK_FAV") && *(const int*)payAtivo->Data == i;
+            bool sel = (i == gSel);
+            ImU32 corAba = sel ? Cinza(255) : LerpCor(Tk::Texto3, IM_COL32(228, 228, 231, 255), ha);
+            ImU32 corFio = sel ? Cinza(255) : Cinza(255, (int)(51.0f + (115.0f - 51.0f) * ha));
             bool mhc = false;
-            if (!euArrastado) {
-            rl->AddRectFilled(ca, cb, IM_COL32(18, 18, 18, ch ? 236 : 205), 13);
-            if (sc.tex) // capa do servidor no card: zoom por ser miniatura (+ um pouco no hover)
-                ImagemCapa(rl, sc.tex, ca, cb, 13.0f, (int)(194.0f - 22.0f * ha), 1.35f + 0.20f * ha);
-            ImU32 borda = (i == gSel) ? AC.cor : (ch ? Cinza(74) : Cinza(40));
-            rl->AddRect(ca, cb, borda, 13, 0, (i == gSel) ? 2.0f : 1.0f);
-            // bolinha de status + nome clipado ANTES do "..." (que fica no topo direito)
-            BolaStatus(rl, ImVec2(ca.x + 19, ca.y + 22), sc.ping, sc.senha);
-            ImGui::PushClipRect(ImVec2(ca.x, ca.y), ImVec2(cb.x - 44, ca.y + 36), true);
-            ImGui::PushFont(gFtCardNome);
-            rl->AddText(ImVec2(ca.x + 30, ca.y + 12), Cinza(240), NomeExib(sc));
-            ImGui::PopFont();
-            ImGui::PopClipRect();
-            // (a descricao/modo saiu dos mini cards - pedido dele; o modo continua na Home grande)
-            if (sc.texLogo) { // logo maior, centralizada no espaco livre entre o nome e os numeros
-                D3DSURFACE_DESC ld2;
-                if (SUCCEEDED(sc.texLogo->GetLevelDesc(0, &ld2)) && ld2.Height) {
-                    float escL = 1.0f + 0.10f * ha; // hover: logo cresce junto com o zoom da capa
-                    float lh2 = 40.0f * escL, lw2 = lh2 * (float)ld2.Width / (float)ld2.Height;
-                    if (lw2 > 160.0f * escL) { lw2 = 160.0f * escL; lh2 = lw2 * (float)ld2.Height / (float)ld2.Width; }
-                    float topoL = ca.y + 36, baseL = cb.y - 28;
-                    float lx = (ca.x + cb.x - lw2) * 0.5f, ly = topoL + (baseL - topoL - lh2) * 0.5f;
-                    rl->AddImage((ImTextureID)sc.texLogo, ImVec2(lx, ly), ImVec2(lx + lw2, ly + lh2));
-                }
-            }
-            ImGui::PushFont(gFtMonoS);
-            char pinfo[48];
-            if (sc.ping >= 0) sprintf(pinfo, "%d/%d", sc.online, sc.maxp); else strcpy(pinfo, "--/--");
-            rl->AddText(ImVec2(ca.x + 15, cb.y - 28), Cinza(158), pinfo);
-            char ptxt[24];
-            if (sc.ping >= 0) sprintf(ptxt, "%d ms", sc.ping); else strcpy(ptxt, "-- ms");
-            ImVec2 psz = ImGui::CalcTextSize(ptxt);
-            rl->AddText(ImVec2(cb.x - 15 - psz.x, cb.y - 28), CorPing(sc.ping), ptxt);
-            ImGui::PopFont();
-            // "..." do card: editar apelido/imagem/remover
-            ImVec2 ma(cb.x - 36, ca.y + 8), mb(cb.x - 10, ca.y + 28);
-            mhc = ImGui::IsMouseHoveringRect(ma, mb);
-            if (mhc && !gMouseNoDrop) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-            DesenhaReticencias(rl, ma, mb, mhc);
-            if (mhc && !gMouseNoDrop) ImGui::SetTooltip(T("Editar servidor"));
-            if (mhc && !gMouseNoDrop && ImGui::IsMouseClicked(0)) {
-                gEditSrv = i;
-                strncpy(gEditApelido, sc.apelido, sizeof(gEditApelido) - 1);
-            }
+            if (euArrastado) {
+                rl->AddRectFilled(ca, ImVec2(cb.x, ca.y + 2.0f), ComAlpha(AC.cor, 0.5f));
             } else {
-                rl->AddRect(ca, cb, Cinza(46, 200), 13, 0, 1.0f); // slot vazio: o card esta no mouse
+                rl->AddRectFilled(ca, ImVec2(cb.x, ca.y + 2.0f), corFio);
+                // meta: bolinha + "135/600 - 140 ms" em maiusculas espacadas
+                char meta[48];
+                if (sc.ping >= 0) _snprintf(meta, sizeof(meta) - 1, "%d/%d \xC2\xB7 %d MS", sc.online, sc.maxp, sc.ping);
+                else _snprintf(meta, sizeof(meta) - 1, "%s", T("SEM RESPOSTA"));
+                meta[sizeof(meta) - 1] = 0;
+                float yMeta = ca.y + 15.5f;
+                BolaStatus(rl, ImVec2(ca.x + 3.4f, yMeta + 6.0f), sc.ping, sc.senha, 3.3f);
+                ImGui::PushClipRect(ImVec2(ca.x, ca.y), ImVec2(cb.x - (ch ? 30.0f : 0.0f), cb.y), true);
+                TextoMicro(rl, ImVec2(ca.x + 6.7f + 7.8f, yMeta), ComAlpha(corAba, 0.9f), meta, 0.2f);
+                ImGui::PopClipRect();
+                // nome (cortado com "..." na largura da aba)
+                ImGui::PushFont(gFtCardNome);
+                TextoTruncado(rl, ImVec2(ca.x, yMeta + 14.0f + 7.8f), wAba - 2.0f, corAba, NomeExib(sc));
+                ImGui::PopFont();
+                // "..." no hover: editar o favorito (apelido, imagem, logo, links)
+                if (ch || gHovCard[i] > 0.05f) {
+                    ImVec2 ma(cb.x - 28.0f, yMeta - 4.0f), mb(cb.x, yMeta + 16.0f);
+                    mhc = ImGui::IsMouseHoveringRect(ma, mb) && !gMouseNoDrop;
+                    if (mhc) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+                    if (ch) DesenhaReticencias(rl, ma, mb, mhc);
+                    if (mhc) ImGui::SetTooltip(T("Editar servidor"));
+                    if (mhc && ImGui::IsMouseClicked(0)) {
+                        gEditSrv = i;
+                        strncpy(gEditApelido, sc.apelido, sizeof(gEditApelido) - 1);
+                    }
+                }
             }
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* pay = ImGui::AcceptDragDropPayload("TROK_FAV",
                         ImGuiDragDropFlags_AcceptBeforeDelivery | ImGuiDragDropFlags_AcceptNoDrawDefaultRect)) {
                     float pulso = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 7.0f);
-                    rl->AddRectFilled(ImVec2(ca.x - 8, ca.y + 8), ImVec2(ca.x - 4, cb.y - 8), ComAlpha(AC.cor, pulso), 2);
-                    rl->AddRect(ca, cb, ComAlpha(AC.cor, 0.35f + 0.35f * pulso), 13, 0, 2.0f);
+                    rl->AddRectFilled(ImVec2(ca.x - GAPA * 0.5f - 1.5f, ca.y), ImVec2(ca.x - GAPA * 0.5f + 1.5f, cb.y), ComAlpha(AC.cor, pulso), 1.5f);
                     if (pay->IsDelivery()) MoverFavorito(*(const int*)pay->Data, i);
                 }
                 ImGui::EndDragDropTarget();
             }
             if (cl && !mhc) gSel = i;
-            cx += 288;
         }
-        ImGui::SetCursorPos(ImVec2(cx > 0 ? cx - 14 : 0, 6));
-        ImGui::Dummy(ImVec2(1, 1)); // estende a area de scroll ate o ultimo card
-        bool railTemMais = ImGui::GetScrollX() < ImGui::GetScrollMaxX() - 2.0f;
-        bool railTemAntes = ImGui::GetScrollX() > 2.0f;
-        // fades anticorte no FOREGROUND: acima de card, borda e degrade, garantido
-        // (guarda p/ nao furar o dim de modal/dropdown/overlay)
+        ImGui::SetCursorPos(ImVec2(gNumSrv * (wAba + GAPA) - GAPA, 2.0f));
+        ImGui::Dummy(ImVec2(1, 1)); // estende a area de rolagem ate a ultima aba
+        // a roda rola a fileira de QUALQUER lugar da Home (menos com modal/dropdown aberto)
+        if (gNumSrv > 5 && io.MouseWheel != 0 && gContasAnim <= 0.01f && !gConectando &&
+            !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel))
+            ImGui::SetScrollX(ImGui::GetScrollX() - io.MouseWheel * (wAba + GAPA));
+        // a aba escolhida fica sempre a vista
         {
-            bool coberto = gConectando ||
-                ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
-            // dropdown de contas so esconde o fade se ELE estiver por cima (dropdown curto
-            // fica longe do rail; sumir o fade com ele aberto deixava o card com corte seco)
-            bool dropNoRail = gContasAnim > 0.01f && gContasB.y > ry;
-            ImDrawList* fgR = ImGui::GetForegroundDrawList();
-            if (railTemMais && !coberto && !(dropNoRail && gContasB.x > ds.x - 78))
-                fgR->AddRectFilledMultiColor(ImVec2(ds.x - 78, ry), ImVec2(ds.x - 36, ry + 156),
-                    Cinza(10, 0), Cinza(10, 235), Cinza(10, 235), Cinza(10, 0));
-            if (railTemAntes && !coberto && !(dropNoRail && gContasA.x < hx + 42))
-                fgR->AddRectFilledMultiColor(ImVec2(hx, ry), ImVec2(hx + 42, ry + 156),
-                    Cinza(10, 235), Cinza(10, 0), Cinza(10, 0), Cinza(10, 235));
+            static int selVisto = -1;
+            if (selVisto != gSel) {
+                selVisto = gSel;
+                float x0s = gSel * (wAba + GAPA), x1s = x0s + wAba, sxs = ImGui::GetScrollX();
+                if (x0s < sxs) ImGui::SetScrollX(x0s);
+                else if (x1s > sxs + WCont) ImGui::SetScrollX(x1s - WCont);
+            }
         }
-        // a roda rola o rail de QUALQUER lugar da Home (menos com modal/dropdown aberto)
-        if (io.MouseWheel != 0 && gContasAnim <= 0.01f && !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel) && !gConectando)
-            ImGui::SetScrollX(ImGui::GetScrollX() - io.MouseWheel * 70.0f);
+        bool temMais = ImGui::GetScrollX() < ImGui::GetScrollMaxX() - 2.0f;
+        bool temAntes = ImGui::GetScrollX() > 2.0f;
         ImGui::EndChild();
         ImGui::PopStyleVar();
         ImGui::PopStyleColor();
+        { // mais favoritos do que cabem: setinhas discretas nas pontas da fileira
+            bool coberto = gConectando || ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
+            if (!coberto && (temMais || temAntes)) {
+                ImDrawList* fgR = ImGui::GetForegroundDrawList();
+                if (temMais) Icone(fgR, ImVec2(XR + 22.0f, yAbas + hAba * 0.5f), I_SETA_DIR, Tk::Texto3, 18.0f);
+                if (temAntes) Icone(fgR, ImVec2(XL - 22.0f, yAbas + hAba * 0.5f), I_SETA_ESQ, Tk::Texto3, 18.0f);
+            }
+        }
     }
     else if (gTela == 1) {
         // ---- SERVIDORES ----
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##painel", ImVec2(ds.x - 148, ds.y - 130), false);
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##painel", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(24, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), T("SERVIDORES"));
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Servidores"));
         ImGui::PopFont();
-        // sub-abas estilo Riot: texto com sublinhado no ativo
-        ImGui::PushFont(gFtBold);
-        char abaF[32], abaI[32];
-        sprintf(abaF, T("Favoritos (%d)"), gNumSrv);
-        sprintf(abaI, gPubEstado == 2 ? T("Internet (%d)") : "Internet", gNumPub);
-        for (int t2 = 0; t2 < 2; t2++) {
-            const char* rot = t2 == 0 ? abaF : abaI;
-            ImVec2 rsz = ImGui::CalcTextSize(rot);
-            ImGui::SetCursorPos(ImVec2(230.0f + t2 * 150.0f, 28.0f));
-            char idab[12]; sprintf(idab, "##aba%d", t2);
-            if (ImGui::InvisibleButton(idab, ImVec2(rsz.x + 8, 30))) gSubAba = t2;
-            ImVec2 ta = ImGui::GetItemRectMin();
-            bool at = (gSubAba == t2), hab = ImGui::IsItemHovered();
-            pl->AddText(ImVec2(ta.x + 4, ta.y + 2), at ? Cinza(250) : (hab ? Cinza(210) : Cinza(140)), rot);
-            if (at) pl->AddRectFilled(ImVec2(ta.x + 4, ta.y + 26), ImVec2(ta.x + 4 + rsz.x, ta.y + 29), AC.cor, 2);
+        { // Favoritos | Internet: o controle segmentado do site, ao lado do titulo
+            char abaF[32], abaI[32];
+            _snprintf(abaF, sizeof(abaF) - 1, T("Favoritos (%d)"), gNumSrv); abaF[sizeof(abaF) - 1] = 0;
+            if (gPubEstado == 2) _snprintf(abaI, sizeof(abaI) - 1, T("Internet (%d)"), gNumPub); else strcpy(abaI, "Internet");
+            abaI[sizeof(abaI) - 1] = 0;
+            const char* rotSub[2] = { abaF, abaI };
+            ImGui::PushFont(gFtTitulo);
+            float wTit = ImGui::CalcTextSize(T("Servidores")).x;
+            ImGui::PopFont();
+            gSubAba = Segmentado("srv", rotSub, 2, gSubAba, ImVec2(24.0f + wTit + 26.0f, 2.0f));
         }
-        ImGui::PopFont();
         { // "+" no canto: adicionar favorito pelo IP (como no samp.exe original)
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 36, 18));
-            bool addCl = ImGui::InvisibleButton("##addipbtn", ImVec2(36, 34));
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 38, 3));
+            bool addCl = ImGui::InvisibleButton("##addipbtn", ImVec2(38, 38));
             ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
             bool ah = ImGui::IsItemHovered();
             if (ah) pl->AddRectFilled(aa, ab, Cinza(255, 16), 9);
@@ -5197,7 +5696,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImVec2 lb = ImGui::GetItemRectMax();
             ImDrawList* ll = ImGui::GetWindowDrawList();
-            if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Cinza(30, 165), 8);
+            if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Tk::Sup2, 8);
             BolaStatus(ll, ImVec2(la.x + 14, la.y + 18), sc.ping, sc.senha); // alinhada ao NOME
             ImGui::PushFont(gFtBold);
             ll->AddText(ImVec2(la.x + 26, la.y + 8), Cinza(240), nm);
@@ -5237,17 +5736,12 @@ static void DesenhaUI(HWND hwnd) {
             {
             ImGui::SetCursorScreenPos(ImVec2(la.x + wRow - 88, la.y + 11)); // ancorado a direita
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button(T("Jogar"), ImVec2(80, 32)) && !gConectando) { gSel = i; IniciarConexao(nm, sc.ip); }
-            ImGui::PopStyleColor(4);
+            if (BotaoPrimario(T("Jogar"), ImVec2(80, 32)) && !gConectando) { gSel = i; IniciarConexao(nm, sc.ip); }
             ImGui::PopFont();
             }
             ImGui::PopID();
             ImVec2 sep = ImGui::GetCursorScreenPos();
-            ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep.y), ImVec2(la.x + wRow, sep.y), Cinza(31), 1);
+            ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep.y), ImVec2(la.x + wRow, sep.y), Tk::Linha, 1);
             ImGui::Dummy(ImVec2(0, 3));
         }
         }
@@ -5298,7 +5792,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::InvisibleButton("##lpub", ImVec2(wRow - 186, 54));
                     ImVec2 lb = ImGui::GetItemRectMax();
                     ImDrawList* ll = ImGui::GetWindowDrawList();
-                    if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Cinza(30, 165), 8);
+                    if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Tk::Sup2, 8);
                     BolaStatus(ll, ImVec2(la.x + 14, la.y + 18), 0, sp.pw); // na lista = online; alinhada ao NOME
                     ImGui::PushFont(gFtBold);
                     ImGui::PushClipRect(la, ImVec2(la.x + 316, lb.y), true);
@@ -5334,17 +5828,12 @@ static void DesenhaUI(HWND hwnd) {
                     if (favCl && !jaFav) FavoritarPublico(i);
                     {
                     ImGui::SetCursorScreenPos(ImVec2(la.x + wRow - 78, la.y + 11)); // mesmo y do marcador
-                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-                    if (ImGui::Button(T("Jogar"), ImVec2(70, 32)) && !gConectando) IniciarConexao(sp.nome, sp.ip, sp.pw);
-                    ImGui::PopStyleColor(4);
+                    if (BotaoPrimario(T("Jogar"), ImVec2(70, 32)) && !gConectando) IniciarConexao(sp.nome, sp.ip, sp.pw);
                     }
                     ImGui::PopFont();
                     ImGui::PopID();
                     ImVec2 sep2 = ImGui::GetCursorScreenPos();
-                    ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep2.y), ImVec2(la.x + wRow, sep2.y), Cinza(31), 1);
+                    ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep2.y), ImVec2(la.x + wRow, sep2.y), Tk::Linha, 1);
                     ImGui::Dummy(ImVec2(0, 3));
                 }
             }
@@ -5354,13 +5843,13 @@ static void DesenhaUI(HWND hwnd) {
         if (gFiltrosAberto) {
             const float FW = 250, FH = 188;
             ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - FW, 92));
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.0f);
             ImGui::BeginChild("##dropfiltros", ImVec2(FW, FH), false, ImGuiWindowFlags_NoScrollbar);
             ImVec2 dA = ImGui::GetWindowPos(), dB = ImVec2(dA.x + FW, dA.y + FH);
             ImGui::SetCursorPos(ImVec2(16, 12));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("F I L T R O S"));
+            RotuloMicro(T("F I L T R O S"));
             ImGui::PopFont();
             bool fMud = false;
             ImGui::PushFont(gFtBody);
@@ -5377,7 +5866,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::EndChild();
             ImGui::PopStyleVar();
             ImGui::PopStyleColor();
-            pl->AddRect(dA, dB, Cinza(58), 12, 0, 1.0f);
+            pl->AddRect(dA, dB, Tk::Linha2, 12, 0, 1.0f);
             // clique fora fecha (clicar no funil ja alterna sozinho)
             if (ImGui::IsMouseClicked(0) && !ImGui::IsMouseHoveringRect(dA, dB) &&
                 !ImGui::IsMouseHoveringRect(gFiltroBtnA, gFiltroBtnB))
@@ -5387,19 +5876,17 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gTela == 2) {
         // ---- DATAS (instalacoes do jogo) ----
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##datas", ImVec2(ds.x - 148, ds.y - 130), false);
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##datas", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(24, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), T("DATAS"));
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Datas"));
         ImGui::PopFont();
-        ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), T("Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR."));
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::SetCursorPos(ImVec2(24, 56)); // 15 px abaixo dos botoes do topo (antes encostava: 5 px)
+        ImGui::TextColored(ImColor(Tk::Texto3), T("Cada data é uma instalação do jogo. Clique para escolher qual será aberta pelo JOGAR."));
         if (gNumDatas >= MAX_DATAS) { // no teto o card "+" some: o motivo fica escrito aqui
             char lim[160];
             _snprintf(lim, sizeof(lim) - 1, T("Limite de %d datas atingido. Remova uma para adicionar outra."), MAX_DATAS); lim[sizeof(lim) - 1] = 0;
@@ -5410,17 +5897,17 @@ static void DesenhaUI(HWND hwnd) {
         { // "Localizar datas no PC": roda em thread; enquanto procura o botao vira o contador de pastas
             ImGui::PushFont(gFtBold);
             const float wLoc = 236.0f;
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wLoc, 22));
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wLoc, 3));
             bool procurando = (gLocEstado != 0);
             char rotLoc[96];
             if (procurando) { _snprintf(rotLoc, sizeof(rotLoc) - 1, T("Procurando datas... (%d pastas)"), (int)gLocPastas); rotLoc[sizeof(rotLoc) - 1] = 0; }
             else { strncpy(rotLoc, T("Localizar datas no PC"), sizeof(rotLoc) - 1); rotLoc[sizeof(rotLoc) - 1] = 0; }
-            if (BotaoSec(rotLoc, ImVec2(wLoc, 34), procurando ? Cinza(95) : 0) && !procurando) IniciarLocalizarDatas(false);
+            if (BotaoSec(rotLoc, ImVec2(wLoc, 38), procurando ? Cinza(95) : 0) && !procurando) IniciarLocalizarDatas(false);
             ImGui::PopFont();
             if (!procurando) Dica(T("Procura pastas com gta_sa.exe e samp.exe nos discos, na Área de Trabalho, em Documentos e no registro"));
         }
-        ImGui::SetCursorPos(ImVec2(24, 76));
-        ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 96), false);
+        ImGui::SetCursorPos(ImVec2(24, 86));
+        ImGui::BeginChild("##gridatas", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 106), false);
         // cards 16:9 esticados para fechar exatamente na borda direita da grade
         const float GAP = 20;
         // largura REAL de dentro do child: quando aparece a barra de rolagem ela come ~8px e os
@@ -5487,10 +5974,10 @@ static void DesenhaUI(HWND hwnd) {
             }
             bool euArrastadoD = arrastandoData && deD == i;
             if (ehAdd) {
-                // card "+" para adicionar data
-                wl->AddRectFilled(ca, cb, Cinza(16, ch ? 235 : 190), 13);
-                ImU32 tra = ch ? Cinza(200) : Cinza(90);
-                wl->AddRect(ca, cb, tra, 13, 0, 1.5f);
+                // card "+" para adicionar data (vazado, como o botao secundario do site)
+                if (ch) wl->AddRectFilled(ca, cb, Tk::Sup2, 12);
+                ImU32 tra = ch ? Tk::Texto : Tk::Texto3;
+                wl->AddRect(ca, cb, ch ? Tk::Linha3 : Tk::Linha2, 12, 0, 1.0f);
                 ImVec2 c((ca.x + cb.x) * 0.5f, (ca.y + cb.y) * 0.5f - 10);
                 wl->AddLine(ImVec2(c.x - 14, c.y), ImVec2(c.x + 14, c.y), tra, 3);
                 wl->AddLine(ImVec2(c.x, c.y - 14), ImVec2(c.x, c.y + 14), tra, 3);
@@ -5503,35 +5990,26 @@ static void DesenhaUI(HWND hwnd) {
             }
             DataGta& d = gDatas[i];
             if (euArrastadoD) { // o card sai daqui: o fantasma completo segue o mouse
-                wl->AddRectFilled(ca, cb, Cinza(16, 170), 13);
-                wl->AddRect(ca, cb, ComAlpha(AC.cor, 0.55f), 13, 0, 1.5f);
+                wl->AddRectFilled(ca, cb, Tk::Sup, 12);
+                wl->AddRect(ca, cb, ComAlpha(AC.cor, 0.55f), 12, 0, 1.5f);
                 continue;
             }
             // imagem 16:9 ocupa o card todo
             if (d.tex) {
                 wl->AddImageRounded((ImTextureID)d.tex, ca, cb, ImVec2(0, 0), ImVec2(1, 1),
-                                    IM_COL32(255, 255, 255, ch ? 255 : 235), 13);
+                                    IM_COL32(255, 255, 255, ch ? 255 : 235), 12);
             } else {
-                wl->AddRectFilled(ca, cb, Cinza(26), 13);
+                wl->AddRectFilled(ca, cb, Tk::Sup2, 12);
                 ImGui::PushFont(gFtDisplay);
                 char ini2[2] = { d.nome[0] ? d.nome[0] : '?', 0 };
                 ImVec2 gsz = ImGui::CalcTextSize(ini2);
                 wl->AddText(ImVec2((ca.x + cb.x - gsz.x) * 0.5f, (ca.y + cb.y - gsz.y) * 0.5f - 8), Cinza(70), ini2);
                 ImGui::PopFont();
             }
-            // fade tambem NO TOPO (leitura do EM USO, pasta e "..."). As faixas se ENCOSTAM meio
-            // pixel: com o card em coordenada fracionaria (escala da janela), emendas exatas
-            // deixavam uma fresta de ~1px sem escurecer - a "linha" que aparecia atravessando os
-            // cards de capa clara. Meio pixel de sobreposicao fecha a fresta sem escurecer a vista.
-            wl->AddRectFilled(ca, ImVec2(cb.x, ca.y + 13.5f), Cinza(8, 150), 13, ImDrawFlags_RoundCornersTop);
-            wl->AddRectFilledMultiColor(ImVec2(ca.x, ca.y + 13), ImVec2(cb.x, ca.y + 98),
-                Cinza(8, 150), Cinza(8, 150), Cinza(8, 0), Cinza(8, 0));
-            // fade de leitura em 2 estagios (mais alto e mais forte na base) + nome/descricao
-            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 140), ImVec2(cb.x, cb.y - 47.5f),
-                Cinza(8, 0), Cinza(8, 0), Cinza(8, 175), Cinza(8, 175));
-            wl->AddRectFilledMultiColor(ImVec2(ca.x, cb.y - 48), ImVec2(cb.x, cb.y - 12.5f),
-                Cinza(8, 175), Cinza(8, 175), Cinza(8, 235), Cinza(8, 235));
-            wl->AddRectFilled(ImVec2(ca.x, cb.y - 13), cb, Cinza(8, 235), 13, ImDrawFlags_RoundCornersBottom);
+            // degrades de leitura em cima (EM USO, pasta e "...") e embaixo (nome e versao): uma primitiva cada,
+            // com o alfa nos vertices (as faixas encostadas deixavam uma risca nos cards de capa clara)
+            RectFadeVertical(wl, ca, ImVec2(cb.x, ca.y + 98.0f), 8, 150, 0, 12.0f, ImDrawFlags_RoundCornersTop);
+            RectFadeVertical(wl, ImVec2(ca.x, cb.y - 140.0f), cb, 8, 0, 235, 12.0f, ImDrawFlags_RoundCornersBottom);
             // versao do SA-MP (lida do samp.dll) no canto direito da linha do nome
             const char* vs = d.versao[0] ? d.versao : T("sem SA-MP");
             // sem descricao o bloco desce (senao sobra um vao no pe do card); nome e descricao longos ganham "..."
@@ -5548,15 +6026,13 @@ static void DesenhaUI(HWND hwnd) {
                 TextoTruncado(wl, ImVec2(ca.x + 14, cb.y - 28), (cb.x - 14) - (ca.x + 14), Cinza(165), d.desc);
                 ImGui::PopFont();
             }
-            ImU32 borda = (i == gDataSel) ? AC.cor : (ch ? Cinza(90) : Cinza(46));
-            wl->AddRect(ca, cb, borda, 13, 0, (i == gDataSel) ? 2.0f : 1.0f);
-            if (i == gDataSel) { // pill EM USO
-                ImGui::PushFont(gFtMini);
-                ImVec2 psz = ImGui::CalcTextSize(T("EM USO"));
-                ImVec2 t0(ca.x + 12, ca.y + 10);
-                wl->AddRectFilled(t0, ImVec2(t0.x + psz.x + 16, t0.y + 20), AC.cor, 10);
-                wl->AddText(ImVec2(t0.x + 8, t0.y + 3), TextoSobreAccent(AC.cor), T("EM USO"));
-                ImGui::PopFont();
+            ImU32 borda = (i == gDataSel) ? AC.cor : (ch ? Tk::Linha3 : Tk::Linha);
+            wl->AddRect(ca, cb, borda, 12, 0, (i == gDataSel) ? 2.0f : 1.0f);
+            if (i == gDataSel) { // selo EM USO (o rotulo maiusculo espacado do site, numa pilula no destaque)
+                float wP = LarguraMicro(T("EM USO"), 0.2f);
+                ImVec2 t0(ca.x + 12, ca.y + 11);
+                wl->AddRectFilled(t0, ImVec2(t0.x + wP + 18, t0.y + 21), AC.cor, 6);
+                TextoMicro(wl, ImVec2(t0.x + 9, t0.y + 4.5f), TextoSobreAccent(AC.cor), T("EM USO"), 0.2f);
             }
             // botao "..." no canto superior direito - teste de clique por retangulo puro,
             // imune a briga de itens sobrepostos do imgui
@@ -5576,7 +6052,7 @@ static void DesenhaUI(HWND hwnd) {
                 Icone(wl, ImVec2(fcx2, fcy2), I_PASTA_ABRIR, fcc, 16.0f);
             }
             if (fh2 && !gMouseNoDrop && !arrastandoData && ImGui::IsMouseClicked(0))
-                ShellExecuteA(NULL, "open", d.caminho, NULL, NULL, SW_SHOWNORMAL);
+                AbrirPasta(d.caminho);
             if (mh && !gMouseNoDrop && !arrastandoData) ImGui::SetTooltip(T("Editar data"));
             if (fh2 && !gMouseNoDrop && !arrastandoData) ImGui::SetTooltip(T("Abrir a pasta da data no Explorer"));
             if (mh && !gMouseNoDrop && !arrastandoData && ImGui::IsMouseClicked(0)) {
@@ -5662,44 +6138,36 @@ static void DesenhaUI(HWND hwnd) {
             strncpy(gFotosDir, dirAtual, MAX_PATH - 1);
             EscanearFotos();
         }
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##galpainel", ImVec2(ds.x - 148, ds.y - 130), false);
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##galpainel", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(24, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), T("GALERIA"));
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Galeria"));
         ImGui::PopFont();
-        // sub-abas: uma por User Files unico (mesmo estilo das abas de Servidores)
+        // sub-abas: uma por User Files unico (o controle segmentado do site, como em Servidores)
         if (nTabs > 1) {
-            ImGui::PushFont(gFtBold);
-            float tx2 = 200;
-            for (int t2 = 0; t2 < nTabs; t2++) {
-                ImVec2 rsz = ImGui::CalcTextSize(tabs[t2].rotulo);
-                ImGui::SetCursorPos(ImVec2(tx2, 24));
-                char idt[16]; sprintf(idt, "##galaba%d", t2);
-                if (ImGui::InvisibleButton(idt, ImVec2(rsz.x + 8, 30))) gGalData = t2;
-                ImVec2 ta = ImGui::GetItemRectMin();
-                bool at = (gGalData == t2), hab = ImGui::IsItemHovered();
-                pl->AddText(ImVec2(ta.x + 4, ta.y + 2), at ? Cinza(250) : (hab ? Cinza(210) : Cinza(140)), tabs[t2].rotulo);
-                if (at) pl->AddRectFilled(ImVec2(ta.x + 4, ta.y + 26), ImVec2(ta.x + 4 + rsz.x, ta.y + 29), AC.cor, 2);
-                tx2 += rsz.x + 26;
-            }
+            const char* rotG[8];
+            int nG = nTabs < 8 ? nTabs : 8;
+            for (int t2 = 0; t2 < nG; t2++) rotG[t2] = tabs[t2].rotulo;
+            ImGui::PushFont(gFtTitulo);
+            float wTitG = ImGui::CalcTextSize(T("Galeria")).x;
             ImGui::PopFont();
+            int g2 = Segmentado("gal", rotG, nG, gGalData < nG ? gGalData : 0, ImVec2(24.0f + wTitG + 26.0f, 2.0f));
+            if (g2 != gGalData && g2 < nG) gGalData = g2;
         }
-        ImGui::SetCursorPos(ImVec2(24, 52));
-        ImGui::PushFont(gFtMini);
+        ImGui::SetCursorPos(ImVec2(24, 56)); // 15 px abaixo da pilula das pastas (antes encostava: 5 px)
+        ImGui::PushFont(gFtMiniLeve);
         char subt[160];
         sprintf(subt, T("%d screenshots  -  %s"), gNumFotos, tabs[gGalData].rotulo);
-        ImGui::TextColored(ImColor(Cinza(140)), "%s", subt); // "%s": nome de data pode ter %
+        ImGui::TextColored(ImColor(Tk::Texto3), "%s", subt); // "%s": nome de data pode ter %
         ImGui::PopFont();
         int nSelG = 0; // fotos marcadas: a barra de acoes ganha uma linha propria e a grade desce
         {
             // icones no canto direito: abrir pasta + atualizar
             float bxI = pb.x - pa.x - 24 - 40;
-            ImGui::SetCursorPos(ImVec2(bxI, 22));
+            ImGui::SetCursorPos(ImVec2(bxI, 3));
             bool pastaCl = ImGui::InvisibleButton("##galpasta", ImVec2(40, 34));
             ImVec2 ia = ImGui::GetItemRectMin(), ib = ImGui::GetItemRectMax();
             bool pHov = ImGui::IsItemHovered();
@@ -5711,9 +6179,8 @@ static void DesenhaUI(HWND hwnd) {
             }
             Dica(T("Abrir a pasta das screenshots"));
             if (pastaCl)
-                ShellExecuteA(NULL, "open", GetFileAttributesA(gFotosDir) != INVALID_FILE_ATTRIBUTES ? gFotosDir : ufRaiz,
-                              NULL, NULL, SW_SHOWNORMAL);
-            ImGui::SetCursorPos(ImVec2(bxI - 48, 22));
+                AbrirPasta(GetFileAttributesA(gFotosDir) != INVALID_FILE_ATTRIBUTES ? gFotosDir : ufRaiz);
+            ImGui::SetCursorPos(ImVec2(bxI - 48, 3));
             bool attCl = ImGui::InvisibleButton("##galatt", ImVec2(40, 34));
             ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
             bool rHov = ImGui::IsItemHovered();
@@ -5723,7 +6190,7 @@ static void DesenhaUI(HWND hwnd) {
             Dica(T("Atualizar a galeria (F5)"));
             if (attCl) EscanearFotos();
             // selecionar varias: icone de check (aceso no accent quando o modo esta ligado)
-            ImGui::SetCursorPos(ImVec2(bxI - 96, 22));
+            ImGui::SetCursorPos(ImVec2(bxI - 96, 3));
             bool selCl = ImGui::InvisibleButton("##galsel", ImVec2(40, 34));
             ImVec2 sa2 = ImGui::GetItemRectMin(), sb2 = ImGui::GetItemRectMax();
             bool sHov = ImGui::IsItemHovered();
@@ -5750,12 +6217,12 @@ static void DesenhaUI(HWND hwnd) {
                 ImVec2 esz = ImGui::CalcTextSize(rotEx);
                 float wEx = esz.x + 26, wLp = ImGui::CalcTextSize(T("Limpar seleção")).x + 26;
                 float xAc = pb.x - pa.x - 24 - wLp - 8 - wEx;
-                ImGui::SetCursorPos(ImVec2(xAc, 82));
+                ImGui::SetCursorPos(ImVec2(xAc, 92));
                 bool exCl = BotaoSec(rotEx, ImVec2(wEx, 30), IM_COL32(240, 120, 116, 255));
                 ImGui::SameLine(0, 8);
                 bool lpCl = BotaoSec(T("Limpar seleção"), ImVec2(wLp, 30));
                 ImGui::PopFont();
-                pl->AddText(ImVec2(pa.x + 24, pa.y + 90), Cinza(200), rotSel);
+                pl->AddText(ImVec2(pa.x + 24, pa.y + 100), Cinza(200), rotSel);
                 if (lpCl) { for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = false; gGalConfT = 0; }
                 if (exCl && gGalConfT <= 0) gGalConfT = 3.0f;
                 else if (exCl) { // confirmou: tudo pra Lixeira e a lista e relida
@@ -5769,7 +6236,7 @@ static void DesenhaUI(HWND hwnd) {
                 if (ImGui::IsKeyPressed(ImGuiKey_Escape) && nSel > 0) for (int k = 0; k < gNumFotos; k++) gFotos[k].sel = false;
             }
         }
-        float yGrid = nSelG > 0 ? 122.0f : 82.0f; // com a barra de selecao a grade comeca mais baixo
+        float yGrid = nSelG > 0 ? 132.0f : 92.0f; // com a barra de selecao a grade comeca mais baixo
         ImGui::SetCursorPos(ImVec2(24, yGrid));
         ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
         ImGui::BeginChild("##galgrid", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 20 - yGrid), false);
@@ -5837,114 +6304,86 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::EndChild();
     }
     else if (gTela == 5) {
-        // ---- MODS (posts do blog TrokMods via feed RSS) ----
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##mods", ImVec2(ds.x - 148, ds.y - 130), false);
+        // ---- TROKMODS: os posts do blog nos cartoes do PROPRIO site (capa 16:9 em cima; rotulo e data curta;
+        //      titulo em duas linhas; resumo). O cartao inteiro abre o post no navegador.
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##mods", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(24, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), "TROKMODS");
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "TrokMods");
+        float wTitM = ImGui::CalcTextSize("TrokMods").x;
         ImGui::PopFont();
-        ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), T("Visite nosso blog TrokMods. Clique num post para abrir no navegador."));
-        ImGui::PopFont();
-        { // sub-abas estilo Riot (como em Servidores): Recentes | Mais vistos
-            ImGui::PushFont(gFtBold);
-            const char* ROT[2] = { "Recentes", "Mais vistos" };
-            float xab = 24.0f;
-            for (int t2 = 0; t2 < 2; t2++) {
-                ImVec2 rsz = ImGui::CalcTextSize(T(ROT[t2]));
-                ImGui::SetCursorPos(ImVec2(xab, 78.0f));
-                char idab[16]; sprintf(idab, "##abamods%d", t2);
-                if (ImGui::InvisibleButton(idab, ImVec2(rsz.x + 8, 30))) gModsAba = t2;
-                ImVec2 ta = ImGui::GetItemRectMin();
-                bool at = (gModsAba == t2), hab = ImGui::IsItemHovered();
-                pl->AddText(ImVec2(ta.x + 4, ta.y + 2), at ? Cinza(250) : (hab ? Cinza(210) : Cinza(140)), T(ROT[t2]));
-                if (at) pl->AddRectFilled(ImVec2(ta.x + 4, ta.y + 26), ImVec2(ta.x + 4 + rsz.x, ta.y + 29), AC.cor, 2);
-                xab += rsz.x + 8 + 26;
-            }
-            ImGui::PopFont();
+        { // Recentes | Mais vistos: o controle segmentado do "Classificar" do site
+            const char* ROT[2] = { T("Recentes"), T("Mais vistos") };
+            gModsAba = Segmentado("mods", ROT, 2, gModsAba, ImVec2(24.0f + wTitM + 26.0f, 2.0f));
         }
-        { // Discord (icone) + "Acesse o site" (botao de texto; a marca do Blogger saiu - pedido dele)
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 72, 18));
-            bool clD = ImGui::InvisibleButton("##modsdiscord", ImVec2(36, 34));
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::SetCursorPos(ImVec2(24, 56)); // 15 px abaixo da pilula e dos botoes (antes encostava: 5 px)
+        ImGui::TextColored(ImColor(Tk::Texto3), "%s", T("Visite nosso blog TrokMods. Clique num post para abrir no navegador."));
+        ImGui::PopFont();
+        { // Discord (icone) + "Acesse o site" + atualizar, na linha do titulo
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 38 - 6 - 38, 3));
+            bool clD = ImGui::InvisibleButton("##modsdiscord", ImVec2(38, 38));
             ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
             bool hv = ImGui::IsItemHovered();
-            if (hv) pl->AddRectFilled(aa, ab, Cinza(255, 16), 9);
-            IconeDiscord(pl, ImVec2((aa.x + ab.x) * 0.5f, (aa.y + ab.y) * 0.5f), hv ? AC.hi : Cinza(170), 23.0f);
+            if (hv) pl->AddRectFilled(aa, ab, Cinza(255, 16), 8);
+            IconeDiscord(pl, ImVec2((aa.x + ab.x) * 0.5f, (aa.y + ab.y) * 0.5f), hv ? Tk::Texto : Tk::Texto2, 22.0f);
             Dica(T("Entrar na comunidade do Discord"));
             if (clD) ShellExecuteA(NULL, "open", URL_DISCORD, NULL, NULL, SW_SHOWNORMAL);
-            ImGui::PushFont(gFtBold);
-            float wSite = ImGui::CalcTextSize(T("Acesse o site")).x + 34.0f;
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 72 - 10 - wSite, 18));
-            bool clS = BotaoSec(T("Acesse o site"), ImVec2(wSite, 34));
+            ImGui::PushFont(gFtBotaoPost);
+            // link sem contorno (pedido), com a seta de abrir fora dos links da Home
+            ImVec2 tszS = ImGui::CalcTextSize(T("Acesse o site"));
+            float wSite = 14.0f + tszS.x + 6.7f + 13.3f + 14.0f;
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 38 - 6 - 38 - 6 - wSite, 3));
+            bool clS = ImGui::InvisibleButton("##modssite", ImVec2(wSite, 38));
+            {
+                ImVec2 sa = ImGui::GetItemRectMin(), sb = ImGui::GetItemRectMax();
+                bool sh = ImGui::IsItemHovered();
+                if (sh) { pl->AddRectFilled(sa, sb, Cinza(255, 16), 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
+                ImU32 cSite = sh ? Tk::Texto : Tk::Texto2;
+                pl->AddText(ImVec2(sa.x + 14.0f, (sa.y + sb.y - tszS.y) * 0.5f), cSite, T("Acesse o site"));
+                IconeAbreFora(pl, ImVec2(sa.x + 14.0f + tszS.x + 6.7f + 6.7f, (sa.y + sb.y) * 0.5f), cSite, 13.3f);
+            }
             ImGui::PopFont();
             Dica(T("Abrir o blog TrokMods"));
             if (clS) ShellExecuteA(NULL, "open", URL_BLOG, NULL, NULL, SW_SHOWNORMAL);
-        }
-        { // atualizar por ICONE (seta circular, igual ao da galeria)
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 36, 18));
-            bool refCl = ImGui::InvisibleButton("##modsref", ImVec2(36, 34));
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - 38, 3));
+            bool refCl = ImGui::InvisibleButton("##modsref", ImVec2(38, 38));
             ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
             bool refHov = ImGui::IsItemHovered();
-            if (refHov) pl->AddRectFilled(ra, rb, Cinza(255, 16), 9);
-            Icone(pl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), I_ATUALIZAR,
-                  Cinza(refHov ? 250 : 170), 17.0f);
+            if (refHov) pl->AddRectFilled(ra, rb, Cinza(255, 16), 8);
+            Icone(pl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), I_ATUALIZAR, refHov ? Tk::Texto : Tk::Texto2, 17.0f);
             Dica(T("Atualizar os posts do blog"));
             if (refCl && gModsEstado != 1) {
                 for (int k = 0; k < MAX_MODS; k++) { AdiarRelease(gModsTex[k]); gModsTex[k] = NULL; gModsPedida[k] = 0; }
                 RodarThread(ThreadMods, NULL);
             }
         }
-        ImGui::SetCursorPos(ImVec2(24, 116));
-        ImGui::BeginChild("##modslista", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 136), false);
+        ImGui::SetCursorPos(ImVec2(24, 90));
+        ImGui::BeginChild("##modslista", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 100), false);
         ImDrawList* ml = ImGui::GetWindowDrawList();
         if (gNumMods == 0) {
-            ImGui::SetCursorPos(ImVec2(6, 16));
+            ImGui::SetCursorPos(ImVec2(0, 10));
             ImGui::PushFont(gFtBody);
-            if (gModsEstado == 1)
-                ImGui::TextColored(ImColor(Cinza(150)), T("buscando posts do blog..."));
-            else
-                ImGui::TextColored(ImColor(Cinza(150)), T("O blog TrokMods está chegando."));
+            ImGui::TextColored(ImColor(Tk::Texto2), "%s", gModsEstado == 1 ? T("buscando posts do blog...") : T("O blog TrokMods está chegando."));
             ImGui::PopFont();
-            ImGui::SetCursorPos(ImVec2(6, 44));
-            ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(105)), T("Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral."));
+            ImGui::SetCursorPos(ImVec2(0, 38));
+            ImGui::PushFont(gFtMiniLeve);
+            ImGui::TextColored(ImColor(Tk::Texto3), "%s", T("Quando saírem posts novos, eles aparecem aqui sozinhos - com aviso na barra lateral."));
             ImGui::PopFont();
         } else {
-            // grade de CARDS: miniatura do post do blog - fundo branco, titulo laranja,
-            // data pequena, capa 16:9, uma linha de resumo e o botao em pilula
-            const float GAPM = 20;
-            float wGridM = pb.x - pa.x - 58;
-            int porLinhaM = (int)((wGridM + GAPM) / (330.0f + GAPM));
-            if (porLinhaM < 1) porLinhaM = 1;
-            float CWM = (wGridM - (porLinhaM - 1) * GAPM) / porLinhaM;
-            const float PADM = 16.0f;                     // respiro lateral, igual ao card do blog
-            const float HBOT = 40.0f;                     // altura da pilula ABRIR O POST
-            float imgH = (CWM - PADM * 2) * 9.0f / 16.0f;
-            ImGui::PushFont(gFtPostTit);                  // faixa do titulo = maior titulo da lista
-            float altT = ImGui::GetTextLineHeight();
-            static int maxLin = 1, genML = -1; static float cwML = -1; // recalcula so com lista/largura nova
-            if (genML != gModsGen || cwML != CWM) {
-                genML = gModsGen; cwML = CWM; maxLin = 1;
-                for (int k = 0; k < gNumMods; k++) {
-                    char a1[224], a2[224];
-                    int nl = TextoDuasLinhas(a1, a2, sizeof(a1), gMods[k].titulo, CWM - PADM * 2 - 22.0f);
-                    if (nl > maxLin) maxLin = nl;
-                }
-            }
-            ImGui::PopFont();
-            ImGui::PushFont(gFtBody);
-            float altD = ImGui::GetTextLineHeight();
-            ImGui::PopFont();
-            float yImg = 14.0f + maxLin * altT + 3.0f + altD + 14.0f; // capa logo abaixo da data
-            float yDesc = yImg + imgH + 15.0f;            // resumo em UMA linha
-            float yBot = yDesc + 27.0f;
-            float CHM = yBot + HBOT + PADM;
+            const float GAPM = 16.0f; // o gap da .lista-posts do site
+            float wGridM = ImGui::GetContentRegionAvail().x - 10.0f; // folga da barra de rolagem
+            int porLinhaM = 4; // 4 posts por linha (pedido de 06/10): os cards crescem com a janela
+            while (porLinhaM > 1 && (wGridM - (porLinhaM - 1) * GAPM) / porLinhaM < 220.0f) porLinhaM--; // so se a janela for estreita demais
+            float CWM = floorf((wGridM - (porLinhaM - 1) * GAPM) / porLinhaM);
+            float imgH = floorf(CWM * 9.0f / 16.0f);
+            const float PADX = 16.0f, PADT = 13.0f, PADB = 15.0f, HMETA = 16.0f;
+            ImGui::PushFont(gFtPostTit); float altT = ImGui::GetTextLineHeight(); ImGui::PopFont();
+            ImGui::PushFont(gFtMiniLeve); float altD = ImGui::GetTextLineHeight(); ImGui::PopFont();
+            const float CHM = floorf(imgH + PADT + HMETA + 7.0f + altT * 2.0f + 6.0f + altD + PADB);
             { // com a aba aberta, tudo que esta na lista conta como visto (persiste no ini)
                 unsigned long long maisNovo = 0;
                 for (int k = 0; k < gNumMods; k++) if (gMods[k].ordem > maisNovo) maisNovo = gMods[k].ordem;
@@ -5958,10 +6397,10 @@ static void DesenhaUI(HWND hwnd) {
                         if (UrlMesmoPost(gMods[k].url, gPopUrl[r])) { ordem[nOrd++] = k; break; }
             } else for (int k = 0; k < gNumMods; k++) ordem[nOrd++] = k;
             if (nOrd == 0) {
-                ImGui::SetCursorPos(ImVec2(6, 16));
+                ImGui::SetCursorPos(ImVec2(0, 10));
                 ImGui::PushFont(gFtBody);
-                ImGui::TextColored(ImColor(Cinza(150)), gPopEstado == 1 ? T("buscando os mais vistos do blog...")
-                                                                         : T("O blog ainda não tem um ranking de mais vistos."));
+                ImGui::TextColored(ImColor(Tk::Texto2), "%s", gPopEstado == 1 ? T("buscando os mais vistos do blog...")
+                                                                               : T("O blog ainda não tem um ranking de mais vistos."));
                 ImGui::PopFont();
             }
             for (int o = 0; o < nOrd; o++) {
@@ -5969,31 +6408,11 @@ static void DesenhaUI(HWND hwnd) {
                 int col = o % porLinhaM, lin = o / porLinhaM;
                 ImGui::SetCursorPos(ImVec2(col * (CWM + GAPM), lin * (CHM + GAPM)));
                 char idm[16]; sprintf(idm, "##post%d", i);
-                bool clP = ImGui::InvisibleButton(idm, ImVec2(CWM, yBot - 6)); // card (sem o botao)
-                ImVec2 ca = ImGui::GetItemRectMin();
+                bool clP = ImGui::InvisibleButton(idm, ImVec2(CWM, CHM));
+                ImVec2 ca = ImGui::GetItemRectMin(), cb2(ca.x + CWM, ca.y + CHM);
                 bool hovP = ImGui::IsItemHovered();
-                ImVec2 cb2(ca.x + CWM, ca.y + CHM);
-                // fundo BRANCO como no blog; no hover so ganha uma sombra por baixo
-                if (hovP) SombraSuave(ml, ImVec2(ca.x + 5, ca.y + 8), ImVec2(cb2.x - 5, cb2.y + 5), 16.0f, 40);
-                ml->AddRectFilled(ca, cb2, IM_COL32(255, 255, 255, 255), 14.0f);
-                // (a bolinha de post novo saiu dos cards - pedido dele; o aviso fica so no icone da aba)
-                { // titulo encostado na data; a data fica sempre na mesma altura em todos os cards
-                    char t1[224], t2[224];
-                    float larg = CWM - PADM * 2;
-                    float cxT = ca.x + CWM * 0.5f;
-                    ImGui::PushFont(gFtPostTit);
-                    int nlin = TextoDuasLinhas(t1, t2, sizeof(t1), gMods[i].titulo, larg);
-                    float ty = ca.y + 14.0f + (maxLin - nlin) * altT; // titulos curtos descem ate a data
-                    if (nlin > 0) ml->AddText(ImVec2(cxT - ImGui::CalcTextSize(t1).x * 0.5f, ty), AC.cor, t1);
-                    if (nlin > 1) ml->AddText(ImVec2(cxT - ImGui::CalcTextSize(t2).x * 0.5f, ty + altT), AC.cor, t2);
-                    ImGui::PopFont();
-                    ImGui::PushFont(gFtBody); // data por extenso, peso normal, cinza
-                    TextoTruncadoCentro(ml, ca.x + CWM * 0.5f, ca.y + 14.0f + maxLin * altT + 3.0f,
-                                        CWM - PADM * 2, IM_COL32(124, 124, 130, 255), gMods[i].data);
-                    ImGui::PopFont();
-                }
-                // capa 16:9 abaixo dos textos: pedida a fila de imagens SO quando o card esta na tela
-                // (download + decode fora da UI); cards que ficaram longe devolvem a textura
+                ml->AddRectFilled(ca, cb2, hovP ? Tk::Sup2 : Tk::Fundo, 12.0f);
+                // capa: pedida a fila de imagens SO quando o card esta na tela; quem ficou longe devolve a textura
                 {
                     bool visP = ImGui::IsRectVisible(ca, cb2);
                     if (visP && !gModsTex[i] && gMods[i].imgCache[0] && gModsPedida[i] == 0) {
@@ -6004,34 +6423,40 @@ static void DesenhaUI(HWND hwnd) {
                         if (dist > wh * 2.0f) { AdiarRelease(gModsTex[i]); gModsTex[i] = NULL; gModsPedida[i] = 0; }
                     }
                 }
-                ImVec2 ia(ca.x + PADM, ca.y + yImg), ib(cb2.x - PADM, ca.y + yImg + imgH);
-                ml->AddRectFilled(ia, ib, IM_COL32(233, 233, 236, 255), 8.0f); // enquanto a capa carrega
-                if (gModsTex[i]) ImagemCapa(ml, gModsTex[i], ia, ib, 8.0f, hovP ? 0 : 16);
-                ImGui::PushFont(gFtBody); // resumo em uma linha so, peso normal
-                TextoTruncadoCentro(ml, ca.x + CWM * 0.5f, ca.y + yDesc, CWM - PADM * 2,
-                                    IM_COL32(80, 80, 86, 255), gMods[i].resumo);
+                ImVec2 ia(ca.x + 1.0f, ca.y + 1.0f), ib(cb2.x - 1.0f, ca.y + imgH);
+                ml->AddRectFilled(ia, ib, Tk::Sup2, 11.0f, ImDrawFlags_RoundCornersTop); // enquanto a capa carrega
+                if (gModsTex[i]) ImagemCapa(ml, gModsTex[i], ia, ib, 11.0f, 0, hovP ? 1.03f : 1.0f, ImDrawFlags_RoundCornersTop);
+                float yb = ca.y + imgH + PADT;
+                // rotulo (maiusculo espacado; o "Nosso mod" no destaque) e a data curta na direita
+                {
+                    char rotU[64];
+                    strncpy(rotU, T(gMods[i].rotulo[0] ? gMods[i].rotulo : "Mod"), sizeof(rotU) - 1); rotU[sizeof(rotU) - 1] = 0;
+                    MaiusculasUtf8(rotU);
+                    ImGui::PushFont(gFtMiniLeve);
+                    ImVec2 dsz = ImGui::CalcTextSize(gMods[i].dataCurta);
+                    ml->AddText(ImVec2(cb2.x - PADX - dsz.x, yb + (HMETA - dsz.y) * 0.5f), Tk::Texto3, gMods[i].dataCurta);
+                    ImGui::PopFont();
+                    ImGui::PushClipRect(ImVec2(ca.x + PADX, yb), ImVec2(cb2.x - PADX - dsz.x - 10.0f, yb + HMETA + 2.0f), true);
+                    TextoMicro(ml, ImVec2(ca.x + PADX, yb + 2.0f), gMods[i].nosso ? AC.cor : Tk::Texto2, rotU, 0.22f);
+                    ImGui::PopClipRect();
+                }
+                // titulo em ate duas linhas (o 15px/700 do site)
+                {
+                    char t1[224], t2[224];
+                    ImGui::PushFont(gFtPostTit);
+                    int nlin = TextoDuasLinhas(t1, t2, sizeof(t1), gMods[i].titulo, CWM - PADX * 2);
+                    float ty = yb + HMETA + 7.0f;
+                    ImU32 ct = hovP ? Cinza(255) : Tk::Texto;
+                    if (nlin > 0) ml->AddText(ImVec2(ca.x + PADX, ty), ct, t1);
+                    if (nlin > 1) ml->AddText(ImVec2(ca.x + PADX, ty + altT), ct, t2);
+                    ImGui::PopFont();
+                }
+                // resumo em uma linha
+                ImGui::PushFont(gFtMiniLeve);
+                TextoTruncado(ml, ImVec2(ca.x + PADX, yb + HMETA + 7.0f + altT * 2.0f + 6.0f), CWM - PADX * 2, Tk::Texto3, gMods[i].resumo);
                 ImGui::PopFont();
+                ml->AddRect(ca, cb2, hovP ? Tk::Linha2 : Tk::Linha, 12.0f, 0, 1.0f);
                 if (clP && UrlWebOk(gMods[i].url))
-                    ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
-                // botao ABRIR O POST: pilula laranja centrada, do mesmo jeito que no blog
-                ImGui::PushFont(gFtBotaoPost);
-                float wBot = ImGui::CalcTextSize(T("ABRIR O POST")).x + 58.0f;
-                ImGui::PopFont();
-                if (wBot > CWM - PADM * 2) wBot = CWM - PADM * 2;
-                ImGui::SetCursorPos(ImVec2(col * (CWM + GAPM) + (CWM - wBot) * 0.5f,
-                                           lin * (CHM + GAPM) + yBot));
-                char idb[16]; sprintf(idb, "##baixa%d", i);
-                bool clB = ImGui::InvisibleButton(idb, ImVec2(wBot, HBOT));
-                ImVec2 ba2 = ImGui::GetItemRectMin(), bb2 = ImGui::GetItemRectMax();
-                bool hovB = ImGui::IsItemHovered();
-                ImU32 topoB = hovB ? LerpCor(AC.cor, IM_COL32(255, 255, 255, 255), 0.10f) : AC.cor;
-                RectGradVertical(ml, ba2, bb2, topoB, LerpCor(topoB, AC.hi, 0.55f), 9.0f); // canto do blog
-                ImGui::PushFont(gFtBotaoPost);
-                ImVec2 bsz2 = ImGui::CalcTextSize(T("ABRIR O POST"));
-                ml->AddText(ImVec2((ba2.x + bb2.x - bsz2.x) * 0.5f, (ba2.y + bb2.y - bsz2.y) * 0.5f),
-                            TextoSobreAccent(AC.cor), T("ABRIR O POST"));
-                ImGui::PopFont();
-                if (clB && UrlWebOk(gMods[i].url))
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
             }
             int linhasM = (nOrd + porLinhaM - 1) / porLinhaM;
@@ -6043,33 +6468,31 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gTela == 6) {
         // ---- INFORMACOES (projeto, contatos, comunidade) ----
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##info", ImVec2(ds.x - 148, ds.y - 130), false);
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##info", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(24, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), T("INFORMAÇÕES"));
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Sobre"));
         ImGui::PopFont();
-        ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(24, 48));
-        ImGui::TextColored(ImColor(Cinza(140)), T("Trok Launcher %s  -  feito pela equipe TrokMods"), VERSAO);
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::SetCursorPos(ImVec2(24, 46));
+        ImGui::TextColored(ImColor(Tk::Texto3), T("Trok Launcher %s  -  feito pela equipe TrokMods"), VERSAO);
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 84));
         ImGui::PushFont(gFtBody);
-        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + (pb.x - pa.x) - 72);
-        ImGui::TextColored(ImColor(Cinza(200)),
+        ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + 720.0f); // linha de leitura confortavel, como o texto do site
+        ImGui::TextColored(ImColor(Tk::Texto2),
             T("O Trok Launcher é um launcher moderno e gratuito de SA-MP: contas com avatar, "
             "várias instalações do jogo (datas), favoritos com capa, galeria das suas screenshots "
             "e atualização automática. Ele NÃO substitui nenhum arquivo do seu jogo - abre o "
-            "samp.exe original da instalacao que voce escolher."));
+            "samp.exe original da instalação que você escolher."));
         ImGui::PopTextWrapPos();
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 190));
         ImGui::PushFont(gFtMini);
-        ImGui::TextColored(ImColor(Cinza(156)), T("L I N K S"));
+        RotuloMicro(T("L I N K S"));
         ImGui::PopFont();
         ImGui::PushFont(gFtBody);
         ImGui::SetCursorPos(ImVec2(24, 212));
@@ -6081,57 +6504,64 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 274));
         ImGui::PushFont(gFtMini);
-        ImGui::TextColored(ImColor(Cinza(156)), T("C O M U N I D A D E"));
+        RotuloMicro(T("C O M U N I D A D E"));
         ImGui::PopFont();
         ImGui::SetCursorPos(ImVec2(24, 296));
         ImGui::PushFont(gFtBold);
-        ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-        if (ImGui::Button(T("Entrar no Discord"), ImVec2(196, 44)))
+        if (BotaoPrimario(T("Entrar no Discord"), ImVec2(196, 44)))
             ShellExecuteA(NULL, "open", URL_DISCORD, NULL, NULL, SW_SHOWNORMAL);
-        ImGui::PopStyleColor(4);
         ImGui::PopFont();
-        ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(24, 348));
-        ImGui::TextColored(ImColor(Cinza(110)), T("O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods."));
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::SetCursorPos(ImVec2(24, 352));
+        ImGui::TextColored(ImColor(Tk::Texto3), "%s", T("O launcher é de graça e sempre vai ser. Dúvidas, sugestões e bugs: no Discord da TrokMods."));
+        ImGui::PopFont();
+        // creditos: a fonte e os icones embutidos (as licencas pedem o aviso; o texto da OFL vai junto no exe)
+        ImGui::SetCursorPos(ImVec2(24, 404));
+        RotuloMicro("C R É D I T O S");
+        ImGui::SetCursorPos(ImVec2(24, 426));
+        ImGui::PushFont(gFtMiniLeve);
+        ImGui::TextColored(ImColor(Tk::Texto3), "Montserrat - SIL Open Font License 1.1 (The Montserrat Project Authors)");
+        ImGui::SetCursorPos(ImVec2(24, 446));
+        ImGui::TextColored(ImColor(Tk::Texto3), "Lucide - ISC License (Lucide Contributors)");
+        ImGui::SetCursorPos(ImVec2(24, 466));
+        ImGui::TextColored(ImColor(Tk::Texto3), "Dear ImGui - MIT License (Omar Cornut)");
         ImGui::PopFont();
         ImGui::EndChild();
     }
     else if (gTela == 3) {
         // ---- CONFIGURACOES ---- (desenhada AQUI, junto das telas: se ficar depois dos
         // dropdowns, o child dela renderiza POR CIMA deles - foi o bug da sobreposicao)
-        ImGui::SetCursorScreenPos(ImVec2(116, 78));
-        ImGui::BeginChild("##cfg", ImVec2(ds.x - 148, ds.y - 130), false);
+        ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
+        ImGui::BeginChild("##cfg", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
         ImVec2 pa = ImGui::GetWindowPos(), pb = ImVec2(pa.x + ImGui::GetWindowSize().x, pa.y + ImGui::GetWindowSize().y);
-        pl->AddRectFilled(pa, pb, IM_COL32(12, 12, 12, 226), 16);
-        pl->AddRect(pa, pb, Cinza(40), 16, 0, 1);
-        ImGui::SetCursorPos(ImVec2(26, 20));
-        ImGui::PushFont(gFtBotao);
-        ImGui::TextColored(ImColor(Cinza(245)), T("CONFIGURAÇÕES"));
+        ImGui::SetCursorPos(ImVec2(24, 6));
+        ImGui::PushFont(gFtTitulo);
+        ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Configurações"));
         ImGui::PopFont();
         { // "Reportar problema": canto de cima, mesmo lugar do "Localizar datas no PC" da aba Datas
-            char rotRep[80];
-            _snprintf(rotRep, sizeof(rotRep) - 1, "     %s", T("Reportar problema")); // espaco pro icone
-            rotRep[sizeof(rotRep) - 1] = 0;
-            ImGui::PushFont(gFtBold);
-            float wRep = ImGui::CalcTextSize(rotRep).x + 30.0f;
-            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wRep, 22));
-            bool clR = BotaoSec(rotRep, ImVec2(wRep, 34));
-            ImGui::PopFont();
-            { // bandeirinha dentro do botao, como nos botoes de backup
+            // link (abre o Discord): sem contorno, como o "Acesse o site" (pedido: "os links, remova os contornos")
+            ImGui::PushFont(gFtBotaoPost);
+            ImVec2 tszR = ImGui::CalcTextSize(T("Reportar problema"));
+            float wRep = 14.0f + 16.0f + 8.0f + tszR.x + 14.0f;
+            ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - wRep, 3));
+            bool clR = ImGui::InvisibleButton("##reportar", ImVec2(wRep, 38));
+            {
                 ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
-                IconeBandeira(ImGui::GetWindowDrawList(), ImVec2(ra.x + 22, (ra.y + rb.y) * 0.5f),
-                              Cinza(ImGui::IsItemHovered() ? 230 : 165), 16.0f);
+                bool rh = ImGui::IsItemHovered();
+                ImDrawList* rl = ImGui::GetWindowDrawList();
+                if (rh) { rl->AddRectFilled(ra, rb, Cinza(255, 16), 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
+                ImU32 cRep = rh ? Tk::Texto : Tk::Texto2;
+                IconeBandeira(rl, ImVec2(ra.x + 14.0f + 8.0f, (ra.y + rb.y) * 0.5f), cRep, 16.0f);
+                rl->AddText(ImVec2(ra.x + 14.0f + 16.0f + 8.0f, (ra.y + rb.y - tszR.y) * 0.5f), cRep, T("Reportar problema"));
             }
+            ImGui::PopFont();
             Dica(T("Fala com a gente no Discord da TrokMods"));
             if (clR) ShellExecuteA(NULL, "open", URL_REPORTAR, NULL, NULL, SW_SHOWNORMAL);
         }
         // nick saiu daqui: mora nas CONTAS (avatar/nick do topo); a conta 0 e a do samp padrão
         ImGui::PushFont(gFtMini);
-        ImGui::SetCursorPos(ImVec2(26, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("C O R   D E   D E S T A Q U E"));
+        ImGui::SetCursorPos(ImVec2(26, 66)); RotuloMicro(T("C O R   D E   D E S T A Q U E"));
         ImGui::PopFont();
         // ordem de exibicao: o LARANJA (padrao do app) vem primeiro; os indices do ini nao mudam
         static const int ORDEM_CORES[N_ACCENTS] = { 2, 0, 1, 3, 4, 5, 6 };
@@ -6196,7 +6626,7 @@ static void DesenhaUI(HWND hwnd) {
         }
         { // IDIOMA ao lado das cores: capsula com o idioma atual; o clique abre a lista
             ImGui::PushFont(gFtMini);
-            ImGui::SetCursorPos(ImVec2(520, 66)); ImGui::TextColored(ImColor(Cinza(156)), T("I D I O M A"));
+            ImGui::SetCursorPos(ImVec2(520, 66)); RotuloMicro(T("I D I O M A"));
             ImGui::PopFont();
             static const char* NOMES_IDIOMA[6] = { "Português", "English", "Español", "Русский", "Bahasa Indonesia", "Türkçe" };
             char rotAtual[96];
@@ -6205,13 +6635,17 @@ static void DesenhaUI(HWND hwnd) {
             rotAtual[sizeof(rotAtual) - 1] = 0;
             ImGui::SetCursorPos(ImVec2(520, 90));
             if (ImGui::InvisibleButton("##idiomacap", ImVec2(290, 36))) ImGui::OpenPopup("##popidioma");
+            ImVec2 capIdA = ImGui::GetItemRectMin(), capIdB = ImGui::GetItemRectMax(); // o menu abre colado embaixo
+#ifdef TROK_TESTE_LIVRE
+            if (gFotoAbrir == 1) { ImGui::OpenPopup("##popidioma"); gFotoAbrir = 0; }
+#endif
             Dica(T("Automático segue o idioma do Windows. Mudou e não trocou tudo? Reabra o launcher."));
             {
                 ImVec2 ba = ImGui::GetItemRectMin(), bb = ImGui::GetItemRectMax();
                 bool bh = ImGui::IsItemHovered();
                 ImDrawList* wl = ImGui::GetWindowDrawList();
-                if (bh) wl->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
-                wl->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
+                if (bh) wl->AddRectFilled(ba, bb, Tk::Sup2, 8.0f);
+                wl->AddRect(ba, bb, bh ? Cinza(255, 87) : Tk::Linha3, 8.0f, 0, 1.0f);
                 ImGui::PushFont(gFtBold);
                 ImVec2 tsz = ImGui::CalcTextSize(rotAtual);
                 wl->AddText(ImVec2(ba.x + 14, (ba.y + bb.y) * 0.5f - tsz.y * 0.5f), Cinza(bh ? 240 : 205), rotAtual);
@@ -6220,24 +6654,21 @@ static void DesenhaUI(HWND hwnd) {
                 wl->AddLine(ImVec2(cx - 5, cy), ImVec2(cx, cy + 5), Cinza(160), 1.8f);
                 wl->AddLine(ImVec2(cx, cy + 5), ImVec2(cx + 5, cy), Cinza(160), 1.8f);
             }
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+            ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
+            ImGui::SetNextWindowPos(ImVec2(capIdA.x, capIdB.y + 6.0f)); // como o dropdown do site: embaixo da capsula
             if (ImGui::BeginPopup("##popidioma")) {
-                ImDrawList* cl2 = ImGui::GetWindowDrawList();
-                for (int q = 0; q <= 6; q++) { // 0 = automatico, 1..6 = idiomas
+                for (int q = 0; q <= 6; q++) { // 0 = automatico (a direita, o idioma do Windows), 1..6 = idiomas
                     char idq[16]; sprintf(idq, "##pi%d", q);
-                    bool clq = ImGui::InvisibleButton(idq, ImVec2(270, 36));
-                    ImVec2 la2 = ImGui::GetItemRectMin(), lb2 = ImGui::GetItemRectMax();
-                    bool hv = ImGui::IsItemHovered(), selQ = (gIdiomaCfg == q);
-                    if (hv) cl2->AddRectFilled(la2, lb2, Cinza(255, 14), 9);
-                    if (selQ) cl2->AddRect(la2, lb2, ComAlpha(AC.cor, 0.85f), 9, 0, 1.5f);
-                    ImGui::PushFont(gFtBold);
-                    cl2->AddText(ImVec2(la2.x + 12, la2.y + 9), Cinza(238), q == 0 ? T("Automático") : NOMES_IDIOMA[q - 1]);
-                    ImGui::PopFont();
-                    if (clq) { gIdiomaCfg = q; DefinirIdioma(); SalvarConfig(); ImGui::CloseCurrentPopup(); }
+                    if (ItemMenu(idq, q == 0 ? T("Automático") : NOMES_IDIOMA[q - 1], q == 0 ? NOMES_IDIOMA[gLang] : NULL,
+                                 gIdiomaCfg == q, 274.0f)) {
+                        gIdiomaCfg = q; DefinirIdioma(); SalvarConfig(); ImGui::CloseCurrentPopup();
+                    }
                 }
                 ImGui::EndPopup();
             }
-            ImGui::PopStyleVar();
+            ImGui::PopStyleVar(3);
         }
         // opcoes em LINHAS de lista (hover + divisoria), switch a direita no destaque
         {
@@ -6279,7 +6710,7 @@ static void DesenhaUI(HWND hwnd) {
             Dica(T("Opção do próprio SA-MP, usada pelas ferramentas RCON do browser original"));
             ImGui::SetCursorPos(ImVec2(26, 651));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("B A C K U P"));
+            RotuloMicro(T("B A C K U P"));
             ImGui::PopFont();
             ImGui::SetCursorPos(ImVec2(24, 673));
             if (BotaoSec(T("     Exportar configurações..."), ImVec2(232, 38))) gPedirExportCfg = true;
@@ -6307,28 +6738,28 @@ static void DesenhaUI(HWND hwnd) {
         if (gRenomear >= 0 && !ImGui::IsPopupOpen(T("Editar data##trok"))) ImGui::OpenPopup(T("Editar data##trok"));
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         // vestido com o design do app (o modal cru do imgui vem com barra azul)
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal(T("Editar data##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             int i = gRenomear;
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("EDITAR DATA"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Editar data"));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E"));
+            RotuloMicro(T("N O M E"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushItemWidth(384);
             ImGui::InputText("##ednome", gEditNome, sizeof(gEditNome));
             ImGui::Dummy(ImVec2(1, 6));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("D E S C R I C A O"));
+            RotuloMicro(T("D E S C R I C A O"));
             ImGui::PopFont();
             ImGui::InputText("##eddesc", gEditDesc, sizeof(gEditDesc));
             ImGui::PopItemWidth();
@@ -6354,7 +6785,7 @@ static void DesenhaUI(HWND hwnd) {
             if (BotaoSec(T("Abrir User Files"), ImVec2(188, 38))) {
                 char uf[MAX_PATH];
                 UserFilesDaData(gDatas[i], uf, sizeof(uf));
-                ShellExecuteA(NULL, "open", uf, NULL, NULL, SW_SHOWNORMAL);
+                AbrirPasta(uf);
             }
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(133)), T("Vazio = o launcher procura sozinho; se não achar, usa a pasta padrão em Documentos."));
@@ -6374,7 +6805,7 @@ static void DesenhaUI(HWND hwnd) {
             if (gNumCapasUI > 0) {
                 ImGui::Dummy(ImVec2(1, 6));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), T("C A P A S   D O   L A U N C H E R"));
+                RotuloMicro(T("C A P A S   D O   L A U N C H E R"));
                 ImGui::PopFont();
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
                 ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
@@ -6453,16 +6884,11 @@ static void DesenhaUI(HWND hwnd) {
             if (!podeRemover) ImGui::EndDisabled();
             ImGui::Dummy(ImVec2(1, 12));
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button(T("Salvar"), ImVec2(188, 40))) {
+            if (BotaoPrimario(T("Salvar"), ImVec2(188, 40))) {
                 SalvarEdicaoData(i);
                 gRenomear = -1;
                 ImGui::CloseCurrentPopup();
             }
-            ImGui::PopStyleColor(4);
             ImGui::SameLine(0, 8);
             if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) { gRenomear = -1; ImGui::CloseCurrentPopup(); }
             ImGui::PopFont();
@@ -6481,21 +6907,21 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::OpenPopup(T("Editar servidor##trok"));
         }
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal(T("Editar servidor##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             int i = gEditSrv;
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("EDITAR SERVIDOR"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Editar servidor"));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E   D E   E X I B I C A O"));
+            RotuloMicro(T("N O M E   D E   E X I B I C A O"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushItemWidth(384);
@@ -6503,7 +6929,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("C O N T A   A O   J O G A R"));
+            RotuloMicro(T("C O N T A   A O   J O G A R"));
             ImGui::PopFont();
             {
                 // capsula mostra AVATAR + NICK da conta escolhida; clique abre a lista
@@ -6511,12 +6937,16 @@ static void DesenhaUI(HWND hwnd) {
                 for (int q = 0; q < gNumPerfis; q++)
                     if (gSrv[i].contaPref[0] && _stricmp(gPerfis[q].nick, gSrv[i].contaPref) == 0) { selPerfil = q; break; }
                 if (ImGui::InvisibleButton("##ctpref", ImVec2(384, 36))) ImGui::OpenPopup("##popconta");
+                ImVec2 capCA = ImGui::GetItemRectMin(), capCB = ImGui::GetItemRectMax(); // o menu abre colado embaixo
+#ifdef TROK_TESTE_LIVRE
+                if (gFotoAbrir == 2) { ImGui::OpenPopup("##popconta"); gFotoAbrir = 0; }
+#endif
                 {
                     ImVec2 ba = ImGui::GetItemRectMin(), bb = ImGui::GetItemRectMax();
                     bool bh = ImGui::IsItemHovered();
                     ImDrawList* dcp = ImGui::GetWindowDrawList();
-                    if (bh) dcp->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
-                    dcp->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
+                    if (bh) dcp->AddRectFilled(ba, bb, Tk::Sup2, 8.0f);
+                    dcp->AddRect(ba, bb, bh ? Cinza(255, 87) : Tk::Linha3, 8.0f, 0, 1.0f);
                     const char* rotC = (selPerfil >= 0) ? gPerfis[selPerfil].nick : T("Conta atual (não trocar)");
                     ImGui::PushFont(gFtBold);
                     ImVec2 tszC = ImGui::CalcTextSize(rotC);
@@ -6530,23 +6960,27 @@ static void DesenhaUI(HWND hwnd) {
                     dcp->AddText(ImVec2(x0 + 32, ymid - tszC.y * 0.5f), Cinza(bh ? 240 : 205), rotC);
                     ImGui::PopFont();
                 }
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+                ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
+                ImGui::SetNextWindowPos(ImVec2(capCA.x, capCB.y + 6.0f));
                 if (ImGui::BeginPopup("##popconta")) {
                     ImDrawList* cl2 = ImGui::GetWindowDrawList();
                     for (int q = -1; q < gNumPerfis; q++) { // -1 = "conta atual (nao trocar)"
                         char idq[16]; sprintf(idq, "##pc%d", q + 1);
                         bool selQ = (q < 0) ? !gSrv[i].contaPref[0]
                                             : _stricmp(gPerfis[q].nick, gSrv[i].contaPref) == 0;
-                        bool clq = ImGui::InvisibleButton(idq, ImVec2(360, 44));
+                        bool clq = ImGui::InvisibleButton(idq, ImVec2(368, 44)); // 368 + 2x8 de margem = a largura da capsula
                         ImVec2 la2 = ImGui::GetItemRectMin(), lb2 = ImGui::GetItemRectMax();
                         bool hv = ImGui::IsItemHovered();
-                        if (hv) cl2->AddRectFilled(la2, lb2, Cinza(255, 14), 9);
-                        if (selQ) cl2->AddRect(la2, lb2, ComAlpha(AC.cor, 0.85f), 9, 0, 1.5f);
+                        if (hv) { cl2->AddRectFilled(la2, lb2, Tk::Realce, 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
                         ImVec2 qa(la2.x + 7, la2.y + 7), qb(la2.x + 37, la2.y + 37);
-                        if (q < 0) cl2->AddRect(qa, qb, Cinza(110), 8, 0, 1.5f); // sem troca: vazado
+                        if (q < 0) cl2->AddRect(qa, qb, Tk::Linha3, 8, 0, 1.5f); // sem troca: vazado
                         else DesenhaAvatar(cl2, qa, qb, gPerfis[q].avatar, gPerfis[q].cor, 8.0f);
-                        ImGui::PushFont(gFtBold);
-                        cl2->AddText(ImVec2(la2.x + 48, la2.y + 12), Cinza(238),
+                        // como o dropdown do site: sem contorno; a escolha atual fica em negrito branco
+                        ImGui::PushFont(selQ ? gFtBold : gFtBody);
+                        ImVec2 tq = ImGui::CalcTextSize("Ag");
+                        cl2->AddText(ImVec2(la2.x + 48, (la2.y + lb2.y - tq.y) * 0.5f), Tk::Texto,
                                      q < 0 ? T("Conta atual (não trocar)") : gPerfis[q].nick);
                         ImGui::PopFont();
                         if (clq) {
@@ -6558,11 +6992,11 @@ static void DesenhaUI(HWND hwnd) {
                     }
                     ImGui::EndPopup();
                 }
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(3);
             }
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("D A T A   A O   J O G A R"));
+            RotuloMicro(T("D A T A   A O   J O G A R"));
             ImGui::PopFont();
             {
                 // capsula mostra CAPA + NOME da data escolhida; clique abre a lista (como a conta)
@@ -6570,12 +7004,16 @@ static void DesenhaUI(HWND hwnd) {
                 for (int q = 0; q < gNumDatas; q++)
                     if (gSrv[i].dataPref[0] && _stricmp(gDatas[q].nome, gSrv[i].dataPref) == 0) { selData = q; break; }
                 if (ImGui::InvisibleButton("##dtpref", ImVec2(384, 36))) ImGui::OpenPopup("##popdata");
+                ImVec2 capDA = ImGui::GetItemRectMin(), capDB = ImGui::GetItemRectMax(); // o menu abre colado embaixo
+#ifdef TROK_TESTE_LIVRE
+                if (gFotoAbrir == 3) { ImGui::OpenPopup("##popdata"); gFotoAbrir = 0; }
+#endif
                 {
                     ImVec2 ba = ImGui::GetItemRectMin(), bb = ImGui::GetItemRectMax();
                     bool bh = ImGui::IsItemHovered();
                     ImDrawList* dcp = ImGui::GetWindowDrawList();
-                    if (bh) dcp->AddRectFilled(ba, bb, Cinza(255, 12), 9.0f);
-                    dcp->AddRect(ba, bb, bh ? Cinza(200) : Cinza(120), 9.0f, 0, 1.5f);
+                    if (bh) dcp->AddRectFilled(ba, bb, Tk::Sup2, 8.0f);
+                    dcp->AddRect(ba, bb, bh ? Cinza(255, 87) : Tk::Linha3, 8.0f, 0, 1.0f);
                     const char* rotD = (selData >= 0) ? gDatas[selData].nome : T("Data em uso (não trocar)");
                     ImGui::PushFont(gFtBold);
                     ImVec2 tszD = ImGui::CalcTextSize(rotD);
@@ -6587,33 +7025,36 @@ static void DesenhaUI(HWND hwnd) {
                     dcp->AddText(ImVec2(x0 + 44, ymid - tszD.y * 0.5f), Cinza(bh ? 240 : 205), rotD);
                     ImGui::PopFont();
                 }
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10, 10));
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+                ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
                 ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(FLT_MAX, 500.0f)); // ate 24 datas: rola em vez de sair da tela
+                ImGui::SetNextWindowPos(ImVec2(capDA.x, capDB.y + 6.0f));
                 if (ImGui::BeginPopup("##popdata")) {
                     ImDrawList* cl2 = ImGui::GetWindowDrawList();
                     for (int q = -1; q < gNumDatas; q++) { // -1 = "data em uso (nao trocar)"
                         char idq[16]; sprintf(idq, "##pd%d", q + 1);
                         bool selQ = (q < 0) ? !gSrv[i].dataPref[0]
                                             : _stricmp(gDatas[q].nome, gSrv[i].dataPref) == 0;
-                        bool clq = ImGui::InvisibleButton(idq, ImVec2(360, 44));
+                        bool clq = ImGui::InvisibleButton(idq, ImVec2(368, 44));
                         ImVec2 la2 = ImGui::GetItemRectMin(), lb2 = ImGui::GetItemRectMax();
                         bool hv = ImGui::IsItemHovered();
-                        if (hv) cl2->AddRectFilled(la2, lb2, Cinza(255, 14), 9);
-                        if (selQ) cl2->AddRect(la2, lb2, ComAlpha(AC.cor, 0.85f), 9, 0, 1.5f);
+                        if (hv) { cl2->AddRectFilled(la2, lb2, Tk::Realce, 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
                         ImVec2 qa(la2.x + 7, la2.y + 7), qb(la2.x + 60, la2.y + 37); // capa 16:9
-                        if (q < 0) cl2->AddRect(qa, qb, Cinza(110), 6, 0, 1.5f);
+                        if (q < 0) cl2->AddRect(qa, qb, Tk::Linha3, 6, 0, 1.5f);
                         else if (gDatas[q].tex) ImagemCapa(cl2, gDatas[q].tex, qa, qb, 6.0f, 0);
                         else cl2->AddRectFilled(qa, qb, Cinza(40), 6);
                         // versao do SA-MP da data a direita; o nome trunca antes de encostar nela
                         const char* vq = (q >= 0) ? (gDatas[q].versao[0] ? gDatas[q].versao : T("sem SA-MP")) : "";
                         ImGui::PushFont(gFtMini);
                         ImVec2 vqs = ImGui::CalcTextSize(vq);
-                        if (q >= 0) cl2->AddText(ImVec2(lb2.x - 12 - vqs.x, la2.y + 15),
-                                                 gDatas[q].versao[0] ? Cinza(150) : IM_COL32(240, 120, 116, 255), vq);
+                        if (q >= 0) cl2->AddText(ImVec2(lb2.x - 12 - vqs.x, (la2.y + lb2.y - vqs.y) * 0.5f),
+                                                 gDatas[q].versao[0] ? Tk::Texto4 : Tk::Vermelho, vq);
                         ImGui::PopFont();
-                        ImGui::PushFont(gFtBold);
-                        TextoTruncado(cl2, ImVec2(la2.x + 70, la2.y + 12), (lb2.x - 12 - (q >= 0 ? vqs.x + 10 : 0)) - (la2.x + 70),
-                                      Cinza(238), q < 0 ? T("Data em uso (não trocar)") : gDatas[q].nome);
+                        ImGui::PushFont(selQ ? gFtBold : gFtBody); // a escolha atual em negrito branco, sem contorno
+                        ImVec2 tq = ImGui::CalcTextSize("Ag");
+                        TextoTruncado(cl2, ImVec2(la2.x + 70, (la2.y + lb2.y - tq.y) * 0.5f), (lb2.x - 12 - (q >= 0 ? vqs.x + 10 : 0)) - (la2.x + 70),
+                                      Tk::Texto, q < 0 ? T("Data em uso (não trocar)") : gDatas[q].nome);
                         ImGui::PopFont();
                         if (clq) {
                             if (q < 0) gSrv[i].dataPref[0] = 0;
@@ -6624,11 +7065,11 @@ static void DesenhaUI(HWND hwnd) {
                     }
                     ImGui::EndPopup();
                 }
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(3);
             }
             ImGui::Dummy(ImVec2(1, 8));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("L I N K S   O F I C I A I S"));
+            RotuloMicro(T("L I N K S   O F I C I A I S"));
             ImGui::PopFont();
             {
                 // lista livre: cada link tem nome e url proprios (viram botoes na Home)
@@ -6725,7 +7166,7 @@ static void DesenhaUI(HWND hwnd) {
             if (gNumCapasUI > 0) {
                 ImGui::Dummy(ImVec2(1, 6));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), T("C A P A S   D O   L A U N C H E R"));
+                RotuloMicro(T("C A P A S   D O   L A U N C H E R"));
                 ImGui::PopFont();
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
                 ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
@@ -6830,18 +7271,13 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImGui::Dummy(ImVec2(1, 12));
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button(T("Salvar"), ImVec2(188, 40))) {
+            if (BotaoPrimario(T("Salvar"), ImVec2(188, 40))) {
                 for (char* c = gEditApelido; *c; c++) if (*c == '|') *c = '/';
                 strncpy(gSrv[i].apelido, gEditApelido, sizeof(gSrv[0].apelido) - 1);
                 SalvarServidores();
                 gEditSrv = -1;
                 ImGui::CloseCurrentPopup();
             }
-            ImGui::PopStyleColor(4);
             ImGui::SameLine(0, 8);
             if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) { gEditSrv = -1; ImGui::CloseCurrentPopup(); }
             ImGui::PopFont();
@@ -6852,7 +7288,9 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PopStyleVar(3);
     }
 
-    // ===== sidebar (desenhada por ULTIMO: expandida cobre o conteudo, estilo Rockstar) =====
+    // ===== trilho (desenhado por ULTIMO: expandido cobre o conteudo, estilo Rockstar) =====
+    // Mockup: faixa de 64 (71 aqui) na cor de fundo do site, logo no destaque em cima, icones cinza que acendem em branco, a aba
+    // atual com um fio de 3 px no destaque na borda esquerda, e embaixo o botao de abrir o menu e a versao.
     {
         float alvoS = gSideAberta ? 1.0f : 0.0f;
         float velS = dt * 8.0f;
@@ -6860,34 +7298,47 @@ static void DesenhaUI(HWND hwnd) {
         gSideAnim += (alvoS - gSideAnim) * velS; // aproximacao exponencial: entra e sai macio
         if (fabsf(gSideAnim - alvoS) < 0.004f) gSideAnim = alvoS;
         float eS = gSideAnim * gSideAnim * (3.0f - 2.0f * gSideAnim); // smoothstep
-        float wSide = 76.0f + 154.0f * eS;
+        float wSide = RAIL_W + 159.0f * eS;
         ImGui::SetCursorScreenPos(ImVec2(0, 0));
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::BeginChild("##sidebar", ImVec2(wSide, ds.y), false,
+        // expandido, o child ganha uma faixa a direita para a sombra (fora dele o clip cortava e ela nunca aparecia)
+        ImGui::BeginChild("##sidebar", ImVec2(wSide + 24.0f * eS, ds.y), false,
                           ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
         ImDrawList* sl = ImGui::GetWindowDrawList();
-        sl->AddRectFilled(ImVec2(0, 0), ImVec2(wSide, ds.y), IM_COL32(6, 6, 6, 252)); // preto Rockstar
-        if (eS > 0.01f) { // sombrinha na borda quando cobre o conteudo
-            sl->AddRectFilledMultiColor(ImVec2(wSide, 0), ImVec2(wSide + 18.0f * eS, ds.y),
-                Cinza(0, (int)(90 * eS)), Cinza(0, 0), Cinza(0, 0), Cinza(0, (int)(90 * eS)));
+        // VIDRO (o .topo.rolado do site): o que esta atras do menu, borrado, com o veu #0B0B0C a 86% por cima
+        if (VidroGarantir()) {
+            sl->AddCallback(CbVidro, NULL);
+            sl->AddImage((ImTextureID)gVidroTex[3], ImVec2(0, 0), ImVec2(wSide, ds.y), ImVec2(0, 0), ImVec2(wSide / ds.x, 1.0f));
+            sl->AddRectFilled(ImVec2(0, 0), ImVec2(wSide, ds.y), IM_COL32(11, 11, 12, 230)); // .90: "bem mais escuro" (pedido)
+        } else sl->AddRectFilled(ImVec2(0, 0), ImVec2(wSide, ds.y), Tk::Fundo);
+        // um fio de 1 px (a linha do site, a borda de baixo do topo quando rola) separa o menu do conteudo
+        sl->AddLine(ImVec2(wSide - 0.5f, 0), ImVec2(wSide - 0.5f, ds.y), eS > 0.01f ? Tk::Linha2 : Tk::Linha, 1.0f);
+        if (eS > 0.01f) { // sombra quando cobre o conteudo
+            sl->AddRectFilledMultiColor(ImVec2(wSide, 0), ImVec2(wSide + 24.0f * eS, ds.y),
+                Cinza(0, (int)(60 * eS)), Cinza(0, 0), Cinza(0, 0), Cinza(0, (int)(60 * eS))); // mais fraca (pedido)
         }
         // logo: o ALVO do TrokMods na cor de destaque (o .ico do exe segue sendo a loira)
-        if (gLogoTrok)
-            sl->AddImage((ImTextureID)gLogoTrok, ImVec2(23, 23), ImVec2(53, 53),
-                         ImVec2(0, 0), ImVec2(1, 1), AC.cor);
-        else
-            sl->AddRectFilled(ImVec2(23, 23), ImVec2(53, 53), AC.cor, 9.0f);
-        static const int NAVS[6] = { 0, 1, 2, 4, 5, 3 }; // sem a aba Informacoes
-        static const char* NOMES_NAV[7] = { "Início", "Servidores", "Datas", "Configurações",
-                                            "Galeria", "TrokMods", "Informações" };
+        {
+            const float cxL = RAIL_W * 0.5f, cyL = TOPO_H * 0.5f, lL = 29.0f; // na linha do nick e dos botoes da janela (desceu um tico, pedido)
+            if (gLogoTrok)
+                sl->AddImage((ImTextureID)gLogoTrok, ImVec2(cxL - lL * 0.5f, cyL - lL * 0.5f), ImVec2(cxL + lL * 0.5f, cyL + lL * 0.5f),
+                             ImVec2(0, 0), ImVec2(1, 1), AC.cor);
+            else
+                sl->AddCircle(ImVec2(cxL, cyL), lL * 0.33f, AC.cor, 24, 2.6f);
+        }
+        // ordem do mockup: Inicio, Servidores, Datas, Galeria, TrokMods, Configuracoes. O "Sobre" do mockup
+        // ficou de fora (ele nao pediu): a aba Informacoes segue fora do trilho, como na 1.11
+        static const int NAVS[6] = { 0, 1, 2, 4, 5, 3 };
+        static const char* NOMES_NAV[6] = { "Início", "Servidores", "Datas", "Configurações",
+                                            "Galeria", "TrokMods" };
         int alfaTxt = (int)(255.0f * eS);
         for (int p = 0; p < 6; p++) {
             int i = NAVS[p];
-            float y = 96.0f + p * 56.0f;
-            ImGui::SetCursorPos(ImVec2(14, y));
+            float y = 76.0f + p * 53.0f;
+            ImGui::SetCursorPos(ImVec2(0, y));
             char id[8]; sprintf(id, "##nav%d", i);
-            if (ImGui::InvisibleButton(id, ImVec2(wSide - 28.0f, 46))) {
+            if (ImGui::InvisibleButton(id, ImVec2(wSide, 53))) {
                 gTela = i;
                 if (i == 5) { // abriu a aba mods: a bolinha do icone some; os cards publicados
                     gModsNovo = false; // depois da ultima visita ainda mostram a bolinha deles
@@ -6896,36 +7347,44 @@ static void DesenhaUI(HWND hwnd) {
                 }
             }
             bool hov = ImGui::IsItemHovered();
-            if (hov && gTela != i)
-                sl->AddRectFilled(ImVec2(14, y), ImVec2(wSide - 14.0f, y + 46), Cinza(22), 12);
-            if (gTela == i)
-                sl->AddRectFilled(ImVec2(0, y + 10), ImVec2(4, y + 36), AC.cor, 2);
-            IconeNav(sl, ImVec2(38, y + 23), i, gTela == i ? Cinza(250) : (hov ? Cinza(215) : Cinza(125)));
-            if (alfaTxt > 8) { // nome da aba (aparece junto com a expansao)
-                ImGui::PushFont(gFtBold);
-                ImVec2 tsz = ImGui::CalcTextSize(T(NOMES_NAV[i]));
-                sl->AddText(ImVec2(66, y + (46 - tsz.y) * 0.5f),
-                            Cinza(gTela == i ? 245 : (hov ? 220 : 150), alfaTxt), T(NOMES_NAV[i]));
-                ImGui::PopFont();
+            bool atual = (gTela == i);
+            if (atual) sl->AddRectFilled(ImVec2(0, y + 13.0f), ImVec2(3.0f, y + 40.0f), AC.cor, 2.0f);
+            // hover como os icones do topo do site (.icone-bt): fundo branco a 8%, cantos de 8. Recolhido,
+            // o quadrado de 40 em volta do icone; abrindo, ele se estica ate virar a linha inteira
+            if (hov && !atual) {
+                float xa = RAIL_W * 0.5f - 20.0f, xb = RAIL_W * 0.5f + 20.0f;
+                xa += (8.0f - xa) * eS; xb += (wSide - 8.0f - xb) * eS;
+                sl->AddRectFilled(ImVec2(xa, y + 6.5f), ImVec2(xb, y + 46.5f), Cinza(255, 20), 8.0f);
             }
-            if (i == 5 && gModsNovo && gTela != 5) { // post novo no blog: bolinha pulsando
-                float pulso = 0.55f + 0.45f * sinf((float)ImGui::GetTime() * 5.0f);
-                sl->AddCircleFilled(ImVec2(54, y + 12), 4.0f, ComAlpha(AC.cor, 0.35f + 0.65f * pulso), 12);
+            ImU32 corI = (atual || hov) ? Cinza(255) : Cinza(255, 204); // branco a 80%, acende no hover
+            IconeNav(sl, ImVec2(RAIL_W * 0.5f, y + 26.5f), i, corI);
+            if (alfaTxt > 8) { // nome da aba: o .nav-link do site (500 a 84%; a atual em 600 branco)
+                ImGui::PushFont(atual ? gFtBold : gFtBody);
+                ImVec2 tsz = ImGui::CalcTextSize(T(NOMES_NAV[i]));
+                sl->AddText(ImVec2(RAIL_W + 2.0f, y + (53.0f - tsz.y) * 0.5f),
+                            ComAlpha((atual || hov) ? Cinza(255) : IM_COL32(242, 242, 243, 214), alfaTxt / 255.0f), T(NOMES_NAV[i]));
+                ImGui::PopFont();
+            } else if (hov) ImGui::SetTooltip("%s", T(NOMES_NAV[i]));
+            if (i == 5 && gModsNovo && gTela != 5) { // post novo no blog: a bolinha do mockup
+                sl->AddCircleFilled(ImVec2(RAIL_W * 0.5f + 14.0f, y + 17.5f), 3.3f, AC.cor, 12);
             }
         }
-        // botao de expandir/recolher (sutil: so um chevron duplo, sem caixa)
+        // embaixo: abrir/recolher o menu lateral e a versao (o mockup)
         {
-            ImGui::SetCursorPos(ImVec2(14, ds.y - 64));
-            bool clS = ImGui::InvisibleButton("##sidetoggle", ImVec2(48, 30));
+            ImGui::SetCursorPos(ImVec2(0, ds.y - 30.0f - 53.0f));
+            bool clS = ImGui::InvisibleButton("##sidetoggle", ImVec2(RAIL_W, 53));
             bool hovS = ImGui::IsItemHovered();
             if (clS) gSideAberta = !gSideAberta;
-            // ícone lucide do painel (o mesmo conceito do launcher da Rockstar)
-            ImU32 cS = Cinza(hovS ? 225 : 115);
-            Icone(sl, ImVec2(38.0f, ds.y - 49.0f), gSideAberta ? I_PAINEL_FECHA : I_PAINEL_ABRE, cS, 19.0f);
-            if (hovS) ImGui::SetTooltip(gSideAberta ? T("Recolher menu") : T("Expandir menu"));
+            if (hovS) sl->AddRectFilled(ImVec2(RAIL_W * 0.5f - 20.0f, ds.y - 30.0f - 46.5f), ImVec2(RAIL_W * 0.5f + 20.0f, ds.y - 30.0f - 6.5f), Cinza(255, 20), 8.0f);
+            ImU32 cS = hovS ? Cinza(255) : Cinza(255, 204);
+            Icone(sl, ImVec2(RAIL_W * 0.5f, ds.y - 30.0f - 26.5f), gSideAberta ? I_PAINEL_FECHA : I_PAINEL_ABRE, cS, 20.0f);
+            if (hovS) ImGui::SetTooltip("%s", gSideAberta ? T("Recolher menu") : T("Abrir o menu lateral"));
         }
-        ImGui::PushFont(gFtMini);
-        sl->AddText(ImVec2(28, ds.y - 26), Cinza(95), VERSAO);
+        ImGui::PushFont(gFtMicro);
+        {
+            ImVec2 vsz = ImGui::CalcTextSize(VERSAO);
+            sl->AddText(ImVec2(floorf(RAIL_W * 0.5f - vsz.x * 0.5f), ds.y - 24.0f), Tk::Texto4, VERSAO);
+        }
         ImGui::PopFont();
         ImGui::EndChild();
         ImGui::PopStyleVar();
@@ -6949,16 +7408,16 @@ static void DesenhaUI(HWND hwnd) {
         }
         if (gAttPopup && !ImGui::IsPopupOpen(T("Atualização##trok"))) ImGui::OpenPopup(T("Atualização##trok"));
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal(T("Atualização##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("NOVA ATUALIZAÇÃO"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Nova atualização"));
             ImGui::PopFont();
             ImGui::PushFont(gFtMini);
             char vtxt[80];
@@ -6967,9 +7426,9 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 10));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("N O V I D A D E S"));
+            RotuloMicro(T("N O V I D A D E S"));
             ImGui::PopFont();
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(10, 10, 10, 255)));
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(Tk::Sup));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 10.0f);
             ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 8.0f);
             ImGui::BeginChild("##attnotas", ImVec2(384, 170), false);
@@ -7006,13 +7465,9 @@ static void DesenhaUI(HWND hwnd) {
                 ImGui::PopFont();
             } else {
                 ImGui::PushFont(gFtBold);
-                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
                 const char* pex = strrchr(gAttUrl, '.');
                 bool linkExe = pex && _stricmp(pex, ".exe") == 0;
-                if (ImGui::Button(T("Atualizar agora"), ImVec2(188, 40))) {
+                if (BotaoPrimario(T("Atualizar agora"), ImVec2(188, 40))) {
                     if (linkExe) { // baixa e instala sozinho, sem sair do app
                         gAttBaixa = 1;
                         RodarThread(ThreadBaixarUpdate, NULL);
@@ -7022,7 +7477,6 @@ static void DesenhaUI(HWND hwnd) {
                         ImGui::CloseCurrentPopup();
                     }
                 }
-                ImGui::PopStyleColor(4);
                 ImGui::SameLine(0, 8);
                 if (BotaoSec(T("Depois"), ImVec2(188, 40))) { gAttPopup = false; ImGui::CloseCurrentPopup(); }
                 ImGui::PopFont();
@@ -7048,17 +7502,17 @@ static void DesenhaUI(HWND hwnd) {
         if (gBoasVindas && gSampOk) gBoasVindas = false; // achou samp valido: liberado
         if (gBoasVindas && !ImGui::IsPopupOpen("BemVindo##trok")) ImGui::OpenPopup("BemVindo##trok");
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal("BemVindo##trok", NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
             if (!gBoasVindas) ImGui::CloseCurrentPopup(); // a busca automatica achou uma data valida: some sozinho
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("BEM-VINDO AO TROK LAUNCHER"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Bem-vindo ao Trok Launcher"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             ImGui::PushTextWrapPos(400);
@@ -7069,15 +7523,10 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 12));
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            if (ImGui::Button(T("Escolher o gta_sa.exe..."), ImVec2(400, 42))) { // largura toda do modal
+            if (BotaoPrimario(T("Escolher o gta_sa.exe..."), ImVec2(400, 42))) { // largura toda do modal
                 gPickCaminho = gDataSel; // o picker roda fora do frame e atualiza a data em uso
                 ImGui::CloseCurrentPopup(); // sem SA-MP valido o popup VOLTA no proximo frame
             }
-            ImGui::PopStyleColor(4);
             ImGui::Dummy(ImVec2(1, 6));
             { // busca automatica (na 1a abertura ela ja sai rodando sozinha; aqui da pra repetir)
                 bool procurando = (gLocEstado != 0);
@@ -7097,23 +7546,23 @@ static void DesenhaUI(HWND hwnd) {
     {
         if (gAddIpAbrir && !ImGui::IsPopupOpen("AddIp##trok")) ImGui::OpenPopup("AddIp##trok");
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal("AddIp##trok", NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("ADICIONAR PELO IP"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Adicionar pelo IP"));
             ImGui::PopFont();
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(140)), T("O servidor entra nos favoritos e o launcher busca o nome e o modo sozinho."));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 10));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("E N D E R E C O   D O   S E R V I D O R"));
+            RotuloMicro(T("E N D E R E C O   D O   S E R V I D O R"));
             ImGui::PopFont();
             ImGui::PushItemWidth(384);
             ImGui::PushFont(gFtBold);
@@ -7123,7 +7572,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1, 6));
             ImGui::PushFont(gFtMini);
-            ImGui::TextColored(ImColor(Cinza(156)), T("N O M E   ( O P C I O N A L )"));
+            RotuloMicro(T("N O M E   ( O P C I O N A L )"));
             ImGui::PopFont();
             ImGui::PushFont(gFtBody);
             bool entrou2 = ImGui::InputTextWithHint("##addnome", T("vazio = nome que o servidor responder"), gAddNome, sizeof(gAddNome),
@@ -7132,12 +7581,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(1, 12));
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            bool adicionar = ImGui::Button(T("Adicionar"), ImVec2(188, 40));
-            ImGui::PopStyleColor(4);
+            bool adicionar = BotaoPrimario(T("Adicionar"), ImVec2(188, 40));
             ImGui::SameLine(0, 8);
             if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) {
                 gAddIpAbrir = false;
@@ -7165,16 +7609,16 @@ static void DesenhaUI(HWND hwnd) {
     {
         if (gPedirSenha && !ImGui::IsPopupOpen(T("Senha##trok"))) ImGui::OpenPopup(T("Senha##trok"));
         ImGui::SetNextWindowPos(ImVec2(ds.x * 0.5f, ds.y * 0.5f), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 14.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(26, 24));
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.0f);
-        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(14, 14, 14, 252)));
-        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Cinza(58)));
-        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.01f, 0.01f, 0.01f, 0.72f));
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
+        ImGui::PushStyleColor(ImGuiCol_Border, ImGui::ColorConvertU32ToFloat4(Tk::Linha2));
+        ImGui::PushStyleColor(ImGuiCol_ModalWindowDimBg, ImVec4(0.0f, 0.0f, 0.0f, 0.66f));
         if (ImGui::BeginPopupModal(T("Senha##trok"), NULL,
                 ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove)) {
-            ImGui::PushFont(gFtBotao);
-            ImGui::TextColored(ImColor(Cinza(245)), T("SERVIDOR COM SENHA"));
+            ImGui::PushFont(gFtTitulo);
+            ImGui::TextColored(ImColor(Tk::Texto), "%s", T("Servidor com senha"));
             ImGui::PopFont();
             ImGui::PushFont(gFtMini);
             ImGui::TextColored(ImColor(Cinza(140)), "%s", gPendNome); // "%s": nome vem do servidor (não e format string!)
@@ -7189,12 +7633,7 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::PopItemWidth();
             ImGui::Dummy(ImVec2(1, 12));
             ImGui::PushFont(gFtBold);
-            ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-            bool conectar = ImGui::Button(T("Conectar"), ImVec2(188, 40));
-            ImGui::PopStyleColor(4);
+            bool conectar = BotaoPrimario(T("Conectar"), ImVec2(188, 40));
             ImGui::SameLine(0, 8);
             if (BotaoSec(T("Cancelar"), ImVec2(188, 40))) {
                 gPedirSenha = false;
@@ -7354,8 +7793,8 @@ static void DesenhaUI(HWND hwnd) {
                 // botao direito na foto: menu com "Copiar imagem" (vai em resolucao original)
                 if (ImGui::IsMouseClicked(1)) ImGui::OpenPopup("##ctxfoto");
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
-                ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(IM_COL32(16, 16, 16, 252)));
+                ImGui::PushStyleVar(ImGuiStyleVar_PopupRounding, 12.0f);
+                ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
                 if (ImGui::BeginPopup("##ctxfoto")) {
                     ImDrawList* cx2 = ImGui::GetWindowDrawList();
                     static float tCop = 0;
@@ -7367,8 +7806,9 @@ static void DesenhaUI(HWND hwnd) {
                         if (CopiarImagemClipboard(gHwnd, f.caminho)) tCop = 1.2f;
                     }
                     ImVec2 ba2 = ImGui::GetItemRectMin(), bb2 = ImGui::GetItemRectMax();
-                    if (ImGui::IsItemHovered()) cx2->AddRectFilled(ba2, bb2, Cinza(255, 16), 8);
-                    cx2->AddText(ImVec2(ba2.x + 10, (ba2.y + bb2.y - csz2.y) * 0.5f), Cinza(230), rotCop);
+                    bool hvC = ImGui::IsItemHovered();
+                    if (hvC) cx2->AddRectFilled(ba2, bb2, Tk::Realce, 8);
+                    cx2->AddText(ImVec2(ba2.x + 14, (ba2.y + bb2.y - csz2.y) * 0.5f), Tk::Texto, rotCop);
                     ImGui::PopFont();
                     ImGui::EndPopup();
                 }
@@ -7423,14 +7863,14 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::BeginChild("##dropcontas", ImVec2(PW, PH), false, fDrop);
             ImDrawList* ml = ImGui::GetWindowDrawList();
             ml->PushClipRect(gContasA, gContasB, false); // o clip do child tem recuo: a borda precisa do retangulo cheio
-            ml->AddRectFilled(gContasA, gContasB, IM_COL32(14, 14, 14, 252), 14.0f);
-            ml->AddRect(gContasA, gContasB, Cinza(58), 14.0f, 0, 1.0f);
+            ml->AddRectFilled(gContasA, gContasB, Tk::Fundo, 12.0f);
+            ml->AddRect(gContasA, gContasB, Tk::Linha2, 12.0f, 0, 1.0f);
             ml->PopClipRect();
             if (gContaEdit == -1) {
                 // ---- lista de contas ----
                 ImGui::SetCursorPos(ImVec2(16, 12));
                 ImGui::PushFont(gFtMini);
-                ImGui::TextColored(ImColor(Cinza(156)), T("C O N T A S"));
+                RotuloMicro(T("C O N T A S"));
                 ImGui::PopFont();
                 float y2 = 36;
                 for (int i = 0; i < gNumPerfis; i++) {
@@ -7442,16 +7882,17 @@ static void DesenhaUI(HWND hwnd) {
                     ImVec2 ma(lb.x - 34, la.y + 16), mb(lb.x - 8, la.y + 38);
                     bool mh = ImGui::IsMouseHoveringRect(ma, mb);
                     if (hovL || mh) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-                    if (hovL && !mh) ml->AddRectFilled(la, lb, Cinza(255, 14), 10);
-                    if (i == gPerfilSel) ml->AddRect(la, lb, ComAlpha(AC.cor, 0.85f), 10, 0, 1.6f);
+                    if (hovL && !mh) ml->AddRectFilled(la, lb, Tk::Realce, 8);
+                    // como o dropdown do site: sem contorno de destaque; a conta em uso fica em negrito branco
+                    bool emUso = (i == gPerfilSel);
                     DesenhaAvatar(ml, ImVec2(la.x + 8, la.y + 8), ImVec2(la.x + 46, la.y + 46),
                                   gPerfis[i].avatar, gPerfis[i].cor, 10.0f);
-                    ImGui::PushFont(gFtBold);
-                    ml->AddText(ImVec2(la.x + 60, la.y + 9), Cinza(240), gPerfis[i].nick);
+                    ImGui::PushFont(emUso ? gFtBold : gFtBody);
+                    ml->AddText(ImVec2(la.x + 60, la.y + 9), Tk::Texto, gPerfis[i].nick);
                     ImGui::PopFont();
                     ImGui::PushFont(gFtMini);
-                    ml->AddText(ImVec2(la.x + 60, la.y + 31), (i == gPerfilSel) ? AC.hi : Cinza(120),
-                                (i == gPerfilSel) ? T("EM USO") : T("clique para usar"));
+                    ml->AddText(ImVec2(la.x + 60, la.y + 31), emUso ? AC.hi : Tk::Texto4,
+                                emUso ? T("EM USO") : T("clique para usar"));
                     ImGui::PopFont();
                     // "..." da conta: editar nick/avatar/remover
                     DesenhaReticencias(ml, ma, mb, mh);
@@ -7469,9 +7910,26 @@ static void DesenhaUI(HWND hwnd) {
                     y2 += 58;
                 }
                 if (gNumPerfis < MAX_PERFIS) {
-                    ImGui::SetCursorPos(ImVec2(14, y2 + 4));
+                    // ultima linha do menu, como o "Ver tudo" do site: negrito branco, sem contorno,
+                    // separada das contas por um fio
+                    ImVec2 fioA(gContasA.x + 14, gContasA.y + y2 + 2);
+                    ml->AddLine(fioA, ImVec2(fioA.x + 332, fioA.y), Tk::Linha, 1.0f);
+                    ImGui::SetCursorPos(ImVec2(14, y2 + 8));
+                    bool clAdd = ImGui::InvisibleButton("##addconta", ImVec2(332, 40));
+                    {
+                        ImVec2 aa = ImGui::GetItemRectMin(), ab = ImGui::GetItemRectMax();
+                        bool ah = ImGui::IsItemHovered();
+                        if (ah) { ml->AddRectFilled(aa, ab, Tk::Realce, 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
+                        float cyA = (aa.y + ab.y) * 0.5f, cxA = aa.x + 27.0f; // o "+" no eixo dos avatares
+                        ml->AddLine(ImVec2(cxA - 6, cyA), ImVec2(cxA + 6, cyA), Tk::Texto, 1.8f);
+                        ml->AddLine(ImVec2(cxA, cyA - 6), ImVec2(cxA, cyA + 6), Tk::Texto, 1.8f);
+                        ImGui::PushFont(gFtBold);
+                        ImVec2 tsA = ImGui::CalcTextSize(T("Adicionar conta"));
+                        ml->AddText(ImVec2(aa.x + 60, cyA - tsA.y * 0.5f), Tk::Texto, T("Adicionar conta"));
+                        ImGui::PopFont();
+                    }
                     ImGui::PushFont(gFtBold);
-                    if (BotaoSec(T("+  Adicionar conta"), ImVec2(332, 42))) {
+                    if (clAdd) {
                         gContaEdit = -2; // modo CRIACAO: so vira conta de verdade no Salvar
                         strcpy(gEditNick, "Novo_Nick");
                         gEditCor = gNumPerfis % N_ACCENTS;
@@ -7552,11 +8010,7 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImGui::SetCursorPos(ImVec2(14, yb));
                 ImGui::PushFont(gFtBold);
-                ImGui::PushStyleColor(ImGuiCol_Button, ImGui::ColorConvertU32ToFloat4(AC.cor));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::ColorConvertU32ToFloat4(AC.hi));
-                ImGui::PushStyleColor(ImGuiCol_Text, ImGui::ColorConvertU32ToFloat4(TextoSobreAccent(AC.cor)));
-                if (ImGui::Button(T("Salvar"), ImVec2(162, 40)) && gContaEdit != -1) {
+                if (BotaoPrimario(T("Salvar"), ImVec2(162, 40)) && gContaEdit != -1) {
                     for (char* c = gEditNick; *c; c++) if (*c == ' ' || *c == '|') *c = '_'; // nick SA-MP nao tem espaco
                     if (!gEditNick[0]) strcpy(gEditNick, "Nick_Sobrenome");
                     if (gContaEdit == -2) { // criacao: a conta so nasce AQUI
@@ -7582,7 +8036,6 @@ static void DesenhaUI(HWND hwnd) {
                     SalvarPerfis();
                     gContaEdit = -1;
                 }
-                ImGui::PopStyleColor(4);
                 ImGui::SameLine(0, 8);
                 if (BotaoSec(T("Voltar"), ImVec2(162, 40))) gContaEdit = -1;
                 ImGui::PopFont();
@@ -7676,17 +8129,17 @@ static void DesenhaUI(HWND hwnd) {
     // ===== overlay conectando (foreground: cobre TUDO, ate os childs, que renderizam
     // por cima do drawlist da janela-mae - mesma causa do bug do fade do rail) =====
     if (gConectando) {
-        gConnT += dt;
+        if (!gModoFoto) gConnT += dt; // a foto do teste congela o "conectando"
         ImDrawList* ov = ImGui::GetForegroundDrawList();
-        ov->AddRectFilled(ImVec2(0, 0), ds, IM_COL32(6, 6, 6, 222));
+        ov->AddRectFilled(ImVec2(0, 0), ds, IM_COL32(11, 11, 12, 236));
         char nomeUp[96];
         int ni = 0;
         for (const char* pc = gConnNome; *pc && ni < 94; pc++) nomeUp[ni++] = (*pc >= 'a' && *pc <= 'z') ? *pc - 32 : *pc;
         nomeUp[ni] = 0;
-        ImGui::PushFont(gFtMini);
-        ImVec2 e1 = ImGui::CalcTextSize(T("C O N E C T A N D O"));
-        ov->AddText(ImVec2((ds.x - e1.x) * 0.5f, ds.y * 0.38f), AccentAtual().hi, T("C O N E C T A N D O"));
-        ImGui::PopFont();
+        { // o rotulo maiusculo espacado do site, no destaque
+            float w1 = LarguraMicro(T("C O N E C T A N D O"));
+            TextoMicro(ov, ImVec2(floorf((ds.x - w1) * 0.5f), ds.y * 0.38f), AccentAtual().cor, T("C O N E C T A N D O"));
+        }
         // servidor com logo entra com a MARCA no lugar do nome (igual a Home)
         IDirect3DTexture9* logoConn = NULL;
         for (int q = 0; q < gNumSrv; q++)
@@ -7699,20 +8152,20 @@ static void DesenhaUI(HWND hwnd) {
             float lx = (ds.x - lw) * 0.5f, ly = ds.y * 0.42f;
             ov->AddImage((ImTextureID)logoConn, ImVec2(lx, ly), ImVec2(lx + lw, ly + lh));
         } else {
-            ImGui::PushFont(gFtDisplay);
-            ImVec2 e2 = ImGui::CalcTextSize(nomeUp);
-            ov->AddText(ImVec2((ds.x - e2.x) * 0.5f, ds.y * 0.42f), Cinza(245), nomeUp);
+            ImGui::PushFont(gFtDisplay); // o nome como na Home: Montserrat Bold, sem forcar maiusculas
+            ImVec2 e2 = ImGui::CalcTextSize(gConnNome);
+            ov->AddText(ImVec2(floorf((ds.x - e2.x) * 0.5f), ds.y * 0.42f), Tk::Texto, gConnNome);
             ImGui::PopFont();
+            (void)nomeUp;
         }
         float frac = gConnT / 1.6f; if (frac > 1) frac = 1;
         float bx0 = ds.x * 0.5f - 150, bx1 = ds.x * 0.5f + 150, by = ds.y * 0.56f;
-        ov->AddRectFilled(ImVec2(bx0, by), ImVec2(bx1, by + 5), Cinza(34), 3);
-        ov->AddRectFilledMultiColor(ImVec2(bx0, by), ImVec2(bx0 + 300 * frac, by + 5),
-            AccentAtual().cor, AccentAtual().hi, AccentAtual().hi, AccentAtual().cor);
+        ov->AddRectFilled(ImVec2(bx0, by), ImVec2(bx1, by + 4), Tk::Ativo, 2);
+        if (frac > 0.01f) ov->AddRectFilled(ImVec2(bx0, by), ImVec2(bx0 + 300 * frac, by + 4), AccentAtual().cor, 2);
         ImGui::PushFont(gFtMono);
         const char* etapa = gConnT < 0.6f ? T("gravando seu nick...") : (gConnT < 1.2f ? T("abrindo o samp.exe...") : T("bom jogo!"));
         ImVec2 e3 = ImGui::CalcTextSize(etapa);
-        ov->AddText(ImVec2((ds.x - e3.x) * 0.5f, by + 18), Cinza(150), etapa);
+        ov->AddText(ImVec2(floorf((ds.x - e3.x) * 0.5f), by + 18), Tk::Texto3, etapa);
         ImGui::PopFont();
         if (gConnT >= 1.6f) { gConectando = false; Jogar(); }
     }
@@ -7727,20 +8180,20 @@ static void DesenhaUI(HWND hwnd) {
         if (alfa > 1) alfa = 1;
         if (alfa < 0) alfa = 0;
         ImVec2 ta2((ds.x - tsz2.x) * 0.5f - 18, 66), tb2((ds.x + tsz2.x) * 0.5f + 18, 66 + tsz2.y + 20);
-        tv->AddRectFilled(ta2, tb2, IM_COL32(22, 14, 14, (int)(246 * alfa)), 10);
-        tv->AddRect(ta2, tb2, ComAlpha(IM_COL32(240, 110, 106, 255), alfa), 10, 0, 1.4f);
-        tv->AddText(ImVec2(ta2.x + 18, ta2.y + 10), ComAlpha(Cinza(240), alfa), gAviso);
+        tv->AddRectFilled(ta2, tb2, ComAlpha(Tk::Sup, 0.98f * alfa), 10);
+        tv->AddRect(ta2, tb2, ComAlpha(Tk::Vermelho, 0.85f * alfa), 10, 0, 1.0f);
+        tv->AddText(ImVec2(ta2.x + 18, ta2.y + 10), ComAlpha(Tk::Texto, alfa), gAviso);
         ImGui::PopFont();
     }
 
     // arrastar a janela pela faixa do topo (fora de widgets)
-    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive() && io.MousePos.y < 56 && io.MousePos.x > 76) {
+    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive() && io.MousePos.y < TOPO_H && io.MousePos.x > RAIL_W) {
         ReleaseCapture();
         SendMessageA(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
     }
 
     // borda externa da janela
-    dl->AddRect(ImVec2(0.5f, 0.5f), ImVec2(ds.x - 0.5f, ds.y - 0.5f), Cinza(52), 0, 0, 1);
+    dl->AddRect(ImVec2(0.5f, 0.5f), ImVec2(ds.x - 0.5f, ds.y - 0.5f), Cinza(255, 26), 0, 0, 1);
     ImGui::End();
     ImGui::PopStyleVar(2);
 }
@@ -7882,6 +8335,21 @@ static ImFont* FonteDoWindows(ImGuiIO& io, const char* arquivo, float tam, const
     return io.Fonts->AddFontFromFileTTF(cam, tam, NULL, rango);
 }
 
+// Montserrat embutida no exe, a mesma fonte do site (SIL Open Font License 1.1; o texto da licenca vai
+// junto como recurso 17). 14 = Medium (500), 15 = SemiBold (600), 16 = Bold (700). O atlas le direto da
+// memoria do recurso, sem copiar.
+static ImFont* FonteEmbutida(ImGuiIO& io, int id, float tam, const ImWchar* rango) {
+    HRSRC r = FindResourceA(NULL, MAKEINTRESOURCEA(id), (LPCSTR)RT_RCDATA);
+    if (!r) return NULL;
+    HGLOBAL h = LoadResource(NULL, r);
+    void* p = h ? LockResource(h) : NULL;
+    DWORD n = SizeofResource(NULL, r);
+    if (!p || n < 1024) return NULL;
+    ImFontConfig cfg;
+    cfg.FontDataOwnedByAtlas = false;
+    return io.Fonts->AddFontFromMemoryTTF(p, (int)n, tam, &cfg, rango);
+}
+
 static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
     // qualquer input acorda o render preguicoso
     if ((m >= WM_MOUSEFIRST && m <= WM_MOUSELAST) || (m >= WM_KEYFIRST && m <= WM_KEYLAST) ||
@@ -7902,6 +8370,7 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
             // vindo da bandeja manda WM_SIZE, e um Reset em device perdido so piorava as coisas)
             if (gDev->TestCooperativeLevel() == D3D_OK) {
                 ImGui_ImplDX9_InvalidateDeviceObjects();
+                VidroLiberar(); // D3DPOOL_DEFAULT: tem que sair antes do Reset
                 if (SUCCEEDED(gDev->Reset(&gPP))) ImGui_ImplDX9_CreateDeviceObjects();
             }
         }
@@ -7993,7 +8462,7 @@ static LONG WINAPI FiltroCrash(EXCEPTION_POINTERS* ep) {
     if (ep->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION && ep->ExceptionRecord->NumberParameters >= 2)
         fprintf(f, "  acesso %s em 0x%08X\n", ep->ExceptionRecord->ExceptionInformation[0] ? "de escrita" : "de leitura",
                 (unsigned)ep->ExceptionRecord->ExceptionInformation[1]);
-    HMODULE dbg = LoadLibraryA("dbghelp.dll");
+    HMODULE dbg = CarregarDllDoSistema("dbghelp.dll");
     if (dbg) {
         FnSymInitialize symInit = (FnSymInitialize)GetProcAddress(dbg, "SymInitialize");
         FnStackWalk64 walk = (FnStackWalk64)GetProcAddress(dbg, "StackWalk64");
@@ -8018,7 +8487,68 @@ static LONG WINAPI FiltroCrash(EXCEPTION_POINTERS* ep) {
     return EXCEPTION_CONTINUE_SEARCH; // o Windows ainda registra o evento dele
 }
 
+#ifdef TROK_TESTE_LIVRE
+// MODO FOTO (so no exe de teste): grava o back buffer num PNG, para conferir o visual sem abrir janela
+// na frente de ninguem. Chamado depois do EndScene e antes do Present (com DISCARD o buffer some no Present).
+static bool SalvarBackBufferPng(const char* arq) {
+    IDirect3DSurface9* bb = NULL;
+    IDirect3DSurface9* sys = NULL;
+    bool ok = false;
+    if (FAILED(gDev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &bb)) || !bb) return false;
+    D3DSURFACE_DESC dsc;
+    bb->GetDesc(&dsc);
+    { char d[96]; _snprintf(d, sizeof(d) - 1, "modo foto: back buffer %ux%u formato %d", dsc.Width, dsc.Height, (int)dsc.Format); d[sizeof(d) - 1] = 0; RegistrarNoLog(d); }
+    // o formato do back buffer e o da area de trabalho (pode ser 10 bits): copia para um alvo X8R8G8B8 conhecido
+    IDirect3DSurface9* rt = NULL;
+    if (SUCCEEDED(gDev->CreateRenderTarget(dsc.Width, dsc.Height, D3DFMT_X8R8G8B8, D3DMULTISAMPLE_NONE, 0, FALSE, &rt, NULL)) &&
+        SUCCEEDED(gDev->StretchRect(bb, NULL, rt, NULL, D3DTEXF_NONE))) { bb->Release(); bb = rt; rt = NULL; dsc.Format = D3DFMT_X8R8G8B8; }
+    if (rt) rt->Release();
+    if (SUCCEEDED(gDev->CreateOffscreenPlainSurface(dsc.Width, dsc.Height, dsc.Format, D3DPOOL_SYSTEMMEM, &sys, NULL)) &&
+        SUCCEEDED(gDev->GetRenderTargetData(bb, sys))) {
+        D3DLOCKED_RECT lr;
+        if (SUCCEEDED(sys->LockRect(&lr, NULL, D3DLOCK_READONLY))) {
+            IWICImagingFactory* fab = NULL;
+            IWICStream* st = NULL;
+            IWICBitmapEncoder* enc = NULL;
+            IWICBitmapFrameEncode* fr = NULL;
+            wchar_t w[MAX_PATH];
+            MultiByteToWideChar(CP_ACP, 0, arq, -1, w, MAX_PATH);
+            if (SUCCEEDED(CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_IWICImagingFactory, (void**)&fab)) &&
+                SUCCEEDED(fab->CreateStream(&st)) && SUCCEEDED(st->InitializeFromFilename(w, GENERIC_WRITE)) &&
+                SUCCEEDED(fab->CreateEncoder(GUID_ContainerFormatPng, NULL, &enc)) &&
+                SUCCEEDED(enc->Initialize(st, WICBitmapEncoderNoCache)) &&
+                SUCCEEDED(enc->CreateNewFrame(&fr, NULL)) && SUCCEEDED(fr->Initialize(NULL)) &&
+                SUCCEEDED(fr->SetSize(dsc.Width, dsc.Height))) {
+                // o PNG nao aceita 32bppBGR (o WIC trocava para 24 bits e a foto saia listrada): BGRA com alfa cheio
+                for (UINT y = 0; y < dsc.Height; y++) {
+                    BYTE* lin = (BYTE*)lr.pBits + y * lr.Pitch;
+                    for (UINT x = 0; x < dsc.Width; x++) lin[x * 4 + 3] = 255;
+                }
+                WICPixelFormatGUID pf = GUID_WICPixelFormat32bppBGRA;
+                fr->SetPixelFormat(&pf);
+                if (IsEqualGUID(pf, GUID_WICPixelFormat32bppBGRA))
+                    ok = SUCCEEDED(fr->WritePixels(dsc.Height, lr.Pitch, lr.Pitch * dsc.Height, (BYTE*)lr.pBits)) &&
+                         SUCCEEDED(fr->Commit()) && SUCCEEDED(enc->Commit());
+            }
+            if (fr) fr->Release();
+            if (enc) enc->Release();
+            if (st) st->Release();
+            if (fab) fab->Release();
+            sys->UnlockRect();
+        }
+    }
+    if (sys) sys->Release();
+    bb->Release();
+    return ok;
+}
+#endif
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
+    { // tudo o que for carregado DEPOIS daqui (LoadLibrary nosso e dos componentes do Windows) vem so do System32
+        typedef BOOL(WINAPI* FnDirs)(DWORD);
+        FnDirs fdd = (FnDirs)GetProcAddress(GetModuleHandleA("kernel32.dll"), "SetDefaultDllDirectories");
+        if (fdd) fdd(0x00000800 /*LOAD_LIBRARY_SEARCH_SYSTEM32*/);
+    }
     WSADATA wsa; WSAStartup(MAKEWORD(2, 2), &wsa);
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED); // WIC (imagens das datas)
     InitializeCriticalSection(&gLock);
@@ -8035,7 +8565,52 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     if (barra) strcpy(barra + 1, "Trok Launcher.ini"); else strcpy(gIniPath, "Trok Launcher.ini");
 #endif
     LerConfig();
-    if (gTela == 6) gTela = 0; // a aba Informacoes saiu da barra
+    if (gTela < 0 || gTela > 5) gTela = 0; // a aba Informacoes/Sobre nao fica no trilho (pedido)
+#ifdef TROK_TESTE_LIVRE
+    // modo foto: --foto "arquivo.png" [--tela N] [--espera ms] [--side 1]
+    static char fotoArq[MAX_PATH] = "";
+    DWORD fotoEspera = 3500;
+    if (cmdLinha) {
+        const char* pf = strstr(cmdLinha, "--foto ");
+        if (pf) {
+            pf += 7;
+            while (*pf == ' ') pf++;
+            char fimC = ' ';
+            if (*pf == '"') { fimC = '"'; pf++; }
+            int k = 0;
+            while (*pf && *pf != fimC && k < MAX_PATH - 1) fotoArq[k++] = *pf++;
+            fotoArq[k] = 0;
+        }
+        const char* pt = strstr(cmdLinha, "--tela ");
+        if (pt) gTela = atoi(pt + 7);
+        const char* pe = strstr(cmdLinha, "--espera ");
+        if (pe) fotoEspera = (DWORD)atoi(pe + 9);
+        if (strstr(cmdLinha, "--side 1")) { gSideAberta = true; gSideAnim = 1.0f; }
+    }
+    const bool modoFoto = fotoArq[0] != 0;
+    gModoFoto = modoFoto;
+    if (modoFoto && cmdLinha) { // --painel X: abre um painel/estado para a foto
+        const char* pp = strstr(cmdLinha, "--painel ");
+        if (pp) {
+            pp += 9;
+            if (!strncmp(pp, "editsrv", 7)) { gEditSrv = 0; strncpy(gEditApelido, gSrv[0].apelido, sizeof(gEditApelido) - 1); }
+            else if (!strncmp(pp, "editdata", 8)) { gRenomear = 0; strncpy(gEditNome, gDatas[0].nome, sizeof(gEditNome) - 1); strncpy(gEditDesc, gDatas[0].desc, sizeof(gEditDesc) - 1); }
+            else if (!strncmp(pp, "att", 3)) { gAttEstado = 1; strcpy(gAttVersao, "v1.12"); strcpy(gAttUrl, URL_RELEASES "v1.12/TrokLauncher-Setup.exe");
+                                              strcpy(gAttNotas, "Visual novo, com a identidade do site\nCorrecoes de seguranca\nMenos falso positivo de antivirus"); gAttPopup = true; }
+            else if (!strncmp(pp, "senha", 5)) { gPedirSenha = true; strcpy(gPendNome, "Servidor de teste"); strcpy(gPendIp, "127.0.0.1:7777"); }
+            else if (!strncmp(pp, "addip", 5)) gAddIpAbrir = true;
+            else if (!strncmp(pp, "boas", 4)) gBoasVindas = true;
+            else if (!strncmp(pp, "contas", 6)) { gEscolherAvatar = true; gContasAnim = 1.0f; }
+            else if (!strncmp(pp, "conectando", 10)) { gConectando = true; gConnT = 0.8f; strcpy(gConnNome, gSrv[0].apelido[0] ? gSrv[0].apelido : gSrv[0].nome); strcpy(gConnIp, gSrv[0].ip); }
+            else if (!strncmp(pp, "aviso", 5)) Avisar("samp.exe nao encontrado na data em uso - confira a pasta na aba de datas");
+            else if (!strncmp(pp, "idioma", 6)) { gTela = 3; gFotoAbrir = 1; }
+            else if (!strncmp(pp, "popconta", 8)) { gEditSrv = 0; strncpy(gEditApelido, gSrv[0].apelido, sizeof(gEditApelido) - 1); gFotoAbrir = 2; }
+            else if (!strncmp(pp, "popdata", 7)) { gEditSrv = 0; strncpy(gEditApelido, gSrv[0].apelido, sizeof(gEditApelido) - 1); gFotoAbrir = 3; }
+            else if (!strncmp(pp, "filtros", 7)) { gTela = 1; gFiltrosAberto = true; }
+            else if (!strncmp(pp, "maisvistos", 10)) { gTela = 5; gModsAba = 1; }
+        }
+    }
+#endif
     SetUnhandledExceptionFilter(FiltroCrash); // depois do LerConfig: o crash.log mora ao lado do ini
 
     // ---- uma copia so -----------------------------------------------------------
@@ -8062,6 +8637,31 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                     PostMessageA(velho, WM_TROK_MOSTRAR, 0, 0);
                 }
                 return 0; // sem aviso (pedido dele): a copia aberta vem pra frente e esta sai em silencio
+            }
+        }
+    }
+#endif
+#if !defined(TROK_TESTE_SEM_SAMP) && !defined(TROK_TESTE_UPDATE) && !defined(TROK_TESTE_AVISO_LIMITE) && !defined(TROK_TESTE_LIVRE)
+    { // "Iniciar com o Windows" ligado, mas a chave aponta para um exe que nao existe mais (pasta movida, copia
+      // de desenvolvimento apagada): o Windows tentava abrir o nada a cada boot. Este exe assume a chave.
+      // Se a chave aponta para OUTRO exe que existe, nao mexe (ha duas copias e a escolha foi dele).
+        HKEY k;
+        if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_QUERY_VALUE, &k) == ERROR_SUCCESS) {
+            char v[MAX_PATH * 2] = "";
+            DWORD tam = sizeof(v) - 1, tipo = 0;
+            bool tem = RegQueryValueExA(k, "Trok Launcher", 0, &tipo, (BYTE*)v, &tam) == ERROR_SUCCESS && v[0];
+            RegCloseKey(k);
+            if (tem) {
+                v[sizeof(v) - 1] = 0;
+                char* c = v; if (*c == '"') c++;
+                char* fimC = strchr(c, '"'); if (fimC) *fimC = 0;
+                if (GetFileAttributesA(c) == INVALID_FILE_ATTRIBUTES) {
+                    DefinirIniciarComWindows(true);
+                    char d[MAX_PATH * 2 + 80];
+                    _snprintf(d, sizeof(d) - 1, "iniciar com o Windows: a chave apontava para \"%s\", que nao existe mais; corrigida", c);
+                    d[sizeof(d) - 1] = 0;
+                    RegistrarNoLog(d);
+                }
             }
         }
     }
@@ -8137,8 +8737,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     HWND hwnd = CreateWindowA("TrokLauncher", "Trok Launcher", WS_POPUP,
         (sw - jw) / 2, (sh - jh) / 2, jw, jh, NULL, NULL, hInst, NULL);
 
-    // cantos arredondados no Windows 11 (no Win10 e ignorado sem erro)
-    HMODULE dwm = LoadLibraryA("dwmapi.dll");
+    // cantos arredondados + a borda padrao do Windows 11 (no Win10 e ignorado sem erro). A sombra vem junto e
+    // nao da para separar: em 06/10 tirei o arredondado para sumir com a sombra e ele pediu de volta - a borda
+    // redonda e parte da identidade (igual aos cantos do site)
+    HMODULE dwm = CarregarDllDoSistema("dwmapi.dll");
     if (dwm) {
         typedef HRESULT(WINAPI* FnAttr)(HWND, DWORD, LPCVOID, DWORD);
         FnAttr SetAttr = (FnAttr)GetProcAddress(dwm, "DwmSetWindowAttribute");
@@ -8148,8 +8750,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     gD3D = Direct3DCreate9(D3D_SDK_VERSION);
     ZeroMemory(&gPP, sizeof(gPP));
     gPP.Windowed = TRUE; gPP.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    gPP.BackBufferFormat = D3DFMT_UNKNOWN; gPP.EnableAutoDepthStencil = TRUE;
-    gPP.AutoDepthStencilFormat = D3DFMT_D16;
+    // sem depth buffer: o ImGui desenha tudo em 2D com o Z desligado. Pedir um D16 era o que fazia alguns
+    // drivers devolverem D3DERR_INVALIDCALL (0x8876086C) no CreateDevice - visto no crash.log de 16/09
+    gPP.BackBufferFormat = D3DFMT_UNKNOWN; gPP.EnableAutoDepthStencil = FALSE;
     gPP.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
     // MULTITHREADED: a thread de imagens cria texturas direto (custo minusculo no nosso caso)
     // Criacao com tolerancia. O CreateDevice falha de forma intermitente quando outro programa
@@ -8217,22 +8820,44 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     CarregarAvatares(gDev); // pasta avatars\ ao lado do exe (criada se nao existir)
     gLogoTrok = CarregarImagemRecurso(gDev, 10, 80); // alvo da sidebar (pre-escalado = nitido)
     gLogoBlogger = CarregarImagemRecurso(gDev, 12, 64); // marca do Blogger (atalho do blog)
+    gLogoDiscord = CarregarImagemRecurso(gDev, 13, 64); // logo do Discord (pedido: o icone real, nao o desenhado)
+    CriarTexturasDoDestaque(gDev); // granulado e trama de pontos do fundo da Home (gerados aqui, sem arquivo)
 
     // fontes do sistema, rasterizadas no tamanho FISICO (nitidas) e medidas no logico
     static const ImWchar RANGO_TXT[] = { 0x0020, 0x024F, 0x0400, 0x04FF, 0x2013, 0x2014, 0x2018, 0x201D, 0x2022, 0x2022, 0x2026, 0x2026, 0 }; // latim + estendido (turco) + cirilico (russo) + travessao/aspas/reticencias // latin + travessao/aspas curvas/reticencias (titulos do blog)
-    gFtBody    = FonteDoWindows(io, "segoeui.ttf", 16.0f * gEscala, RANGO_TXT);
-    gFtBold    = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
-    gFtMono    = FonteDoWindows(io, "consola.ttf", 14.5f * gEscala, RANGO_TXT);
-    gFtDisplay = FonteDoWindows(io, "seguibl.ttf", 52.0f * gEscala, RANGO_TXT);
-    gFtBotao   = FonteDoWindows(io, "seguibl.ttf", 23.0f * gEscala, RANGO_TXT);
-    // piso tipografico: nada menor que ~13.5 (o menor texto da Rockstar e a regua)
-    gFtMini    = FonteDoWindows(io, "segoeuib.ttf", 13.5f * gEscala, RANGO_TXT);
-    gFtMonoS   = FonteDoWindows(io, "consola.ttf", 14.0f * gEscala, RANGO_TXT);
-    gFtMiniLeve = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
-    gFtCardNome = FonteDoWindows(io, "segoeuib.ttf", 17.5f * gEscala, RANGO_TXT);
-    gFtPostTit  = FonteDoWindows(io, "segoeuib.ttf", 22.0f * gEscala, RANGO_TXT);
-    gFtBotaoPost = FonteDoWindows(io, "seguibl.ttf", 16.0f * gEscala, RANGO_TXT);
-    gFtCardDesc = FonteDoWindows(io, "segoeuib.ttf", 13.5f * gEscala, RANGO_TXT);
+    // Montserrat embutida (a fonte do site). Tamanhos = os do mockup do launcher x 1,11 (o mockup tem
+    // 1280 de largura; o launcher, 1420). Sem os recursos (exe montado sem eles), cai no Segoe UI do Windows.
+    const float E = gEscala;
+    gFtBody      = FonteEmbutida(io, 14, 14.5f * E, RANGO_TXT); // Medium: texto corrido
+    gFtBold      = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nomes, rotulos de botao
+    gFtMono      = FonteEmbutida(io, 14, 14.0f * E, RANGO_TXT); // Medium: ip, jogadores, ping
+    gFtDisplay   = FonteEmbutida(io, 16, 38.0f * E, RANGO_TXT); // Bold: nome grande do servidor
+    gFtBotao     = FonteEmbutida(io, 16, 15.5f * E, RANGO_TXT); // Bold: Jogar e botoes principais
+    gFtMini      = FonteEmbutida(io, 15, 13.0f * E, RANGO_TXT); // SemiBold: texto pequeno
+    gFtMonoS     = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: numeros pequenos
+    gFtMiniLeve  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: descricoes
+    gFtCardNome  = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nome nas abas dos favoritos
+    gFtPostTit   = FonteEmbutida(io, 16, 16.5f * E, RANGO_TXT); // Bold: titulo do card de post (15px do site)
+    gFtBotaoPost = FonteEmbutida(io, 16, 14.0f * E, RANGO_TXT); // Bold: rotulo de botao secundario
+    gFtCardDesc  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium
+    gFtTitulo    = FonteEmbutida(io, 16, 26.0f * E, RANGO_TXT); // Bold: titulo das telas e dos paineis
+    gFtMicro     = FonteEmbutida(io, 16, 11.5f * E, RANGO_TXT); // Bold: rotulos maiusculos espacados
+    if (!gFtBody) { // recursos ausentes: o visual antigo (Segoe UI) em vez de quebrar
+        gFtBody    = FonteDoWindows(io, "segoeui.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtBold    = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtMono    = FonteDoWindows(io, "consola.ttf", 14.5f * gEscala, RANGO_TXT);
+        gFtDisplay = FonteDoWindows(io, "seguibl.ttf", 44.0f * gEscala, RANGO_TXT);
+        gFtBotao   = FonteDoWindows(io, "seguibl.ttf", 19.0f * gEscala, RANGO_TXT);
+        gFtMini    = FonteDoWindows(io, "segoeuib.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtMonoS   = FonteDoWindows(io, "consola.ttf", 14.0f * gEscala, RANGO_TXT);
+        gFtMiniLeve = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtCardNome = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtPostTit  = FonteDoWindows(io, "segoeuib.ttf", 18.0f * gEscala, RANGO_TXT);
+        gFtBotaoPost = FonteDoWindows(io, "segoeuib.ttf", 15.0f * gEscala, RANGO_TXT);
+        gFtCardDesc = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtTitulo   = FonteDoWindows(io, "segoeuib.ttf", 26.0f * gEscala, RANGO_TXT);
+        gFtMicro    = FonteDoWindows(io, "segoeuib.ttf", 12.0f * gEscala, RANGO_TXT);
+    }
     { // fonte de icones LUCIDE embutida no exe (recurso 11) - so os glifos usados (atlas leve)
         HRSRC rL = FindResourceA(NULL, MAKEINTRESOURCEA(11), (LPCSTR)RT_RCDATA);
         if (rL) {
@@ -8259,31 +8884,41 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     if (!gFtPostTit)   gFtPostTit   = gFtBold;
     if (!gFtCardNome)  gFtCardNome  = gFtBold;
     if (!gFtCardDesc)  gFtCardDesc  = gFtBody;
+    if (!gFtTitulo)    gFtTitulo    = gFtBotao;
+    if (!gFtMicro)     gFtMicro     = gFtMini;
     io.FontGlobalScale = 1.0f / gEscala; // layout logico; o vertice escala de volta no render
 
     ImGuiStyle& st = ImGui::GetStyle();
-    st.FrameRounding = 9; st.FramePadding = ImVec2(12, 9);
+    // os tokens do site: campos em #111113 com contorno branco a 15%, cantos de 8, rolagem fina
+    st.FrameRounding = 8; st.FramePadding = ImVec2(12, 9); st.FrameBorderSize = 1.0f;
     st.ScrollbarSize = 8; st.ScrollbarRounding = 4;
     st.Colors[ImGuiCol_ScrollbarBg]          = ImColor(0, 0, 0, 0);
-    st.Colors[ImGuiCol_ScrollbarGrab]        = ImColor(56, 56, 56, 255);
-    st.Colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(84, 84, 84, 255);
-    st.Colors[ImGuiCol_ScrollbarGrabActive]  = ImColor(110, 110, 110, 255);
-    st.Colors[ImGuiCol_FrameBg]        = ImColor(20, 20, 20, 255);
-    st.Colors[ImGuiCol_FrameBgHovered] = ImColor(28, 28, 28, 255);
-    st.Colors[ImGuiCol_FrameBgActive]  = ImColor(32, 32, 32, 255);
-    st.Colors[ImGuiCol_Text]           = ImColor(240, 240, 240, 255);
-    st.Colors[ImGuiCol_Button]         = ImColor(28, 28, 28, 255);
-    st.Colors[ImGuiCol_ButtonHovered]  = ImColor(46, 46, 46, 255);
-    st.Colors[ImGuiCol_ButtonActive]   = ImColor(60, 60, 60, 255);
-    st.Colors[ImGuiCol_CheckMark]      = ImColor(240, 240, 240, 255);
+    st.Colors[ImGuiCol_ScrollbarGrab]        = ImColor(42, 42, 46, 255);
+    st.Colors[ImGuiCol_ScrollbarGrabHovered] = ImColor(62, 62, 68, 255);
+    st.Colors[ImGuiCol_ScrollbarGrabActive]  = ImColor(84, 84, 90, 255);
+    st.Colors[ImGuiCol_FrameBg]        = ImColor(Tk::Sup);
+    st.Colors[ImGuiCol_FrameBgHovered] = ImColor(Tk::Sup2);
+    st.Colors[ImGuiCol_FrameBgActive]  = ImColor(Tk::Sup2);
+    st.Colors[ImGuiCol_Text]           = ImColor(Tk::Texto);
+    st.Colors[ImGuiCol_TextDisabled]   = ImColor(Tk::Texto4);
+    st.Colors[ImGuiCol_TextSelectedBg] = ImColor(252, 94, 58, 90); // o ::selection do site
+    st.Colors[ImGuiCol_Button]         = ImColor(Tk::Sup2);
+    st.Colors[ImGuiCol_ButtonHovered]  = ImColor(Tk::Ativo);
+    st.Colors[ImGuiCol_ButtonActive]   = ImColor(40, 40, 44, 255);
+    st.Colors[ImGuiCol_CheckMark]      = ImColor(Tk::Texto);
     st.Colors[ImGuiCol_DragDropTarget] = ImColor(0, 0, 0, 0); // indicador de drop e desenhado a mao
-    st.Colors[ImGuiCol_PopupBg] = ImColor(18, 18, 20, 250);   // tooltips no visual do app
-    st.Colors[ImGuiCol_Border]  = ImColor(58, 58, 58, 255);
+    st.Colors[ImGuiCol_PopupBg] = ImColor(Tk::Fundo);         // dicas, menus e janelas: o #0B0B0C do fundo do site (pedido)
+    st.Colors[ImGuiCol_Border]  = ImColor(Tk::Linha2);
+    st.Colors[ImGuiCol_ModalWindowDimBg] = ImColor(0, 0, 0, 160);
     st.PopupRounding = 8;
     st.PopupBorderSize = 1;
+    st.WindowPadding = ImVec2(10, 8); // tooltip com respiro
 
     gHwnd = hwnd;
     CriarTray(hwnd);
+#ifdef TROK_TESTE_LIVRE
+    if (modoFoto) { /* nasce escondido: desenha e fotografa sem aparecer */ } else
+#endif
     if (gIniciarMin) {
         ShowWindow(hwnd, SW_HIDE); // nasce quietinho na bandeja
     } else {
@@ -8333,6 +8968,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                 if (gNotifPostOrdem > gModsNotificadoOrdem) { gModsNotificadoOrdem = gNotifPostOrdem; SalvarConfig(); }
             }
         }
+#ifdef TROK_TESTE_LIVRE
+        if (!modoFoto)
+#endif
         if (!IsWindowVisible(hwnd)) { Sleep(60); continue; } // escondido na bandeja: nao renderiza
         // render preguicoso: parado (sem input ha 1,5s e sem animacao correndo), cai p/ ~12 fps
         // e economiza bateria; o primeiro input acorda instantaneo (timestamp no WndProc)
@@ -8362,6 +9000,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
             }
             if (coop == D3DERR_DEVICENOTRESET) {
                 ImGui_ImplDX9_InvalidateDeviceObjects();
+                VidroLiberar(); // D3DPOOL_DEFAULT: tem que sair antes do Reset
                 HRESULT hr = gDev->Reset(&gPP);
                 if (FAILED(hr)) {
                     char d[120]; _snprintf(d, sizeof(d) - 1, "aviso: Reset do Direct3D falhou (0x%08X), tentando de novo", (unsigned)hr); d[sizeof(d) - 1] = 0;
@@ -8388,7 +9027,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                 ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
         }
         ImGui::EndFrame();
-        gDev->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_RGBA(10, 10, 10, 255), 1.0f, 0);
+        gDev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_RGBA(11, 11, 12, 255), 1.0f, 0);
         if (gDev->BeginScene() >= 0) {
             ImGui::Render();
             ImDrawData* dd = ImGui::GetDrawData();
@@ -8411,6 +9050,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
             }
             ImGui_ImplDX9_RenderDrawData(dd);
             gDev->EndScene();
+#ifdef TROK_TESTE_LIVRE
+            static DWORD fotoT0 = GetTickCount();
+            if (modoFoto && GetTickCount() - fotoT0 > fotoEspera) {
+                bool okF = SalvarBackBufferPng(fotoArq);
+                RegistrarNoLog(okF ? "modo foto: png gravado" : "modo foto: FALHOU ao gravar o png");
+                gRodando = false;
+            }
+#endif
         }
         gDev->Present(NULL, NULL, NULL, NULL); // DEVICELOST aqui e tratado no comeco do proximo quadro
         ProcessarPedidosDatas(); // dialogos nativos (trocar imagem/caminho, nova data) fora do frame
@@ -8424,6 +9071,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     if (gEvImg) { SetEvent(gEvImg); SetEvent(gEvImg); } // acorda as operarias p/ verem gRodando=false
     WaitForMultipleObjects(2, hImg, TRUE, 3000); // decodes em voo terminam ANTES do device morrer
     if (!gPulaSalvarSaida) SalvarConfig(); // acabou de importar: o ini novo fica como veio
+    VidroLiberar();
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();

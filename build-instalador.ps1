@@ -1,6 +1,10 @@
 ﻿# Compila o INSTALADOR proprio do Trok Launcher (TrokInstaller.cpp, mesma cara do app).
 # Empacota dentro dele: Trok Launcher.exe + avatars\* (formato TROKPAK1 como recurso).
 # Arte do painel esquerdo: artes\instalador-grande.png (se existir; senao a mira placeholder).
+# Fonte: Montserrat (recursos 14/16), a mesma do site e do launcher.
+# DLLs: /DEPENDENTLOADFLAG:0x800 + delay-load do d3d9/WindowsCodecs = so do System32 (o setup roda
+# da pasta Downloads, onde uma dll plantada com o nome de uma do sistema seria carregada primeiro).
+# Sem controle (IMGUI_IMPL_WIN32_DISABLE_GAMEPAD): o backend nao procura nenhuma xinput*.dll.
 # Uso:  & .\build-instalador.ps1
 $ErrorActionPreference = 'Stop'
 $vcvars = 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars32.bat'
@@ -25,6 +29,17 @@ if (Test-Path "$dir\capas") { # capas padrao dos favoritos
         [void]$itens.Add(@{ rel = ('capas\' + $_.Name); full = $_.FullName })
     }
 }
+# LICENCAS.txt ao lado do launcher: Montserrat (OFL), Lucide (ISC) e Dear ImGui (MIT) pedem o aviso junto
+$modeloLic = Join-Path $dir 'fontes\LICENCAS-terceiros.txt'
+if (Test-Path $modeloLic) {
+    $lic = [IO.File]::ReadAllText($modeloLic)
+    $lic = $lic.Replace('@@OFL@@', [IO.File]::ReadAllText((Join-Path $dir 'fontes\OFL.txt')).Trim())
+    $lic = $lic.Replace('@@IMGUI@@', [IO.File]::ReadAllText((Join-Path $dir 'imgui\LICENSE.txt')).Trim())
+    $lic = $lic -replace "`r?`n", "`r`n" # o Bloco de Notas antigo so entende CRLF
+    $licArq = Join-Path $obj 'LICENCAS.txt'
+    [IO.File]::WriteAllText($licArq, $lic, (New-Object Text.UTF8Encoding($true)))
+    [void]$itens.Add(@{ rel = 'LICENCAS.txt'; full = $licArq })
+}
 $pak = Join-Path $obj 'payload.trokpak'
 $fs = New-Object IO.FileStream($pak, [IO.FileMode]::Create)
 $bw = New-Object IO.BinaryWriter($fs)
@@ -48,9 +63,11 @@ $rc = @"
 1 ICON "$($dir -replace '\\','\\\\')\\TrokSetup.ico"
 2 RCDATA "$($pak -replace '\\','\\\\')"
 $(if ($temArte) { "3 RCDATA `"$($arte -replace '\\','\\\\')`"" })
+14 RCDATA "$($dir -replace '\\','\\\\')\\fontes\\Montserrat-Medium.otf"
+16 RCDATA "$($dir -replace '\\','\\\\')\\fontes\\Montserrat-Bold.otf"
 1 VERSIONINFO
-FILEVERSION     1,11,0,0
-PRODUCTVERSION  1,11,0,0
+FILEVERSION     1,12,0,0
+PRODUCTVERSION  1,12,0,0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -60,9 +77,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "TrokMods"
       VALUE "FileDescription",  "Instalador do Trok Launcher"
-      VALUE "FileVersion",      "1.11.0.0"
+      VALUE "FileVersion",      "1.12.0.0"
       VALUE "ProductName",      "Trok Launcher"
-      VALUE "ProductVersion",   "1.11"
+      VALUE "ProductVersion",   "1.12"
       VALUE "LegalCopyright",   "TrokMods"
       VALUE "OriginalFilename", "TrokLauncher-Setup.exe"
     END
@@ -91,7 +108,7 @@ call "$vcvars" >nul 2>&1
 if errorlevel 1 exit /b 1
 rc /nologo /fo "$obj\TrokInstaller.res" "$rcArq"
 if errorlevel 1 exit /b 1
-cl /nologo /utf-8 /MT /O2 /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista "$obj\TrokInstaller.res" /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /OPT:REF /OPT:ICF /MANIFEST:EMBED /MANIFESTINPUT:"$dir\TrokLauncher.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+cl /nologo /utf-8 /MT /O2 /guard:cf /EHsc /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS /DIMGUI_IMPL_WIN32_DISABLE_GAMEPAD /I "$dir" /I "$dir\imgui" /Fo"$obj\\" /Fe"$saida" $lista "$obj\TrokInstaller.res" delayimp.lib /link /MACHINE:X86 /SUBSYSTEM:WINDOWS /GUARD:CF /DYNAMICBASE /NXCOMPAT /SAFESEH /DEPENDENTLOADFLAG:0x800 /DELAYLOAD:d3d9.dll /DELAYLOAD:windowscodecs.dll /OPT:REF /OPT:ICF /MANIFEST:EMBED /MANIFESTINPUT:"$dir\TrokLauncher.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 "@
 $bat = Join-Path $env:TEMP ("build-instalador-" + [guid]::NewGuid().ToString('N') + '.bat')
 Set-Content -Path $bat -Value $cmd -Encoding ASCII
