@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JAN_W 880
 #define JAN_H 540
-#define VERSAO_INST "1.13"
+#define VERSAO_INST "1.14"
 
 // identidade do site (trokmods.blogspot.com): os mesmos tokens do launcher
 static const ImU32 COR_ACCENT    = IM_COL32(252,  94,  58, 255); // --laranja

@@ -53,7 +53,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.13"
+#define VERSAO "v1.14"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -808,6 +808,12 @@ namespace Tk {
 #define I_PAINEL_ABRE  u8"\uE21D" // panel-left-open
 #define I_COMUNIDADE   u8"\uE40D" // messages-square (lucide nao tem logo do Discord)
 #define I_GLOBO        u8"\uE0E8" // globe
+#define I_ESTRELA      u8"\uE176" // star (marcar jogador)
+#define I_LINK_FORA    u8"\uE0B9" // external-link (links do servidor e do Sobre)
+#define I_FLECHA_DIR   u8"\uE049" // arrow-right ("Todos os servidores")
+#define I_BANDEIRA     u8"\uE0D1" // flag ("Reportar problema")
+#define I_USUARIOS     u8"\uE1A4" // users (a pilula do painel de jogadores recolhido)
+#define I_PAINEL_DIR_FECHA u8"\uE432" // panel-right-close (recolher o painel de jogadores)
 static void Icone(ImDrawList* d, ImVec2 centro, const char* gl, ImU32 cor, float tam = 19.0f);
 
 // ===================== util =====================
@@ -2165,6 +2171,17 @@ static int GrupoVersao(const SrvPub& s) {
     if (strstr(s.ver, "DL")) return VER_DL;
     if (strstr(s.ver, "0.3.7")) return VER_037;
     return VER_OUTRA;
+}
+// quao bem um nick (normalizado) casa com a busca: 0 comeca com ela, 1 uma palavra comeca com ela
+// ("X_Anjo_Mal_X" com "m"), 2 so contem, -1 nao tem
+static int RankBusca(const char* nn, const char* q) {
+    size_t n = strlen(q);
+    if (!n) return 0;
+    if (strncmp(nn, q, n) == 0) return 0;
+    const char* p = strstr(nn, q);
+    if (!p) return -1;
+    for (; p; p = strstr(p + 1, q)) if (!LetraOuDigito((unsigned char)p[-1])) return 1;
+    return 2;
 }
 // todas as palavras da busca aparecem, em qualquer ordem, no texto ja normalizado ("brasil rp" acha "Brasil Roleplay")
 static bool BuscaCasa(const char* hay, const char* q) {
@@ -5460,39 +5477,6 @@ static bool LinhaFiltro(const char* rot, bool* v) {
     return cl;
 }
 
-// estrela de 5 pontas (a "star" do Lucide, que nao esta no recorte da fonte de icones): contorno ou cheia
-static void Estrela(ImDrawList* d, ImVec2 c, float r, ImU32 cor, bool cheia) {
-    ImVec2 p[10];
-    for (int i = 0; i < 10; i++) {
-        float a = -1.5707963f + i * 0.62831853f;
-        float rr = (i & 1) ? r * 0.48f : r;
-        p[i] = ImVec2(c.x + cosf(a) * rr, c.y + sinf(a) * rr);
-    }
-    if (cheia) for (int i = 0; i < 10; i++) d->AddTriangleFilled(c, p[i], p[(i + 1) % 10], cor);
-    d->AddPolyline(p, 10, cor, ImDrawFlags_Closed, 1.2f);
-}
-// o "panel-right-close" do Lucide (a fonte de icones nao tem): moldura, divisoria a direita e a seta indo pra ela
-static void IconeRecolherPainel(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
-    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.0f * e * 1.25f;
-    d->AddRect(ImVec2(ox + 3 * e, oy + 3 * e), ImVec2(ox + 21 * e, oy + 21 * e), cor, 2.5f * e, 0, w);
-    d->AddLine(ImVec2(ox + 15 * e, oy + 3 * e), ImVec2(ox + 15 * e, oy + 21 * e), cor, w);
-    d->PathLineTo(ImVec2(ox + 8 * e, oy + 9 * e)); d->PathLineTo(ImVec2(ox + 11 * e, oy + 12 * e));
-    d->PathLineTo(ImVec2(ox + 8 * e, oy + 15 * e)); d->PathStroke(cor, 0, w);
-}
-// o "users" do Lucide, desenhado: uma pessoa na frente e o contorno da outra atras
-static void IconePessoas(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
-    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.0f * e * 1.25f;
-    d->AddCircle(ImVec2(ox + 9 * e, oy + 7 * e), 4.0f * e, cor, 20, w);
-    d->PathLineTo(ImVec2(ox + 16 * e, oy + 21 * e)); d->PathLineTo(ImVec2(ox + 16 * e, oy + 19 * e));
-    d->PathArcTo(ImVec2(ox + 12 * e, oy + 19 * e), 4 * e, 0.0f, -1.5708f, 8);
-    d->PathLineTo(ImVec2(ox + 6 * e, oy + 15 * e));
-    d->PathArcTo(ImVec2(ox + 6 * e, oy + 19 * e), 4 * e, -1.5708f, -3.1416f, 8);
-    d->PathLineTo(ImVec2(ox + 2 * e, oy + 21 * e));
-    d->PathStroke(cor, 0, w);
-    d->PathLineTo(ImVec2(ox + 22 * e, oy + 21 * e)); d->PathLineTo(ImVec2(ox + 22 * e, oy + 19 * e));
-    d->PathArcTo(ImVec2(ox + 18 * e, oy + 19 * e), 4 * e, 0.0f, -1.318f, 6); d->PathStroke(cor, 0, w);
-    d->PathArcTo(ImVec2(ox + 15 * e, oy + 7 * e), 4 * e, -1.318f, 1.318f, 10); d->PathStroke(cor, 0, w);
-}
 // entrada suave de um painel: multiplica o alfa e empurra em x os vertices de uma faixa da draw list
 static void AplicarEntrada(ImDrawList* d, int v0, float alfa, float dx) {
     for (int v = v0; v < d->VtxBuffer.Size; v++) {
@@ -5601,24 +5585,6 @@ static void Icone(ImDrawList* d, ImVec2 centro, const char* gl, ImU32 cor, float
     d->AddText(f, tam, ImVec2(centro.x - sz.x * 0.5f, centro.y - sz.y * 0.5f), cor, gl);
 }
 
-// bandeirinha de "reportar problema" (a fonte de icones embutida nao traz o glifo flag):
-// mesmo traco dos outros icones, caixa 24x24 do Lucide
-static void IconeBandeira(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
-    const float e = tam / 24.0f;
-    const float ox = c.x - 12.0f * e, oy = c.y - 12.0f * e;
-    #define BPT(X, Y) ImVec2(ox + (X) * e, oy + (Y) * e)
-    d->PathClear();                                  // pano: onda em cima e embaixo
-    d->PathLineTo(BPT(5.5f, 14.5f));
-    d->PathBezierQuadraticCurveTo(BPT(9.5f, 12.0f), BPT(13.0f, 14.5f));
-    d->PathBezierQuadraticCurveTo(BPT(16.5f, 17.0f), BPT(19.5f, 15.0f));
-    d->PathLineTo(BPT(19.5f, 4.5f));
-    d->PathBezierQuadraticCurveTo(BPT(16.5f, 6.5f), BPT(13.0f, 4.0f));
-    d->PathBezierQuadraticCurveTo(BPT(9.5f, 1.5f), BPT(5.5f, 4.0f));
-    d->PathStroke(cor, ImDrawFlags_Closed, 1.7f * e * 1.6f);
-    d->AddLine(BPT(5.5f, 14.0f), BPT(5.5f, 21.0f), cor, 1.7f * e * 1.6f); // haste
-    #undef BPT
-}
-
 // logo do Discord: o oficial (recurso 13, rasterizado do SVG da marca, quadrado com o logo na largura
 // toda). O desenho a mao abaixo so fica de reserva se o recurso faltar
 static void IconeDiscord(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
@@ -5646,24 +5612,6 @@ static void IconeDiscord(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
     d->AddCircleFilled(DPT(26.5f, 30.0f), 4.8f * e, IM_COL32(12, 12, 12, 255), 16);
     d->AddCircleFilled(DPT(44.5f, 30.0f), 4.8f * e, IM_COL32(12, 12, 12, 255), 16);
     #undef DPT
-}
-
-// seta de "abre fora" (o external-link do mockup): caixa 24x24 do Lucide, traco 2.2
-static void IconeAbreFora(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
-    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.2f * e * 1.25f;
-    #define XPT(X, Y) ImVec2(ox + (X) * e, oy + (Y) * e)
-    d->PathLineTo(XPT(14, 4)); d->PathLineTo(XPT(20, 4)); d->PathLineTo(XPT(20, 10)); d->PathStroke(cor, 0, w);
-    d->AddLine(XPT(20, 4), XPT(11, 13), cor, w);
-    d->PathLineTo(XPT(18, 14)); d->PathLineTo(XPT(18, 19)); d->PathLineTo(XPT(5, 19)); d->PathLineTo(XPT(5, 6));
-    d->PathLineTo(XPT(10, 6)); d->PathStroke(cor, 0, w);
-    #undef XPT
-}
-// seta para a direita (o "Todos os servidores ->" do mockup)
-static void IconeSetaDir(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
-    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.2f * e * 1.25f;
-    d->AddLine(ImVec2(ox + 5 * e, oy + 12 * e), ImVec2(ox + 19 * e, oy + 12 * e), cor, w);
-    d->PathLineTo(ImVec2(ox + 13 * e, oy + 6 * e)); d->PathLineTo(ImVec2(ox + 19 * e, oy + 12 * e));
-    d->PathLineTo(ImVec2(ox + 13 * e, oy + 18 * e)); d->PathStroke(cor, 0, w);
 }
 
 static void IconeNav(ImDrawList* dl, ImVec2 c, int tipo, ImU32 cor) {
@@ -6099,7 +6047,7 @@ static void DesenhaUI(HWND hwnd) {
                 bool lbh = ImGui::IsItemHovered();
                 if (lbh) dl->AddRectFilled(la, lb, Cinza(255, 18), 8.0f); // link sem contorno (pedido): so o realce no hover
                 dl->AddText(ImVec2(la.x + 15.5f, (la.y + lb.y - ssz.y) * 0.5f), Tk::Texto, rotL);
-                IconeAbreFora(dl, ImVec2(la.x + 15.5f + ssz.x + 6.7f + 6.7f, (la.y + lb.y) * 0.5f), Tk::Texto, 13.3f);
+                Icone(dl, ImVec2(la.x + 15.5f + ssz.x + 6.7f + 6.7f, (la.y + lb.y) * 0.5f), I_LINK_FORA, Tk::Texto, 13.3f);
                 if (lbh) { // pra onde o link vai, como a barra de status do navegador
                     char dica[224];
                     if (strstr(urlL, "://")) { strncpy(dica, urlL, sizeof(dica) - 1); dica[sizeof(dica) - 1] = 0; }
@@ -6141,7 +6089,7 @@ static void DesenhaUI(HWND hwnd) {
             bool hT = ImGui::IsItemHovered();
             ImU32 cT = hT ? Tk::Texto : Tk::Texto2;
             dl->AddText(ImVec2(XR - wT, yFav - 1.0f), cT, rotT);
-            IconeSetaDir(dl, ImVec2(XR - 7.2f, yFav - 1.0f + tsz.y * 0.5f), cT, 14.4f);
+            Icone(dl, ImVec2(XR - 7.2f, yFav - 1.0f + tsz.y * 0.5f), I_FLECHA_DIR, cT, 14.4f);
             ImGui::PopFont();
             if (clT) { gTela = 1; gSubAba = 0; }
         }
@@ -6299,7 +6247,7 @@ static void DesenhaUI(HWND hwnd) {
                 bool hP = ImGui::IsItemHovered();
                 if (hP) dl->AddRectFilled(pA, pB, Cinza(255, 12), raio);
                 const float cyP = (pA.y + pB.y) * 0.5f;
-                IconePessoas(dl, ImVec2(pA.x + 14.0f + 8.0f, cyP), hP ? Tk::Texto : Tk::Texto2, 16.0f);
+                Icone(dl, ImVec2(pA.x + 14.0f + 8.0f, cyP), I_USUARIOS, hP ? Tk::Texto : Tk::Texto2, 16.0f);
                 ImGui::PushFont(gFtBold);
                 dl->AddText(ImVec2(pA.x + 14.0f + 16.0f + 8.0f, floorf(cyP - numSz.y * 0.5f)), hP ? Tk::Texto : Tk::Texto2, nPil);
                 ImGui::PopFont();
@@ -6314,7 +6262,7 @@ static void DesenhaUI(HWND hwnd) {
                     bool hR = ImGui::IsItemHovered();
                     ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
                     if (hR) dl->AddRectFilled(ra, rb, Cinza(255, 16), 6.0f);
-                    IconeRecolherPainel(dl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), hR ? Tk::Texto : Tk::Texto3, 15.0f);
+                    Icone(dl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), I_PAINEL_DIR_FECHA, hR ? Tk::Texto : Tk::Texto3, 16.0f);
                     Dica(T("Recolher"));
                     if (clR) { gJogRecolhido = true; SalvarConfig(); }
                 }
@@ -6332,18 +6280,21 @@ static void DesenhaUI(HWND hwnd) {
                 }
                 ImGui::PopFont();
                 const float yLista = ImGui::GetItemRectMax().y + 8.0f;
-                // ordem: marcados que estao online, voce, o resto (jogLoc ja vem por score)
+                // ordem: marcados que estao online, voce, o resto (jogLoc ja vem por score). Buscando, dentro de cada
+                // grupo vem primeiro quem COMECA com o texto, depois quem tem uma palavra que comeca, depois o resto
                 char qJ[40];
                 Normalizar(buscaJog, qJ, sizeof(qJ));
                 int ordem[128], nOrd = 0, nMarc = 0;
                 for (int pass = 0; pass < 3; pass++) {
-                    for (int k = 0; k < nJogLoc; k++) {
-                        bool eu = _stricmp(jogLoc[k].nick, gNick) == 0;
-                        bool marc = !eu && NickMarcado(jogLoc[k].nick);
-                        if ((pass == 0 && !marc) || (pass == 1 && !eu) || (pass == 2 && (eu || marc))) continue;
-                        if (qJ[0]) { char nn[32]; Normalizar(jogLoc[k].nick, nn, sizeof(nn)); if (!strstr(nn, qJ)) continue; }
-                        ordem[nOrd++] = k;
-                        if (pass == 0) nMarc++;
+                    for (int rk = 0; rk < (qJ[0] ? 3 : 1); rk++) {
+                        for (int k = 0; k < nJogLoc; k++) {
+                            bool eu = _stricmp(jogLoc[k].nick, gNick) == 0;
+                            bool marc = !eu && NickMarcado(jogLoc[k].nick);
+                            if ((pass == 0 && !marc) || (pass == 1 && !eu) || (pass == 2 && (eu || marc))) continue;
+                            if (qJ[0]) { char nn[32]; Normalizar(jogLoc[k].nick, nn, sizeof(nn)); if (RankBusca(nn, qJ) != rk) continue; }
+                            ordem[nOrd++] = k;
+                            if (pass == 0) nMarc++;
+                        }
                     }
                 }
                 ImGui::SetCursorScreenPos(ImVec2(jx0 + 6.0f, yLista));
@@ -6367,7 +6318,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImVec2 rA = ImGui::GetCursorScreenPos(), rB(rA.x + wL, rA.y + 44.0f);
                     ImGui::Dummy(ImVec2(wL, 44.0f));
                     bool hovR = ImGui::IsItemHovered();
-                    if (hovR) jl->AddRectFilled(rA, rB, Cinza(255, 14), 7.0f);
+                    if (hovR) jl->AddRectFilled(rA, rB, Cinza(255, 14), 8.0f); // o canto das linhas dos menus
                     ImGui::PushFont(gFtBold);
                     jl->AddText(ImVec2(rA.x + 10.0f, rA.y + 5.0f), eu ? AC.cor : Tk::Texto, j.nick);
                     float wNick = ImGui::CalcTextSize(j.nick).x;
@@ -6382,14 +6333,14 @@ static void DesenhaUI(HWND hwnd) {
                     sprintf(pg, "%d ms", j.ping);
                     jl->AddText(ImVec2(rA.x + 10.0f + wLin, rA.y + 24.0f), CorPing(j.ping), pg);
                     ImGui::PopFont();
-                    if (!eu) { // estrela a direita, so no hover da linha: vazia = marcar; cheia (nos marcados) = desmarcar
+                    if (!eu) { // estrela a direita, so no hover da linha: cinza = marcar; no destaque (nos marcados) = desmarcar
                         ImVec2 e0(rB.x - 36.0f, rA.y + 8.0f);
                         ImGui::SetCursorScreenPos(e0);
                         bool clS = ImGui::InvisibleButton("##estrela", ImVec2(28, 28));
                         bool hovS = ImGui::IsItemHovered();
                         ImVec2 cE(e0.x + 14.0f, e0.y + 14.0f);
-                        if (marc) { if (hovR || hovS) Estrela(jl, cE, 5.5f, AC.cor, true); }
-                        else if (hovR || hovS) Estrela(jl, cE, 5.5f, hovS ? Tk::Texto2 : Cinza(255, 80), false); // so com o mouse na linha
+                        if (marc) { if (hovR || hovS) Icone(jl, cE, I_ESTRELA, AC.cor, 14.0f); } // marcado: no destaque, como o marcador dos favoritos
+                        else if (hovR || hovS) Icone(jl, cE, I_ESTRELA, hovS ? Tk::Texto2 : Cinza(255, 80), 14.0f); // so com o mouse na linha
                         if (clS) AlternarMarcado(j.nick);
                         ImGui::SetCursorScreenPos(ImVec2(rA.x, rB.y + 2.0f));
                     }
@@ -7331,7 +7282,7 @@ static void DesenhaUI(HWND hwnd) {
                 if (sh) { pl->AddRectFilled(sa, sb, Cinza(255, 16), 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
                 ImU32 cSite = sh ? Tk::Texto : Tk::Texto2;
                 pl->AddText(ImVec2(sa.x + 14.0f, (sa.y + sb.y - tszS.y) * 0.5f), cSite, T("Acesse o site"));
-                IconeAbreFora(pl, ImVec2(sa.x + 14.0f + tszS.x + 6.7f + 6.7f, (sa.y + sb.y) * 0.5f), cSite, 13.3f);
+                Icone(pl, ImVec2(sa.x + 14.0f + tszS.x + 6.7f + 6.7f, (sa.y + sb.y) * 0.5f), I_LINK_FORA, cSite, 13.3f);
             }
             ImGui::PopFont();
             Dica(T("Abrir o blog TrokMods"));
@@ -7544,7 +7495,7 @@ static void DesenhaUI(HWND hwnd) {
                 ImDrawList* rl = ImGui::GetWindowDrawList();
                 if (rh) { rl->AddRectFilled(ra, rb, Cinza(255, 16), 8); ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); }
                 ImU32 cRep = rh ? Tk::Texto : Tk::Texto2;
-                IconeBandeira(rl, ImVec2(ra.x + 14.0f + 8.0f, (ra.y + rb.y) * 0.5f), cRep, 16.0f);
+                Icone(rl, ImVec2(ra.x + 14.0f + 8.0f, (ra.y + rb.y) * 0.5f), I_BANDEIRA, cRep, 16.0f);
                 rl->AddText(ImVec2(ra.x + 14.0f + 16.0f + 8.0f, (ra.y + rb.y - tszR.y) * 0.5f), cRep, T("Reportar problema"));
             }
             ImGui::PopFont();
@@ -9416,10 +9367,10 @@ static void CarregarFontes(ImGuiIO& io) {
             void* pL = LockResource(hL);
             DWORD tamL = SizeofResource(NULL, rL);
             static const ImWchar RANGO_ICO[] = {
-                0xE060,0xE060, 0xE06C,0xE06F, 0xE09E,0xE09E, 0xE0B2,0xE0B2, 0xE0D7,0xE0D7,
-                0xE0DC,0xE0DC, 0xE0E8,0xE0E8, 0xE0F5,0xE0F6, 0xE0F9,0xE0F9, 0xE11C,0xE11C, 0xE129,0xE129,
-                0xE145,0xE145, 0xE153,0xE154, 0xE18E,0xE18E, 0xE19E,0xE19E, 0xE1B2,0xE1B2,
-                0xE21C,0xE21D, 0xE247,0xE247, 0xE40D,0xE40D, 0xE5C4,0xE5C4, 0 };
+                0xE049,0xE049, 0xE060,0xE060, 0xE06C,0xE06F, 0xE09E,0xE09E, 0xE0B2,0xE0B2, 0xE0B9,0xE0B9, 0xE0D1,0xE0D1,
+                0xE0D7,0xE0D7, 0xE0DC,0xE0DC, 0xE0E8,0xE0E8, 0xE0F5,0xE0F6, 0xE0F9,0xE0F9, 0xE11C,0xE11C, 0xE129,0xE129,
+                0xE145,0xE145, 0xE153,0xE154, 0xE176,0xE176, 0xE18E,0xE18E, 0xE19E,0xE19E, 0xE1A4,0xE1A4,
+                0xE1B2,0xE1B2, 0xE21C,0xE21D, 0xE247,0xE247, 0xE40D,0xE40D, 0xE432,0xE432, 0xE5C4,0xE5C4, 0 };
             static ImFontConfig cfgL;
             cfgL.FontDataOwnedByAtlas = false; // o ttf mora no recurso do exe, o atlas nao da free
             if (pL && tamL) {

@@ -70,8 +70,8 @@ $(if ($temArte) { "3 RCDATA `"$($arte -replace '\\','\\\\')`"" })
 14 RCDATA "$($dir -replace '\\','\\\\')\\fontes\\Montserrat-Medium.otf"
 16 RCDATA "$($dir -replace '\\','\\\\')\\fontes\\Montserrat-Bold.otf"
 1 VERSIONINFO
-FILEVERSION     1,13,0,0
-PRODUCTVERSION  1,13,0,0
+FILEVERSION     1,14,0,0
+PRODUCTVERSION  1,14,0,0
 FILEOS          VOS_NT_WINDOWS32
 FILETYPE        VFT_APP
 BEGIN
@@ -81,9 +81,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",      "TrokMods"
       VALUE "FileDescription",  "Instalador do Trok Launcher"
-      VALUE "FileVersion",      "1.13.0.0"
+      VALUE "FileVersion",      "1.14.0.0"
       VALUE "ProductName",      "Trok Launcher"
-      VALUE "ProductVersion",   "1.13"
+      VALUE "ProductVersion",   "1.14"
       VALUE "LegalCopyright",   "TrokMods"
       VALUE "OriginalFilename", "TrokLauncher-Setup.exe"
     END
