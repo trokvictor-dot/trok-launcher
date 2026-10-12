@@ -53,7 +53,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 #ifdef TROK_TESTE_UPDATE
 #define VERSAO "v0.9" // exe de AMOSTRA: se acha antigo p/ demonstrar o fluxo de atualizacao
 #else
-#define VERSAO "v1.12"
+#define VERSAO "v1.13"
 #endif
 
 // atualizacoes: arquivo de texto hospedado (GitHub raw e gratis). Formato:
@@ -308,6 +308,39 @@ static const Traducao TRADUCOES[] = {
     { { "vazio = nome real do servidor", "empty = the server's real name", "vacío = nombre real del servidor", "пусто = настоящее название сервера", "kosong = nama asli server", "boş = sunucunun gerçek adı" } },
     { { "Visite nosso blog TrokMods. Clique num post para abrir no navegador.", "Visit our TrokMods blog. Click a post to open it in the browser.", "Visita nuestro blog TrokMods. Haz clic en un post para abrirlo en el navegador.", "Заходите в наш блог TrokMods. Нажмите на пост, чтобы открыть в браузере.", "Kunjungi blog TrokMods kami. Klik postingan untuk membukanya di browser.", "TrokMods blogumuzu ziyaret edin. Tarayıcıda açmak için bir gönderiye tıklayın." } },
     { { "Voltar", "Back", "Volver", "Назад", "Kembali", "Geri" } },
+    { { "VERSÃO", "VERSION", "VERSIÓN", "ВЕРСИЯ", "VERSI", "SÜRÜM" } },
+    { { "Este servidor parece ser 0.3.DL e a data em uso é %s. Se ele recusar, escolha uma data 0.3.DL na aba Datas.",
+        "This server looks like 0.3.DL and the install in use is %s. If it refuses you, pick a 0.3.DL install in the Installs tab.",
+        "Este servidor parece ser 0.3.DL y la instalación en uso es %s. Si te rechaza, elige una instalación 0.3.DL en la pestaña Instalaciones.",
+        "Этот сервер, похоже, 0.3.DL, а текущая установка - %s. Если он не пустит, выберите установку 0.3.DL во вкладке Установки.",
+        "Server ini tampaknya 0.3.DL dan instalasi yang dipakai %s. Jika ditolak, pilih instalasi 0.3.DL di tab Instalasi.",
+        "Bu sunucu 0.3.DL gibi görünüyor ve kullanılan kurulum %s. Reddederse Kurulumlar sekmesinden bir 0.3.DL kurulumu seçin." } },
+    { { "I D I O M A", "L A N G U A G E", "I D I O M A", "Я З Ы К", "B A H A S A", "D İ L" } },
+    { { "T I P O   D E   J O G O", "G A M E   T Y P E", "T I P O   D E   J U E G O", "Т И П   И Г Р Ы", "J E N I S   G A M E", "O Y U N   T Ü R Ü" } },
+    { { "V E R S Ã O", "V E R S I O N", "V E R S I Ó N", "В Е Р С И Я", "V E R S I", "S Ü R Ü M" } },
+    { { "O C U L T A R", "H I D E", "O C U L T A R", "С К Р Ы Т Ь", "S E M B U N Y I K A N", "G İ Z L E" } },
+    { { "Todos", "All", "Todos", "Все", "Semua", "Tümü" } },
+    { { "Stunt/Corrida", "Stunt/Racing", "Stunt/Carreras", "Трюки/гонки", "Stunt/Balap", "Stunt/Yarış" } },
+    { { "Zumbi", "Zombie", "Zombi", "Зомби", "Zombie", "Zombi" } },
+    { { "Polícia e ladrão", "Cops and robbers", "Policías y ladrones", "Копы и грабители", "Polisi dan perampok", "Polis ve hırsız" } },
+    { { "Outras", "Others", "Otras", "Другие", "Lainnya", "Diğer" } },
+    { { "Limpar filtros", "Clear filters", "Limpiar filtros", "Сбросить фильтры", "Hapus filter", "Filtreleri temizle" } },
+    { { "Mostrando %d de %d. Use a busca ou os filtros para achar o resto.",
+        "Showing %d of %d. Use search or the filters to find the rest.",
+        "Mostrando %d de %d. Usa la búsqueda o los filtros para encontrar el resto.",
+        "Показано %d из %d. Используйте поиск или фильтры, чтобы найти остальные.",
+        "Menampilkan %d dari %d. Gunakan pencarian atau filter untuk menemukan sisanya.",
+        "%d / %d gösteriliyor. Gerisini bulmak için aramayı veya filtreleri kullanın." } },
+    { { "Nenhum servidor com esses filtros.", "No servers match these filters.", "Ningún servidor con estos filtros.",
+        "Нет серверов с такими фильтрами.", "Tidak ada server dengan filter ini.", "Bu filtrelerle sunucu yok." } },
+    { { "J O G A D O R E S   O N L I N E", "P L A Y E R S   O N L I N E", "J U G A D O R E S   E N   L Í N E A", "И Г Р О К И   О Н Л А Й Н",
+        "P E M A I N   O N L I N E", "Ç E V R İ M İ Ç İ   O Y U N C U L A R" } },
+    { { "M A R C A D O S", "S T A R R E D", "M A R C A D O S", "О Т М Е Ч Е Н Н Ы Е", "D I T A N D A I", "İ Ş A R E T L İ L E R" } },
+    { { "T O D O S", "A L L", "T O D O S", "В С Е", "S E M U A", "T Ü M Ü" } },
+    { { "Buscar jogador...", "Search player...", "Buscar jugador...", "Найти игрока...", "Cari pemain...", "Oyuncu ara..." } },
+    { { "você", "you", "tú", "вы", "kamu", "sen" } },
+    { { "Recolher", "Collapse", "Contraer", "Свернуть", "Ciutkan", "Daralt" } },
+    { { "Jogadores online", "Players online", "Jugadores en línea", "Игроки онлайн", "Pemain online", "Çevrimiçi oyuncular" } },
 };
 static const char* T(const char* pt) {
     if (gLang == 0 || !pt) return pt;
@@ -584,6 +617,10 @@ static char gRPServidor[96] = "";
 static long long gRPDesde = 0;
 static HWND gHwnd = NULL;
 static float gEscala = 1.0f; // janela fisica / 1420 logico: a UI inteira escala junto
+static volatile bool gTelaMudou = false; // WM_DISPLAYCHANGE: a resolucao do Windows mudou com o launcher aberto
+#ifdef TROK_TESTE_LIVRE
+static int gSimTelaW = 0, gSimTelaH = 0; // so no exe de teste: --simular-tela LxA = tela "pequena" na abertura
+#endif
 static bool gModoFoto = false; // exe de teste fotografando as telas: nunca fecha nem abre jogo
 #ifdef TROK_TESTE_LIVRE
 static int gFotoAbrir = 0; // modo foto: 1 = menu de idioma, 2 = conta do servidor, 3 = data do servidor
@@ -597,11 +634,13 @@ static char gNotifPostImg[MAX_PATH] = "";           // capa ja baixada (vira o i
 static char gNotifPostUrl[300] = "";                // clicar no balao abre este post
 static unsigned long long gNotifPostOrdem = 0;      // ordem do post do balao (marca como notificado ao disparar)
 static bool gFocarBusca = false;   // Ctrl+F: foca a busca da aba Servidores
+static volatile int gTabPedido = 0; // Tab fora de campo de texto: +1 proxima aba do trilho, -1 (Shift+Tab) a anterior
 static bool gBoasVindas = false;   // 1a execucao sem SA-MP detectado: guia a pessoa
 static bool gSampOk = true;        // a data em uso tem samp.exe? (reavaliado a cada ~1s; esconde os botoes Jogar)
 static DWORD gEsperandoPasta = 0;  // pasta da data em uso nao respondeu no arranque: instante ate o qual esperamos
 static bool gIniTinhaDatas = false; // o ini ja trazia data configurada? (so o 1o acesso DE VERDADE adota data sozinho)
 static float gHomeSlide = 1.0f;    // slide estilo Rockstar: conteudo da Home entra da direita
+static bool gJogAnimando = false;   // painel de jogadores entrando: o desenho preguicoso segue desenhando
 static bool  gSideAberta = false;  // menu lateral expandido (nomes das abas, estilo Rockstar)
 static float gSideAnim = 0.0f;     // 0 = recolhido (76px), 1 = expandido (~230px)
 static bool gSalvarSenhaServ = false; // opcoes do SA-MP original (HKCU\Software\SAMP: SaveServPasses/SaveRconPasses)
@@ -618,17 +657,36 @@ static void Avisar(const char* msg) {
 }
 
 // lista publica de servidores (masterlist da open.mp - a lists.sa-mp.com original morreu)
-#define MAX_PUB 500
-struct SrvPub { char nome[96]; char ip[64]; char modo[64]; int on, maxp, pw; };
+// + a do SAMonitor (sam.markski.ar, a mesma que o version.dll "SA-MP Masterlist Fix" poe no samp.exe), sem duplicar
+#define MAX_PUB 3000 // 12/10: open.mp 1250 + SAMonitor 1096, 134 so no SAMonitor; com 500 o corte pegava a ORDEM DA API
+struct SrvPub {
+    char nome[96]; char ip[64]; char modo[64]; int on, maxp, pw; char ver[24]; int omp;
+    char lingua[48];                        // o idioma que a lista informa ("Português - Brasil", "EN"...)
+    unsigned char idiomas, tipos, grupoVer; // bits dos filtros (DetectarIdiomas, DetectarTipos, GrupoVersao)
+    unsigned char falhas;                   // rodadas ao vivo seguidas sem resposta (2 = fica cinza)
+    int ping;                               // ao vivo: -1 ainda nao consultado, -2 nao respondeu, >= 0 ms
+    DWORD consultaT;                        // GetTickCount da ultima consulta ao vivo (0 = nunca)
+    char busca[256];                        // nome, modo, ip, versao e idioma sem acento e em minusculas (a busca)
+};
 static SrvPub gPub[MAX_PUB];
 static volatile int gNumPub = 0;
+static volatile LONG gPubGeracao = 0; // muda a cada lista baixada: resposta ao vivo de lista velha e descartada
+static int gPubFila[MAX_PUB];         // a ordem da tela, ja filtrada (a UI monta; a consulta ao vivo segue ela)
+static volatile int gPubFilaN = 0;
+static volatile LONG gPubVivoVer = 0; // conta lotes respondidos: a UI reordena por ping/jogadores quando muda
 static volatile int gPubEstado = 0;  // 0 nunca pedido, 1 baixando, 2 ok, -1 falhou
 static int gSubAba = 0;              // tela servidores: 0 favoritos, 1 internet
 static bool gAddIpAbrir = false;     // modal "adicionar pelo IP" (aba servidores, como no samp.exe)
 static char gAddIp[64] = "";
 static char gAddNome[96] = "";
 static bool gOcCheios = false, gOcSenha = false, gOcVazios = false; // filtros (internet + favoritos)
-static bool gOcOff = false;                     // ocultar sem resposta (so faz sentido nos favoritos)
+static bool gOcOff = false;                     // ocultar sem resposta (favoritos; na internet, quem nao respondeu ao vivo)
+static int gFiltroIdioma = 0;   // aba Internet: 0 todos, 1 Brasil, 2 Espanol, 3 English, 4 Russo, 5 Indonesia
+static int gFiltroTipo = 0;     // 0 todos, 1 Roleplay, 2 DM/TDM, 3 Freeroam, 4 Stunt/Corrida, 5 Zumbi, 6 Policia e ladrao
+static int gFiltroVersoes = 15; // bits: 1 0.3.7, 2 0.3.DL, 4 open.mp, 8 outras (tudo marcado = sem filtro)
+static char gMarcados[64][25];  // nicks marcados com a estrela no painel de jogadores (valem em qualquer servidor)
+static int  gNumMarcados = 0;
+static bool gJogRecolhido = false; // painel de jogadores recolhido na pilula (vale pra todos os servidores)
 static bool gFiltrosAberto = false;             // dropdown de filtros (funil ao lado da busca)
 static ImVec2 gFiltroBtnA, gFiltroBtnB;         // retangulo do botao funil
 
@@ -1045,6 +1103,24 @@ static void LerConfig() {
     gOcSenha  = GetPrivateProfileIntA("config", "ocultar_senha", 0, gIniPath) != 0;
     gOcVazios = GetPrivateProfileIntA("config", "ocultar_vazios", 0, gIniPath) != 0;
     gOcOff    = GetPrivateProfileIntA("config", "ocultar_off", 0, gIniPath) != 0;
+    gFiltroIdioma  = GetPrivateProfileIntA("config", "pub_idioma", 0, gIniPath);
+    gFiltroTipo    = GetPrivateProfileIntA("config", "pub_tipo", 0, gIniPath);
+    gFiltroVersoes = GetPrivateProfileIntA("config", "pub_versoes", 15, gIniPath) & 15;
+    if (gFiltroIdioma < 0 || gFiltroIdioma > 5) gFiltroIdioma = 0;
+    if (gFiltroTipo < 0 || gFiltroTipo > 6) gFiltroTipo = 0;
+    if (!gFiltroVersoes) gFiltroVersoes = 15;
+    gJogRecolhido = GetPrivateProfileIntA("config", "jogadores_recolhido", 0, gIniPath) != 0;
+    { // nicks marcados: "Fulano,Ciclano" (nick do SA-MP nao tem virgula)
+        char mk[2048];
+        GetPrivateProfileStringA("config", "jogadores_marcados", "", mk, sizeof(mk), gIniPath);
+        gNumMarcados = 0;
+        for (char* t = strtok(mk, ","); t && gNumMarcados < 64; t = strtok(NULL, ",")) {
+            while (*t == ' ') t++;
+            if (!*t) continue;
+            strncpy(gMarcados[gNumMarcados], t, 24); gMarcados[gNumMarcados][24] = 0;
+            gNumMarcados++;
+        }
+    }
     gDiscordRP = GetPrivateProfileIntA("config", "discord_rp", 1, gIniPath) != 0;
     gIdiomaCfg = GetPrivateProfileIntA("config", "idioma", 0, gIniPath); // 0 auto (Windows), 1 pt, 2 en
     if (gIdiomaCfg < 0 || gIdiomaCfg > 6) gIdiomaCfg = 0;
@@ -1230,6 +1306,15 @@ static void SalvarConfig() {
     WritePrivateProfileStringA("config", "ocultar_senha", gOcSenha ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "ocultar_vazios", gOcVazios ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "ocultar_off", gOcOff ? "1" : "0", gIniPath);
+    { char nf[16];
+      sprintf(nf, "%d", gFiltroIdioma);  WritePrivateProfileStringA("config", "pub_idioma", nf, gIniPath);
+      sprintf(nf, "%d", gFiltroTipo);    WritePrivateProfileStringA("config", "pub_tipo", nf, gIniPath);
+      sprintf(nf, "%d", gFiltroVersoes); WritePrivateProfileStringA("config", "pub_versoes", nf, gIniPath); }
+    { char mk[2048]; int w = 0; mk[0] = 0;
+      for (int i = 0; i < gNumMarcados; i++) w += _snprintf(mk + w, sizeof(mk) - 1 - w, i ? ",%s" : "%s", gMarcados[i]);
+      mk[sizeof(mk) - 1] = 0;
+      WritePrivateProfileStringA("config", "jogadores_marcados", mk, gIniPath); }
+    WritePrivateProfileStringA("config", "jogadores_recolhido", gJogRecolhido ? "1" : "0", gIniPath);
     WritePrivateProfileStringA("config", "discord_rp", gDiscordRP ? "1" : "0", gIniPath);
     { char vi[4]; sprintf(vi, "%d", gIdiomaCfg); WritePrivateProfileStringA("config", "idioma", vi, gIniPath); }
     WritePrivateProfileStringA("config", "notif_windows", gNotifWin ? "1" : "0", gIniPath);
@@ -1345,7 +1430,7 @@ static void CriarTexturasDoDestaque(LPDIRECT3DDEVICE9 dev) {
             for (int y = 0; y < 3; y++) {
                 DWORD* lin = (DWORD*)((BYTE*)lr.pBits + y * lr.Pitch);
                 for (int x = 0; x < 3; x++) // centro + vizinhos a 1 px (o raio de 1px do site); quinas fora
-                    lin[x] = (abs(x - 1) + abs(y - 1) <= 1) ? 0x14000000u : 0x00000000u; // preto a 8% (o site usa 20%: forte demais aqui)
+                    lin[x] = (abs(x - 1) + abs(y - 1) <= 1) ? 0x0F000000u : 0x00000000u; // preto a 6% (o site usa 20%; 8% ainda pesava, 12/10)
             }
             gTexPontos->UnlockRect(0);
         }
@@ -1678,12 +1763,17 @@ static bool QueryServidor(Servidor& s) {
     unsigned char buf[600];
     int r = -1;
     DWORD dt = 0;
+    // ping no relogio de ALTA precisao: o GetTickCount anda de 15,6 em 15,6 ms, entao 143-150 ms reais
+    // saiam sempre 140/141/157 e o ping parecia congelado mesmo atualizando a cada rodada (12/10)
+    LARGE_INTEGER qf, q0, q1;
+    QueryPerformanceFrequency(&qf);
     for (int tent = 0; tent < 3; tent++) {
-        DWORD t0 = GetTickCount();
+        QueryPerformanceCounter(&q0);
         sendto(sk, (char*)pac, 11, 0, (sockaddr*)&addr, sizeof(addr));
         sockaddr_in de; int deTam = sizeof(de);
         r = recvfrom(sk, (char*)buf, sizeof(buf), 0, (sockaddr*)&de, &deTam);
-        dt = GetTickCount() - t0;
+        QueryPerformanceCounter(&q1);
+        dt = (DWORD)(((q1.QuadPart - q0.QuadPart) * 1000 + qf.QuadPart / 2) / qf.QuadPart);
         // so vale a resposta do proprio servidor (pacote de outro endereco nao vira contagem de jogadores)
         if (r >= 16 && memcmp(buf, "SAMP", 4) == 0 && de.sin_addr.s_addr == addr.sin_addr.s_addr && de.sin_port == addr.sin_port) break;
         r = -1;
@@ -1741,6 +1831,125 @@ static DWORD WINAPI ThreadQuery(LPVOID) {
         }
         for (int i = 0; i < n; i++) { WaitForSingleObject(hs[i], 6000); CloseHandle(hs[i]); } // 3 tentativas x 1,2s cabem
         for (int t = 0; t < 300 && gRodando; t++) Sleep(100); // ~30 s entre rodadas
+    }
+    return 0;
+}
+
+// ===================== jogadores online do servidor escolhido (painel do Inicio) =====================
+struct JogadorOn { char nick[25]; int score, ping; };
+static JogadorOn gJog[128];
+static int gNumJog = 0;
+static char gJogIp[64] = "";     // de qual servidor e a lista
+static int gJogEstado = 0;       // 1 = lista ok; 0 = sem lista (nada no painel)
+
+static bool NickMarcado(const char* n) {
+    for (int i = 0; i < gNumMarcados; i++) if (_stricmp(gMarcados[i], n) == 0) return true;
+    return false;
+}
+static void AlternarMarcado(const char* n) {
+    for (int i = 0; i < gNumMarcados; i++) {
+        if (_stricmp(gMarcados[i], n) != 0) continue;
+        for (int k = i; k < gNumMarcados - 1; k++) memcpy(gMarcados[k], gMarcados[k + 1], sizeof(gMarcados[k]));
+        gNumMarcados--;
+        SalvarConfig();
+        return;
+    }
+    if (gNumMarcados >= 64) return;
+    strncpy(gMarcados[gNumMarcados], n, 24); gMarcados[gNumMarcados][24] = 0;
+    gNumMarcados++;
+    SalvarConfig();
+}
+
+// lista detalhada (opcode 'd': id, nick, score, ping). O proprio SA-MP so manda com ate 100 online. -1 = nao veio
+static int ConsultarJogadores(const char* ipPorta, JogadorOn* out, int maxN) {
+    char host[64];
+    strncpy(host, ipPorta, 63); host[63] = 0;
+    int porta = 7777;
+    char* dp = strchr(host, ':');
+    if (dp) { *dp = 0; porta = atoi(dp + 1); }
+    addrinfo hints = {0}, *res = NULL;
+    hints.ai_family = AF_INET; hints.ai_socktype = SOCK_DGRAM;
+    if (getaddrinfo(host, NULL, &hints, &res) != 0 || !res) return -1;
+    sockaddr_in addr = *(sockaddr_in*)res->ai_addr;
+    addr.sin_port = htons((u_short)porta);
+    freeaddrinfo(res);
+    SOCKET sk = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sk == INVALID_SOCKET) return -1;
+    DWORD tmo = 1500;
+    setsockopt(sk, SOL_SOCKET, SO_RCVTIMEO, (char*)&tmo, sizeof(tmo));
+    unsigned char pac[11];
+    memcpy(pac, "SAMP", 4);
+    memcpy(pac + 4, &addr.sin_addr.s_addr, 4);
+    pac[8] = (unsigned char)(porta & 0xFF);
+    pac[9] = (unsigned char)(porta >> 8);
+    pac[10] = 'd';
+    unsigned char buf[8192];
+    int r = -1;
+    for (int tent = 0; tent < 2; tent++) {
+        sendto(sk, (char*)pac, 11, 0, (sockaddr*)&addr, sizeof(addr));
+        sockaddr_in de; int deTam = sizeof(de);
+        r = recvfrom(sk, (char*)buf, sizeof(buf), 0, (sockaddr*)&de, &deTam);
+        if (r >= 13 && memcmp(buf, "SAMP", 4) == 0 && buf[10] == 'd' &&
+            de.sin_addr.s_addr == addr.sin_addr.s_addr && de.sin_port == addr.sin_port) break;
+        r = -1;
+    }
+    closesocket(sk);
+    if (r < 13) return -1;
+    const unsigned char* p = buf + 11;
+    const unsigned char* fim = buf + r;
+    int n = p[0] | (p[1] << 8);
+    p += 2;
+    int k = 0;
+    for (int i = 0; i < n && k < maxN; i++) {
+        if (p + 2 > fim) break;
+        p++; // id
+        int len = *p++;
+        if (p + len + 8 > fim) break;
+        int c = len < 24 ? len : 24;
+        memcpy(out[k].nick, p, c); out[k].nick[c] = 0;
+        p += len;
+        out[k].score = (int)((unsigned)p[0] | ((unsigned)p[1] << 8) | ((unsigned)p[2] << 16) | ((unsigned)p[3] << 24)); p += 4;
+        out[k].ping  = (int)((unsigned)p[0] | ((unsigned)p[1] << 8) | ((unsigned)p[2] << 16) | ((unsigned)p[3] << 24)); p += 4;
+        k++;
+    }
+    return k;
+}
+
+// a lista do servidor escolhido no Inicio, a cada 8 s (e na hora quando troca de servidor). Sem lista = sem painel:
+// fora do ar, vazio, acima de 100 online (o SA-MP nao manda) ou "suspeito" (diz que tem gente e manda 0 nomes)
+static DWORD WINAPI ThreadJogadores(LPVOID) {
+    DWORD ultima = 0;
+    char ipAnt[64] = "";
+    while (gRodando) {
+        Sleep(250);
+        if (gTela != 0 || !gHwnd || !IsWindowVisible(gHwnd) || IsIconic(gHwnd)) continue;
+        char ip[64]; int online = 0, pingS = -1;
+        EnterCriticalSection(&gLock);
+        int sl = gSel;
+        bool ok = sl >= 0 && sl < gNumSrv;
+        if (ok) { strncpy(ip, gSrv[sl].ip, 63); ip[63] = 0; online = gSrv[sl].online; pingS = gSrv[sl].ping; }
+        LeaveCriticalSection(&gLock);
+        if (!ok) continue;
+        bool trocou = _stricmp(ip, ipAnt) != 0;
+        if (!trocou && GetTickCount() - ultima < 8000) continue;
+        if (trocou) {
+            strcpy(ipAnt, ip);
+            EnterCriticalSection(&gLock); gJogEstado = 0; gNumJog = 0; LeaveCriticalSection(&gLock);
+        }
+        ultima = GetTickCount();
+        if (pingS < 0 || online <= 0 || online > 100) {
+            if (pingS < 0) ultima -= 6000; // a consulta do servidor ainda nao voltou: olha de novo em 2 s
+            EnterCriticalSection(&gLock); gJogEstado = 0; gNumJog = 0; strcpy(gJogIp, ip); LeaveCriticalSection(&gLock);
+            continue;
+        }
+        static JogadorOn tmp[128];
+        int n = ConsultarJogadores(ip, tmp, 128);
+        EnterCriticalSection(&gLock);
+        if (n > 0) { memcpy(gJog, tmp, n * sizeof(JogadorOn)); gNumJog = n; gJogEstado = 1; }
+        else { gNumJog = 0; gJogEstado = 0; }
+        strcpy(gJogIp, ip);
+        LeaveCriticalSection(&gLock);
+        gUltimaAtividade = GetTickCount(); // acorda o desenho preguicoso
     }
     return 0;
 }
@@ -1860,20 +2069,142 @@ static int PegaBool(const char* o, int n, const char* chave) {
     return 0;
 }
 
-static DWORD WINAPI ThreadPublicos(LPVOID) {
-    gPubEstado = 1;
-    HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-    if (!h) { gPubEstado = -1; return 0; }
-    HINTERNET u = InternetOpenUrlA(h, "https://api.open.mp/servers", NULL, 0,
+// ---- busca e filtros da aba Internet ----
+// minusculas e sem acento (UTF-8 latino: "Português" -> "portugues", "ESPAÑOL" -> "espanol"); cirilico e o resto passam iguais
+static void Normalizar(const char* in, char* out, int sz) {
+    // 0xC3 0x80..0xBF = U+00C0..U+00FF: maiusculas e minusculas acentuadas caem na mesma letra sem acento
+    static const char LAT[65] = "aaaaaaaceeeeiiiidnooooo ouuuuytsaaaaaaaceeeeiiiidnooooo ouuuuyty";
+    int w = 0;
+    for (const unsigned char* p = (const unsigned char*)in; *p && w < sz - 1; p++) {
+        if (p[0] == 0xC3 && p[1] >= 0x80 && p[1] <= 0xBF) { out[w++] = LAT[p[1] - 0x80]; p++; continue; }
+        out[w++] = (p[0] >= 'A' && p[0] <= 'Z') ? (char)(p[0] + 32) : (char)p[0];
+    }
+    out[w] = 0;
+}
+static bool LetraOuDigito(unsigned char c) { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'); }
+// a palavra w inteira no texto ja normalizado (cercada por espaco, pontuacao ou borda)
+static bool TemPalavra(const char* t, const char* w) {
+    size_t n = strlen(w);
+    for (const char* p = strstr(t, w); p; p = strstr(p + 1, w))
+        if ((p == t || !LetraOuDigito((unsigned char)p[-1])) && !LetraOuDigito((unsigned char)p[n])) return true;
+    return false;
+}
+// etiqueta logo depois de colchete ou parentese: "[br]", "(esp)", "[br/pt]"
+static bool TemEtiqueta(const char* t, const char* w) {
+    size_t n = strlen(w);
+    for (const char* p = strstr(t, w); p; p = strstr(p + 1, w))
+        if (p > t && (p[-1] == '[' || p[-1] == '(') && !LetraOuDigito((unsigned char)p[n])) return true;
+    return false;
+}
+static bool TemCirilico(const char* t) { // UTF-8 0xD0/0xD1 + continuacao = letra cirilica
+    for (const unsigned char* p = (const unsigned char*)t; *p; p++)
+        if ((p[0] == 0xD0 || p[0] == 0xD1) && p[1] >= 0x80 && p[1] <= 0xBF) return true;
+    return false;
+}
+// "pt-br", "pt/br", "pt br", "ptbr", "pt|br" e o "br/pt" ao contrario
+static bool TemPtBr(const char* t) {
+    for (const char* p = strstr(t, "pt"); p; p = strstr(p + 1, "pt")) {
+        if (p > t && LetraOuDigito((unsigned char)p[-1])) continue;
+        const char* q = p + 2;
+        if (*q == '-' || *q == '/' || *q == ' ' || *q == '_' || *q == '|') q++;
+        if (q[0] == 'b' && q[1] == 'r' && !LetraOuDigito((unsigned char)q[2])) return true;
+    }
+    return TemPalavra(t, "br/pt");
+}
+enum { IDI_BR = 1, IDI_ES = 2, IDI_EN = 4, IDI_RU = 8, IDI_ID = 16 };
+enum { TIPO_RP = 1, TIPO_DM = 2, TIPO_FR = 4, TIPO_CORRIDA = 8, TIPO_ZUMBI = 16, TIPO_CNR = 32 };
+enum { VER_037 = 1, VER_DL = 2, VER_OMP = 4, VER_OUTRA = 8 };
+// idioma pelo que o servidor declara: o campo de idioma da lista, o nome e o modo (12/10: 151 brasileiros so pelo
+// idioma, 169 juntando os tres). Um "BR" solto no nome/modo NAO conta ("Black Russia Pure BR"); entre colchetes, conta
+static int DetectarIdiomas(const char* l, const char* nm) { // l = idioma normalizado; nm = nome + modo normalizados
+    int b = 0;
+    if (strstr(l, "portug") || strstr(l, "brasil") || strstr(l, "brazil") || TemPalavra(l, "br") || TemPalavra(l, "pt") || TemPtBr(l) ||
+        strstr(nm, "brasil") || strstr(nm, "brazil") || strstr(nm, "portugu") || TemPtBr(nm) || TemEtiqueta(nm, "br"))
+        b |= IDI_BR;
+    if (strstr(l, "espa") || strstr(l, "spanish") || strstr(l, "castell") || strstr(l, "latino") || TemPalavra(l, "es") || TemPalavra(l, "esp") ||
+        strstr(nm, "espanol") || strstr(nm, "latino") || strstr(nm, "hispan") || TemEtiqueta(nm, "esp") || TemEtiqueta(nm, "es"))
+        b |= IDI_ES;
+    if (strstr(l, "english") || strstr(l, "ingles") || TemPalavra(l, "en") || TemPalavra(l, "eng") ||
+        strstr(nm, "english") || TemEtiqueta(nm, "en") || TemEtiqueta(nm, "eng"))
+        b |= IDI_EN;
+    if (strstr(l, "russ") || TemPalavra(l, "ru") || TemPalavra(l, "rus") || TemCirilico(l) ||
+        TemCirilico(nm) || strstr(nm, "russia") || TemEtiqueta(nm, "ru") || TemEtiqueta(nm, "rus"))
+        b |= IDI_RU;
+    if (strstr(l, "indonesia") || strstr(l, "bahasa") || TemPalavra(l, "id") || TemPalavra(l, "indo") ||
+        strstr(nm, "indonesia") || TemEtiqueta(nm, "id") || TemEtiqueta(nm, "indo"))
+        b |= IDI_ID;
+    return b;
+}
+// tipo de jogo pelas palavras do nome e do modo (um servidor pode ter varios: "Stunt-DM-Race-Freeroam")
+static int DetectarTipos(const char* t) {
+    int b = 0;
+    if (strstr(t, "roleplay") || strstr(t, "role play") || strstr(t, "role-play") || strstr(t, "rolplay") || strstr(t, "rol en ") ||
+        TemPalavra(t, "rp") || TemPalavra(t, "rpg") || TemPalavra(t, "rol")) b |= TIPO_RP;
+    else { // sigla de roleplay: palavra de 3 a 6 letras terminada em "rp" (hzrp, brp, lsrp)
+        for (const char* p = t; *p; ) {
+            while (*p && !LetraOuDigito((unsigned char)*p)) p++;
+            const char* ini = p;
+            while (*p && LetraOuDigito((unsigned char)*p)) p++;
+            int n = (int)(p - ini);
+            if (n >= 3 && n <= 6 && ini[n - 2] == 'r' && ini[n - 1] == 'p') { b |= TIPO_RP; break; }
+        }
+    }
+    if (TemPalavra(t, "dm") || TemPalavra(t, "tdm") || strstr(t, "deathmatch") || strstr(t, "death match") || strstr(t, "gangwar") ||
+        strstr(t, "gang war") || TemPalavra(t, "gw") || TemPalavra(t, "pvp") || TemPalavra(t, "war") || TemPalavra(t, "wars") ||
+        TemPalavra(t, "cw") || TemPalavra(t, "tw") || strstr(t, "gun game") || strstr(t, "gungame")) b |= TIPO_DM;
+    if (strstr(t, "freeroam") || strstr(t, "free roam") || strstr(t, "free-roam")) b |= TIPO_FR;
+    if (strstr(t, "stunt") || strstr(t, "drift") || strstr(t, "derby") || strstr(t, "racing") || strstr(t, "corrida") ||
+        strstr(t, "rally") || TemPalavra(t, "race") || TemPalavra(t, "races")) b |= TIPO_CORRIDA;
+    if (strstr(t, "zombi") || strstr(t, "zumbi")) b |= TIPO_ZUMBI;
+    if (TemPalavra(t, "cnr") || TemPalavra(t, "cops") || strstr(t, "robbers") || strstr(t, "policia") || strstr(t, "police") ||
+        TemPalavra(t, "polis") || strstr(t, "ladrao") || strstr(t, "ladroes") || strstr(t, "hirsiz")) b |= TIPO_CNR;
+    return b;
+}
+static int GrupoVersao(const SrvPub& s) {
+    if (s.omp) return VER_OMP;
+    if (strstr(s.ver, "DL")) return VER_DL;
+    if (strstr(s.ver, "0.3.7")) return VER_037;
+    return VER_OUTRA;
+}
+// todas as palavras da busca aparecem, em qualquer ordem, no texto ja normalizado ("brasil rp" acha "Brasil Roleplay")
+static bool BuscaCasa(const char* hay, const char* q) {
+    char w[64];
+    while (*q) {
+        while (*q == ' ') q++;
+        int n = 0;
+        while (*q && *q != ' ' && n < 63) w[n++] = *q++;
+        while (*q && *q != ' ') q++;
+        w[n] = 0;
+        if (n && !strstr(hay, w)) return false;
+    }
+    return true;
+}
+
+// um servidor da Internet passa nos filtros e na busca (ja normalizada)? A lista e o numero da aba usam este
+static bool PubPassaFiltros(const SrvPub& sp, const char* qBusca) {
+    if (gFiltroIdioma && !(sp.idiomas & (1 << (gFiltroIdioma - 1)))) return false;
+    if (gFiltroTipo && !(sp.tipos & (1 << (gFiltroTipo - 1)))) return false;
+    if (!(sp.grupoVer & gFiltroVersoes)) return false;
+    if (gOcCheios && sp.maxp > 0 && sp.on >= sp.maxp) return false;
+    if (gOcSenha && sp.pw) return false;
+    if (gOcVazios && sp.on == 0) return false;
+    if (gOcOff && sp.ping == -2) return false; // consultado ao vivo e nao respondeu
+    if (qBusca[0] && !BuscaCasa(sp.busca, qBusca)) return false; // nome, modo, ip, versao e idioma
+    return true;
+}
+
+// baixa a URL inteira para a memoria (teto de 8 MB); NULL se falhar. Quem chama da free()
+static char* BaixarTexto(HINTERNET h, const char* url, int* tamOut) {
+    HINTERNET u = InternetOpenUrlA(h, url, NULL, 0,
         INTERNET_FLAG_SECURE | INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE, 0);
-    if (!u) { InternetCloseHandle(h); gPubEstado = -1; return 0; }
+    if (!u) return NULL;
     int cap = 1 << 20, tam = 0;
     char* js = (char*)malloc(cap);
     DWORD lidos = 0;
     while (js && InternetReadFile(u, js + tam, cap - tam - 1, &lidos) && lidos > 0) {
         tam += (int)lidos;
         if (cap - tam < 65536) {
-            if (cap >= (8 << 20)) break; // teto de 8 MB: resposta maior que isso nao e a masterlist
+            if (cap >= (8 << 20)) break; // teto de 8 MB: resposta maior que isso nao e uma masterlist
             cap *= 2;
             char* nv = (char*)realloc(js, cap);
             if (!nv) break;
@@ -1881,11 +2212,17 @@ static DWORD WINAPI ThreadPublicos(LPVOID) {
         }
     }
     InternetCloseHandle(u);
-    InternetCloseHandle(h);
-    if (!js || tam < 64) { free(js); gPubEstado = -1; return 0; }
+    if (!js || tam < 64) { free(js); return NULL; }
     js[tam] = 0;
-    // percorre objetos de nivel 1 do array raiz (respeitando strings e escapes)
-    int prof = 0, ini = -1, cont = 0;
+    *tamOut = tam;
+    return js;
+}
+
+// le os objetos de nivel 1 do array raiz (respeitando strings e escapes) e acrescenta em gPub a partir de 'cont'.
+// fonte 0 = open.mp (ip, hn, gm, pc, pm, pa, vn, omp); 1 = SAMonitor (ipAddr, name, gameMode, playersOnline...).
+// Servidor que ja esta na lista (mesmo ip:porta) fica com o dado que chegou primeiro (o do open.mp).
+static int LerListaPublica(const char* js, int tam, int fonte, int cont) {
+    int prof = 0, ini = -1;
     bool str = false;
     for (int i = 0; i < tam && cont < MAX_PUB; i++) {
         char c = js[i];
@@ -1894,30 +2231,186 @@ static DWORD WINAPI ThreadPublicos(LPVOID) {
         if (c == '{') { if (++prof == 1) ini = i; }
         else if (c == '}') {
             if (prof-- == 1 && ini >= 0) {
+                const char* o = js + ini;
+                int len = i - ini + 1;
+                ini = -1;
                 SrvPub& s = gPub[cont];
                 memset(&s, 0, sizeof(s));
-                int len = i - ini + 1;
-                if (PegaStr(js + ini, len, "ip", s.ip, sizeof(s.ip))) {
-                    if (!PegaStr(js + ini, len, "hn", s.nome, sizeof(s.nome)) || !s.nome[0])
-                        strncpy(s.nome, s.ip, sizeof(s.nome) - 1);
-                    PegaStr(js + ini, len, "gm", s.modo, sizeof(s.modo));
-                    s.on = PegaInt(js + ini, len, "pc");
-                    s.maxp = PegaInt(js + ini, len, "pm");
-                    s.pw = PegaBool(js + ini, len, "pa");
-                    if (!strchr(s.ip, ':') && strlen(s.ip) + 6 < sizeof(s.ip)) strcat(s.ip, ":7777");
+                if (fonte == 0) {
+                    if (!PegaStr(o, len, "ip", s.ip, sizeof(s.ip))) continue;
+                    PegaStr(o, len, "hn", s.nome, sizeof(s.nome));
+                    PegaStr(o, len, "gm", s.modo, sizeof(s.modo));
+                    PegaStr(o, len, "vn", s.ver, sizeof(s.ver));
+                    PegaStr(o, len, "la", s.lingua, sizeof(s.lingua));
+                    s.on = PegaInt(o, len, "pc");
+                    s.maxp = PegaInt(o, len, "pm");
+                    s.pw = PegaBool(o, len, "pa");
+                    s.omp = PegaBool(o, len, "omp");
+                } else {
+                    if (!PegaBool(o, len, "success")) continue; // o SAMonitor nao conseguiu consultar: dado velho
+                    if (!PegaStr(o, len, "ipAddr", s.ip, sizeof(s.ip))) continue;
+                    PegaStr(o, len, "name", s.nome, sizeof(s.nome));
+                    PegaStr(o, len, "gameMode", s.modo, sizeof(s.modo));
+                    PegaStr(o, len, "version", s.ver, sizeof(s.ver));
+                    PegaStr(o, len, "language", s.lingua, sizeof(s.lingua));
+                    s.on = PegaInt(o, len, "playersOnline");
+                    s.maxp = PegaInt(o, len, "maxPlayers");
+                    s.pw = PegaBool(o, len, "requiresPassword");
+                    s.omp = PegaBool(o, len, "isOpenMp");
+                }
+                if (!s.ip[0]) continue;
+                if (!s.nome[0]) strncpy(s.nome, s.ip, sizeof(s.nome) - 1);
+                if (!strchr(s.ip, ':') && strlen(s.ip) + 6 < sizeof(s.ip)) strcat(s.ip, ":7777");
+                if (s.omp) strcpy(s.ver, "open.mp"); // o open.mp aceita os clientes 0.3.7 e 0.3.DL
+                else if (_stricmp(s.ver, "unknown") == 0) s.ver[0] = 0; // o SAMonitor manda "unknown": vira "--"
+                bool repetido = false;
+                for (int k = 0; k < cont; k++) if (_stricmp(gPub[k].ip, s.ip) == 0) { repetido = true; break; }
+                if (!repetido) {
+                    if (strcmp(s.lingua, "-") == 0) s.lingua[0] = 0;
+                    s.ping = -1; s.consultaT = 0;
+                    // filtros e busca calculados uma vez aqui, nao a cada quadro
+                    char tmp[400], nl[64], nm[224];
+                    Normalizar(s.lingua, nl, sizeof(nl));
+                    _snprintf(tmp, sizeof(tmp) - 1, "%s %s", s.nome, s.modo); tmp[sizeof(tmp) - 1] = 0;
+                    Normalizar(tmp, nm, sizeof(nm));
+                    s.idiomas = (unsigned char)DetectarIdiomas(nl, nm);
+                    s.tipos = (unsigned char)DetectarTipos(nm);
+                    s.grupoVer = (unsigned char)GrupoVersao(s);
+                    _snprintf(tmp, sizeof(tmp) - 1, "%s %s %s %s %s", s.nome, s.modo, s.ip, s.ver, s.lingua); tmp[sizeof(tmp) - 1] = 0;
+                    Normalizar(tmp, s.busca, sizeof(s.busca));
                     cont++;
                 }
-                ini = -1;
             }
         }
     }
-    free(js);
+    return cont;
+}
+
+static DWORD WINAPI ThreadPublicos(LPVOID) {
+    gPubEstado = 1;
+    InterlockedIncrement(&gPubGeracao); // a consulta ao vivo em andamento descarta o que era da lista velha
+    gPubFilaN = 0;
+    HINTERNET h = InternetOpenA("TrokLauncher/1.0", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
+    if (!h) { gPubEstado = -1; return 0; }
+    // duas listas, a do open.mp primeiro; se uma cair a outra ainda aparece
+    static const char* LISTAS[2] = { "https://api.open.mp/servers", "https://sam.markski.ar/api/GetAllServers" };
+    int cont = 0;
+    for (int f = 0; f < 2; f++) {
+        int tam = 0;
+        char* js = BaixarTexto(h, LISTAS[f], &tam);
+        if (!js) continue;
+        cont = LerListaPublica(js, tam, f, cont);
+        free(js);
+    }
+    InternetCloseHandle(h);
     // mais cheios primeiro
     qsort(gPub, cont, sizeof(SrvPub), [](const void* a, const void* b) {
         return ((const SrvPub*)b)->on - ((const SrvPub*)a)->on;
     });
     gNumPub = cont;
     gPubEstado = cont > 0 ? 2 : -1;
+    return 0;
+}
+
+#ifndef SIO_UDP_CONNRESET
+#define SIO_UDP_CONNRESET _WSAIOW(IOC_VENDOR, 12)
+#endif
+// ping e jogadores AO VIVO da aba Internet: lotes de 64 num socket so (o browser do samp.exe faz igual), na ordem
+// da tela, cada servidor no maximo 1x por minuto. Quem nao responde em 2 tentativas fica "sem resposta".
+// Tambem desmascara dado velho das listas (o "Server Offline 1000/1000" do SAMonitor)
+static DWORD WINAPI ThreadPingPub(LPVOID) {
+    SOCKET sk = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (sk == INVALID_SOCKET) return 0;
+    { BOOL nao = FALSE; DWORD ret = 0; // porta fechada (ICMP) nao pode derrubar o recvfrom do lote inteiro
+      WSAIoctl(sk, SIO_UDP_CONNRESET, &nao, sizeof(nao), NULL, 0, &ret, NULL, NULL); }
+    LARGE_INTEGER qf; QueryPerformanceFrequency(&qf);
+    enum { LOTE = 64 };
+    static int idx[LOTE], resp[LOTE], onl[LOTE], maxp[LOTE], pw[LOTE], ms[LOTE];
+    static char ip[LOTE][64];
+    static sockaddr_in end[LOTE];
+    static LARGE_INTEGER t0[LOTE];
+    static unsigned char pac[LOTE][11];
+    while (gRodando) {
+        if (gTela != 1 || gPubEstado != 2) { Sleep(400); continue; } // aba Servidores aberta (Favoritos ou Internet)
+        int n = 0;
+        LONG ger = gPubGeracao;
+        DWORD agora = GetTickCount();
+        EnterCriticalSection(&gLock);
+        for (int k = 0; k < gPubFilaN && n < LOTE; k++) {
+            int i = gPubFila[k];
+            if (i < 0 || i >= gNumPub) continue;
+            if (gPub[i].consultaT && agora - gPub[i].consultaT < 60000) continue;
+            gPub[i].consultaT = agora ? agora : 1;
+            idx[n] = i; strncpy(ip[n], gPub[i].ip, 63); ip[n][63] = 0; n++;
+        }
+        LeaveCriticalSection(&gLock);
+        if (!n) { Sleep(500); continue; }
+        for (int k = 0; k < n; k++) {
+            resp[k] = 0;
+            memset(&end[k], 0, sizeof(end[k]));
+            char host[64];
+            strcpy(host, ip[k]);
+            int porta = 7777;
+            char* dp = strchr(host, ':');
+            if (dp) { *dp = 0; porta = atoi(dp + 1); }
+            end[k].sin_family = AF_INET;
+            end[k].sin_port = htons((u_short)porta);
+            if (inet_pton(AF_INET, host, &end[k].sin_addr) != 1) { // nome (ip.servidor.com): resolve
+                addrinfo hints = {0}, *res = NULL;
+                hints.ai_family = AF_INET; hints.ai_socktype = SOCK_DGRAM;
+                if (getaddrinfo(host, NULL, &hints, &res) == 0 && res) {
+                    end[k].sin_addr = ((sockaddr_in*)res->ai_addr)->sin_addr;
+                    freeaddrinfo(res);
+                } else { resp[k] = -1; continue; } // nome que nao resolve = sem resposta
+            }
+            memcpy(pac[k], "SAMP", 4);
+            memcpy(pac[k] + 4, &end[k].sin_addr.s_addr, 4);
+            pac[k][8] = (unsigned char)(porta & 0xFF);
+            pac[k][9] = (unsigned char)(porta >> 8);
+            pac[k][10] = 'i';
+        }
+        for (int tent = 0; tent < 2 && gRodando; tent++) { // UDP perde pacote a toa: 2 tentativas
+            for (int k = 0; k < n; k++) if (resp[k] == 0) {
+                QueryPerformanceCounter(&t0[k]);
+                sendto(sk, (char*)pac[k], 11, 0, (sockaddr*)&end[k], sizeof(end[k]));
+            }
+            DWORD fim = GetTickCount() + (tent == 0 ? 900 : 1100);
+            while ((int)(fim - GetTickCount()) > 0) {
+                fd_set fs; FD_ZERO(&fs); FD_SET(sk, &fs);
+                timeval tv = { 0, 50000 };
+                if (select(0, &fs, NULL, NULL, &tv) <= 0) continue;
+                unsigned char buf[600];
+                sockaddr_in de; int deTam = sizeof(de);
+                int r = recvfrom(sk, (char*)buf, sizeof(buf), 0, (sockaddr*)&de, &deTam);
+                if (r < 16 || memcmp(buf, "SAMP", 4) != 0 || buf[10] != 'i') continue;
+                LARGE_INTEGER t1; QueryPerformanceCounter(&t1);
+                for (int k = 0; k < n; k++) { // so vale a resposta do proprio servidor
+                    if (resp[k] != 0 || de.sin_addr.s_addr != end[k].sin_addr.s_addr || de.sin_port != end[k].sin_port) continue;
+                    const unsigned char* p = buf + 11;
+                    pw[k] = p[0] ? 1 : 0;
+                    onl[k] = p[1] | (p[2] << 8);
+                    maxp[k] = p[3] | (p[4] << 8);
+                    ms[k] = (int)(((t1.QuadPart - t0[k].QuadPart) * 1000 + qf.QuadPart / 2) / qf.QuadPart);
+                    resp[k] = 1;
+                    break;
+                }
+            }
+        }
+        EnterCriticalSection(&gLock);
+        if (ger == gPubGeracao) {
+            for (int k = 0; k < n; k++) {
+                SrvPub& sp = gPub[idx[k]];
+                if (_stricmp(sp.ip, ip[k]) != 0) continue;
+                if (resp[k] == 1) { sp.ping = ms[k]; sp.on = onl[k]; sp.maxp = maxp[k]; sp.pw = pw[k]; sp.falhas = 0; }
+                else if (++sp.falhas >= 2) sp.ping = -2;       // 2 rodadas seguidas (4 pacotes) sem resposta: cinza
+                else sp.consultaT = GetTickCount() - 50000;    // 1a falha pode ser pacote perdido: tenta de novo em ~10 s
+            }
+        }
+        LeaveCriticalSection(&gLock);
+        InterlockedIncrement(&gPubVivoVer);
+        gUltimaAtividade = GetTickCount(); // acorda o desenho preguicoso
+    }
+    closesocket(sk);
     return 0;
 }
 
@@ -3488,6 +3981,13 @@ static int CmpFav(const void* A, const void* B) {
     }
     return gOrdAsc ? r : -r;
 }
+// servidor SA-MP 0.3.DL costuma recusar o cliente 0.3.7 (quem decide e o proprio servidor; o open.mp aceita os dois
+// por padrao e o cliente DL entra nos 0.3.7). So AVISA: a versao fica vermelha e o Jogar conecta mesmo assim (12/10)
+static bool VersaoNaoCombina(const SrvPub& s) {
+    if (s.omp || !strstr(s.ver, "DL") || gDataSel < 0 || gDataSel >= gNumDatas) return false;
+    return strncmp(gDatas[gDataSel].versao, "0.3.7", 5) == 0; // build desconhecido ("SA-MP ?") nao avisa
+}
+
 static int CmpPub(const void* A, const void* B) {
     const SrvPub& a = gPub[*(const int*)A];
     const SrvPub& b = gPub[*(const int*)B];
@@ -3495,7 +3995,9 @@ static int CmpPub(const void* A, const void* B) {
     switch (gOrdCol) {
     case 0: r = _stricmp(a.nome, b.nome); break;
     case 1: r = _stricmp(a.modo, b.modo); break;
-    default: r = a.on - b.on; break;  // jogadores/ping: na internet ordena por lotacao
+    case 3: { bool va = a.ping >= 0, vb = b.ping >= 0; if (va != vb) return va ? -1 : 1; r = a.ping - b.ping; break; } // sem ping: sempre no fim
+    case 4: r = _stricmp(a.ver, b.ver); break;
+    default: r = a.on - b.on; break;  // jogadores (ao vivo quando ja respondeu)
     }
     return gOrdAsc ? r : -r;
 }
@@ -4958,6 +5460,98 @@ static bool LinhaFiltro(const char* rot, bool* v) {
     return cl;
 }
 
+// estrela de 5 pontas (a "star" do Lucide, que nao esta no recorte da fonte de icones): contorno ou cheia
+static void Estrela(ImDrawList* d, ImVec2 c, float r, ImU32 cor, bool cheia) {
+    ImVec2 p[10];
+    for (int i = 0; i < 10; i++) {
+        float a = -1.5707963f + i * 0.62831853f;
+        float rr = (i & 1) ? r * 0.48f : r;
+        p[i] = ImVec2(c.x + cosf(a) * rr, c.y + sinf(a) * rr);
+    }
+    if (cheia) for (int i = 0; i < 10; i++) d->AddTriangleFilled(c, p[i], p[(i + 1) % 10], cor);
+    d->AddPolyline(p, 10, cor, ImDrawFlags_Closed, 1.2f);
+}
+// o "panel-right-close" do Lucide (a fonte de icones nao tem): moldura, divisoria a direita e a seta indo pra ela
+static void IconeRecolherPainel(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.0f * e * 1.25f;
+    d->AddRect(ImVec2(ox + 3 * e, oy + 3 * e), ImVec2(ox + 21 * e, oy + 21 * e), cor, 2.5f * e, 0, w);
+    d->AddLine(ImVec2(ox + 15 * e, oy + 3 * e), ImVec2(ox + 15 * e, oy + 21 * e), cor, w);
+    d->PathLineTo(ImVec2(ox + 8 * e, oy + 9 * e)); d->PathLineTo(ImVec2(ox + 11 * e, oy + 12 * e));
+    d->PathLineTo(ImVec2(ox + 8 * e, oy + 15 * e)); d->PathStroke(cor, 0, w);
+}
+// o "users" do Lucide, desenhado: uma pessoa na frente e o contorno da outra atras
+static void IconePessoas(ImDrawList* d, ImVec2 c, ImU32 cor, float tam) {
+    const float e = tam / 24.0f, ox = c.x - 12.0f * e, oy = c.y - 12.0f * e, w = 2.0f * e * 1.25f;
+    d->AddCircle(ImVec2(ox + 9 * e, oy + 7 * e), 4.0f * e, cor, 20, w);
+    d->PathLineTo(ImVec2(ox + 16 * e, oy + 21 * e)); d->PathLineTo(ImVec2(ox + 16 * e, oy + 19 * e));
+    d->PathArcTo(ImVec2(ox + 12 * e, oy + 19 * e), 4 * e, 0.0f, -1.5708f, 8);
+    d->PathLineTo(ImVec2(ox + 6 * e, oy + 15 * e));
+    d->PathArcTo(ImVec2(ox + 6 * e, oy + 19 * e), 4 * e, -1.5708f, -3.1416f, 8);
+    d->PathLineTo(ImVec2(ox + 2 * e, oy + 21 * e));
+    d->PathStroke(cor, 0, w);
+    d->PathLineTo(ImVec2(ox + 22 * e, oy + 21 * e)); d->PathLineTo(ImVec2(ox + 22 * e, oy + 19 * e));
+    d->PathArcTo(ImVec2(ox + 18 * e, oy + 19 * e), 4 * e, 0.0f, -1.318f, 6); d->PathStroke(cor, 0, w);
+    d->PathArcTo(ImVec2(ox + 15 * e, oy + 7 * e), 4 * e, -1.318f, 1.318f, 10); d->PathStroke(cor, 0, w);
+}
+// entrada suave de um painel: multiplica o alfa e empurra em x os vertices de uma faixa da draw list
+static void AplicarEntrada(ImDrawList* d, int v0, float alfa, float dx) {
+    for (int v = v0; v < d->VtxBuffer.Size; v++) {
+        ImDrawVert& vt = d->VtxBuffer[v];
+        vt.pos.x += dx;
+        unsigned a = (vt.col >> IM_COL32_A_SHIFT) & 0xFF;
+        vt.col = (vt.col & ~IM_COL32_A_MASK) | ((ImU32)(a * alfa) << IM_COL32_A_SHIFT);
+    }
+}
+// 1204 -> "1.204"
+static void Milhar(int v, char* out, int sz) {
+    char t[16];
+    sprintf(t, "%d", v < 0 ? -v : v);
+    int n = (int)strlen(t), w = 0;
+    if (v < 0 && w < sz - 1) out[w++] = '-';
+    for (int i = 0; i < n && w < sz - 2; i++) {
+        if (i && (n - i) % 3 == 0) out[w++] = '.';
+        out[w++] = t[i];
+    }
+    out[w] = 0;
+}
+
+// pilula de filtro (aba Internet): marcada = fundo e contorno no accent. Devolve true no clique
+static bool Pilula(const char* id, const char* rot, bool marcada, ImVec2 pos) {
+    ImVec2 tsz = ImGui::CalcTextSize(rot);
+    ImGui::SetCursorPos(pos);
+    bool cl = ImGui::InvisibleButton(id, ImVec2(tsz.x + 26.0f, 30.0f));
+    ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+    bool hov = ImGui::IsItemHovered();
+    ImDrawList* d = ImGui::GetWindowDrawList();
+    const Accent& ac = AccentAtual();
+    d->AddRectFilled(a, b, marcada ? ComAlpha(ac.cor, 0.16f) : (hov ? Tk::Realce : Cinza(255, 6)), 15.0f);
+    d->AddRect(a, b, marcada ? ac.cor : (hov ? Tk::Linha3 : Tk::Linha2), 15.0f, 0, 1.0f);
+    d->AddText(ImVec2(floorf(a.x + 13.0f), floorf((a.y + b.y - tsz.y) * 0.5f)), (marcada || hov) ? Tk::Texto : Tk::Texto2, rot);
+    return cl;
+}
+// fileira de pilulas que quebra linha em wMax; desenhar = false so mede. Devolve a altura usada.
+// unico != NULL: escolha unica (indice); senao 'mascara' = bits marcados (varias, nunca nenhuma)
+static float Pilulas(const char* id, const char* const* rot, int n, int* unico, int* mascara, float x0, float y0, float wMax,
+                     bool desenhar, bool* mudou) {
+    float x = x0, y = y0;
+    for (int k = 0; k < n; k++) {
+        float w = ImGui::CalcTextSize(rot[k]).x + 26.0f;
+        if (x > x0 && x + w > x0 + wMax) { x = x0; y += 38.0f; }
+        if (desenhar) {
+            char idk[40];
+            _snprintf(idk, sizeof(idk) - 1, "##%s%d", id, k); idk[sizeof(idk) - 1] = 0;
+            bool marc = unico ? (*unico == k) : ((*mascara >> k) & 1) != 0;
+            if (Pilula(idk, rot[k], marc, ImVec2(x, y))) {
+                if (unico) *unico = k;
+                else { *mascara ^= (1 << k); if (!*mascara) *mascara = 1 << k; }
+                if (mudou) *mudou = true;
+            }
+        }
+        x += w + 8.0f;
+    }
+    return y - y0 + 30.0f;
+}
+
 // minimizar e fechar como no mockup (.tk-icone-topo): quadrados de 38 com canto 8, icone cinza claro que
 // acende no hover, com uma linha fina separando do resto do topo
 static void BotaoJanela(ImDrawList* dl, HWND hwnd) {
@@ -5078,6 +5672,68 @@ static void IconeNav(ImDrawList* dl, ImVec2 c, int tipo, ImU32 cor) {
     if (tipo >= 0 && tipo < 7) Icone(dl, c, GL[tipo], cor, 21.0f);
 }
 
+// ===== teclado: Tab troca a aba do trilho; nas grades e listas as setas movem o foco e o Enter escolhe =====
+// Foco por aba (indice do item; -1 = nenhum). O anel so aparece depois de usar as setas e some quando o
+// mouse mexe; o mouse leva o foco junto, entao o Enter vale tambem para o card que esta embaixo dele.
+static int  gFoco[7] = { -1, -1, -1, -1, -1, -1, -1 };
+static bool gFocoVisivel = false;
+static int  gFocoRolar = 0;      // quadros em que a grade ainda rola ate o foco (a lista de servidores move depois de desenhar)
+static bool gTeclaLivre = false; // calculado no inicio do quadro: sem campo de texto, popup ou painel por cima
+static bool gEnter = false;      // Enter apertado neste quadro, com o teclado livre
+
+static void IrParaAba(int i) { // o mesmo que clicar no icone do trilho
+    gTela = i;
+    if (i == 5) { // abriu a aba mods: a bolinha do icone some; os cards publicados
+        gModsNovo = false; // depois da ultima visita ainda mostram a bolinha deles
+        gModsVistoAteOrdem = gModsUltimoOrdem;
+        if (gModsEstado == 0) RodarThread(ThreadMods, NULL);
+    }
+}
+
+// setas numa grade de n itens (lista: porLinha 1 e so cima/baixo). A primeira seta so acende o foco
+// (no 'inicial' se ainda nao ha nenhum); as seguintes andam. Devolve o foco novo.
+static int MoverFoco(int f, int n, int porLinha, int inicial, bool soVertical = false) {
+    if (!gTeclaLivre || n <= 0) return f;
+    int d = 0;
+    if (ImGui::IsKeyPressed(ImGuiKey_DownArrow)) d = porLinha;
+    else if (ImGui::IsKeyPressed(ImGuiKey_UpArrow)) d = -porLinha;
+    else if (!soVertical && ImGui::IsKeyPressed(ImGuiKey_RightArrow)) d = 1;
+    else if (!soVertical && ImGui::IsKeyPressed(ImGuiKey_LeftArrow)) d = -1;
+    if (!d) return f;
+    if (f < 0 || f >= n) f = (inicial >= 0 && inicial < n) ? inicial : 0;
+    else if (gFocoVisivel) {
+        int nf = f + d;
+        if (nf >= n && d > 1 && f / porLinha < (n - 1) / porLinha) nf = n - 1; // desce para a ultima fileira, mais curta
+        if (nf >= 0 && nf < n) f = nf;
+    }
+    gFocoVisivel = true;
+    gFocoRolar = 2;
+    return f;
+}
+
+// o anel do foco do teclado: branco, por dentro do card (por fora ele seria cortado na borda da grade)
+static void AnelFoco(ImDrawList* d, ImVec2 a, ImVec2 b, float raio) {
+    d->AddRect(ImVec2(a.x + 2.0f, a.y + 2.0f), ImVec2(b.x - 2.0f, b.y - 2.0f), Cinza(255, 235), raio > 2.0f ? raio - 2.0f : 0.0f, 0, 2.0f);
+}
+
+// rola o minimo para o item com o foco aparecer inteiro (na janela/child atual)
+static void RolarAte(ImVec2 a, ImVec2 b) {
+    float wy = ImGui::GetWindowPos().y, wh = ImGui::GetWindowSize().y, sy = ImGui::GetScrollY();
+    if (a.y < wy) ImGui::SetScrollY(sy - (wy - a.y) - 4.0f);
+    else if (b.y > wy + wh) ImGui::SetScrollY(sy + (b.y - (wy + wh)) + 4.0f);
+}
+
+// item i da aba t: o mouse em cima (mexendo) leva o foco; true = o anel aparece nele
+static bool FocoNoItem(int t, int i, bool hov) {
+    ImGuiIO& io = ImGui::GetIO();
+    if (hov && (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f)) gFoco[t] = i;
+    return gFocoVisivel && gFoco[t] == i;
+}
+// Enter escolhe o item i: o do anel ou o que esta embaixo do mouse
+static bool EnterNoItem(int t, int i, bool hov) {
+    return gEnter && gFoco[t] == i && (gFocoVisivel || hov);
+}
+
 static void DesenhaUI(HWND hwnd) {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 ds = io.DisplaySize;
@@ -5110,6 +5766,24 @@ static void DesenhaUI(HWND hwnd) {
     // atalhos de teclado (fora de campos de texto e sem popup aberto)
     {
         bool algumPopup = ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel);
+        // teclado "livre" para Tab, setas e Enter: nada por cima da tela (popups, contas, filtros, conectando)
+        gTeclaLivre = !algumPopup && !io.WantTextInput && !io.KeyCtrl && !io.KeyAlt && !gConectando && !gPedirSenha &&
+                      !gBoasVindas && !gAttPopup && !gAddIpAbrir && gEditSrv < 0 && gRenomear < 0 && gFotoVista < 0 &&
+                      !gEscolherAvatar && gContasAnim <= 0.01f && !gFiltrosAberto;
+        gEnter = gTeclaLivre && (ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false));
+        static int telaFoco = -1; // trocou de aba: o foco do teclado recomeca
+        if (gTela != telaFoco) { telaFoco = gTela; for (int k = 0; k < 7; k++) gFoco[k] = -1; gFocoVisivel = false; }
+        if (io.MouseDelta.x != 0.0f || io.MouseDelta.y != 0.0f) gFocoVisivel = false; // o mouse manda: o anel some
+        if (gTabPedido) { // Tab / Shift+Tab: a aba seguinte (ou a anterior) do trilho, na ordem dele
+            static const int ORDEM[6] = { 0, 1, 2, 4, 5, 3 };
+            if (gTeclaLivre) {
+                int p = -1;
+                for (int k = 0; k < 6; k++) if (ORDEM[k] == gTela) p = k;
+                p = (gTabPedido > 0) ? (p + 1) % 6 : (p <= 0 ? 5 : p - 1); // da aba Informacoes: Tab vai ao Inicio
+                IrParaAba(ORDEM[p]);
+            }
+            gTabPedido = 0;
+        }
         if (!algumPopup && !io.WantTextInput) {
             if (io.KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_F)) { gTela = 1; gFocarBusca = true; } // buscar
             if (ImGui::IsKeyPressed(ImGuiKey_F5)) { // atualizar o que estiver na tela
@@ -5267,6 +5941,18 @@ static void DesenhaUI(HWND hwnd) {
         // links do servidor. Medidas do mockup x 1,11.
         const float XL = RAIL_W + 44.0f, XR = ds.x - 44.0f, WCont = XR - XL;
         const float GAPV = 13.3f; // o gap de 12 do bloco do servidor
+        // jogadores online do servidor escolhido: o painel de vidro da direita so existe quando o servidor manda a lista
+        static bool jogThread = false;
+        if (!jogThread) { jogThread = true; RodarThread(ThreadJogadores, NULL); }
+        static JogadorOn jogLoc[128];
+        int nJogLoc = 0;
+        EnterCriticalSection(&gLock);
+        if (gJogEstado == 1 && _stricmp(gJogIp, sSel.ip) == 0) { nJogLoc = gNumJog; memcpy(jogLoc, gJog, nJogLoc * sizeof(JogadorOn)); }
+        LeaveCriticalSection(&gLock);
+        if (nJogLoc > 1) qsort(jogLoc, nJogLoc, sizeof(JogadorOn), [](const void* a, const void* b) {
+            return ((const JogadorOn*)b)->score - ((const JogadorOn*)a)->score; }); // maior score primeiro
+        const float JW = 300.0f, jx1 = XR, jx0 = XR - JW;
+        const bool painelJog = nJogLoc > 0 && jx0 > XL + 560.0f; // janela estreita: o painel nao briga com o bloco do servidor
         // slide estilo Rockstar: ao ENTRAR na home ou TROCAR de servidor, o bloco do servidor desliza um tico
         {
             static int telaAnt = -9, selAnt = -9;
@@ -5284,6 +5970,7 @@ static void DesenhaUI(HWND hwnd) {
         const float hAba = 56.0f;                      // fio + meta + nome
         const float yAbas = ds.y - 33.0f - hAba;
         const float yFav = yAbas - 4.4f - 15.0f;       // linha "FAVORITOS ... Todos os servidores"
+        const float jy0 = TOPO_H + 22.0f, jy1 = yFav - 36.0f; // painel de jogadores: abaixo do topo, com folga do "Todos os servidores"
         const float hBotoes = 11.0f + 53.0f;           // padding-top + Jogar (48 no mockup)
         float hNome = 42.5f;                           // 38 px com line-height 1,12
         float lhLogo = 0, lwLogo = 0;
@@ -5317,7 +6004,7 @@ static void DesenhaUI(HWND hwnd) {
             dl->AddImage((ImTextureID)sSel.texLogo, ImVec2(hx, y), ImVec2(hx + lwLogo, y + lhLogo));
         } else {
             ImGui::PushFont(gFtDisplay);
-            ImGui::PushClipRect(ImVec2(hx, y - 4), ImVec2(XR, y + hNome + 6), true);
+            ImGui::PushClipRect(ImVec2(hx, y - 4), ImVec2(painelJog ? (gJogRecolhido ? XR - 110.0f : jx0 - 24.0f) : XR, y + hNome + 6), true); // nome longo nao entra no painel
             dl->AddText(ImVec2(hx - 1.0f, y), Tk::Texto, nomeSel);
             ImGui::PopClipRect();
             ImGui::PopFont();
@@ -5396,7 +6083,7 @@ static void DesenhaUI(HWND hwnd) {
             ImVec2 jsz = ImGui::CalcTextSize(T("Jogar"));
             dl->AddText(ImVec2(tx + 15.5f + 11.0f, ty - jsz.y * 0.5f), ctJ, T("Jogar"));
             ImGui::PopFont();
-            if (clicou && !gConectando) IniciarConexao(nomeSel, sSel.ip);
+            if ((clicou || gEnter) && !gConectando) IniciarConexao(nomeSel, sSel.ip); // Enter = Jogar
             float sx = b.x + 11.0f;
             ImGui::PushFont(gFtBotaoPost);
             for (int q = 0; q < 4; q++) {
@@ -5538,8 +6225,10 @@ static void DesenhaUI(HWND hwnd) {
         }
         ImGui::SetCursorPos(ImVec2(gNumSrv * (wAba + GAPA) - GAPA, 2.0f));
         ImGui::Dummy(ImVec2(1, 1)); // estende a area de rolagem ate a ultima aba
-        // a roda rola a fileira de QUALQUER lugar da Home (menos com modal/dropdown aberto)
-        if (gNumSrv > 5 && io.MouseWheel != 0 && gContasAnim <= 0.01f && !gConectando &&
+        // a roda rola a fileira de QUALQUER lugar da Home (menos com modal/dropdown aberto e em cima do painel de
+        // jogadores, que rola a lista dele - antes os dois rolavam juntos, 12/10)
+        bool rodaNoPainel = painelJog && !gJogRecolhido && ImGui::IsMouseHoveringRect(ImVec2(jx0, jy0), ImVec2(jx1, jy1), false);
+        if (gNumSrv > 5 && io.MouseWheel != 0 && gContasAnim <= 0.01f && !gConectando && !rodaNoPainel &&
             !ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId | ImGuiPopupFlags_AnyPopupLevel))
             ImGui::SetScrollX(ImGui::GetScrollX() - io.MouseWheel * (wAba + GAPA));
         // a aba escolhida fica sempre a vista
@@ -5565,9 +6254,177 @@ static void DesenhaUI(HWND hwnd) {
                 if (temAntes) Icone(fgR, ImVec2(XL - 22.0f, yAbas + hAba * 0.5f), I_SETA_ESQ, Tk::Texto3, 18.0f);
             }
         }
+        // ---- JOGADORES ONLINE (12/10): vidro igual ao menu lateral aberto, entre o topo e os FAVORITOS ----
+        // Aparece sozinho (sem botao, sem fechar). Marcados (online) no topo, depois voce e o resto, por score
+        // entrada suave (pedido): espera ~1 s e surge no lugar, so no alfa (deslizar de lado ele nao quis)
+        static float jogEspera = 0.0f, jogAnim = 0.0f;
+        static int jogQuadro = -9;
+        const bool painelOk = painelJog && jy1 - jy0 > 180.0f;
+        if (painelOk) {
+            if (ImGui::GetFrameCount() - jogQuadro > 1) { jogEspera = 0.9f; jogAnim = 0.0f; } // acabou de aparecer
+            jogQuadro = ImGui::GetFrameCount();
+            if (jogEspera > 0.0f) jogEspera -= dt;
+            else { jogAnim += dt / 0.7f; if (jogAnim > 1.0f) jogAnim = 1.0f; }
+        }
+        // recolher (12/10): a lista vira uma pilula "pessoas + numero" no canto de cima, em 0,3 s; vale pra todos
+        static float jogAbre = -1.0f; // 0 = pilula .. 1 = lista aberta
+        if (jogAbre < 0.0f) jogAbre = gJogRecolhido ? 0.0f : 1.0f;
+        const float alvoAbre = gJogRecolhido ? 0.0f : 1.0f;
+        if (jogAbre < alvoAbre) { jogAbre += dt / 0.3f; if (jogAbre > alvoAbre) jogAbre = alvoAbre; }
+        else if (jogAbre > alvoAbre) { jogAbre -= dt / 0.3f; if (jogAbre < alvoAbre) jogAbre = alvoAbre; }
+        gJogAnimando = painelOk && (jogAnim < 1.0f || jogAbre != alvoAbre);
+        if (painelOk && jogEspera <= 0.0f) {
+            const float eJ = jogAnim * jogAnim * (3.0f - 2.0f * jogAnim); // smoothstep: comeca e termina macio
+            const float eA = jogAbre * jogAbre * (3.0f - 2.0f * jogAbre);
+            const int vtxJog0 = dl->VtxBuffer.Size;
+            char nPil[16];
+            sprintf(nPil, "%d", nJogLoc);
+            ImGui::PushFont(gFtBold);
+            const ImVec2 numSz = ImGui::CalcTextSize(nPil);
+            ImGui::PopFont();
+            const float wPil = 14.0f + 16.0f + 8.0f + numSz.x + 15.0f, hPil = 34.0f;
+            // a caixa vai da pilula (canto de cima, a direita) ate o painel inteiro
+            ImVec2 pA((jx1 - wPil) + (jx0 - (jx1 - wPil)) * eA, jy0), pB(jx1, jy0 + hPil + (jy1 - jy0 - hPil) * eA);
+            const float raio = 17.0f + (12.0f - 17.0f) * eA;
+            if (VidroGarantir()) {
+                dl->AddCallback(CbVidro, NULL);
+                dl->AddImageRounded((ImTextureID)gVidroTex[3], pA, pB, ImVec2(pA.x / ds.x, pA.y / ds.y), ImVec2(pB.x / ds.x, pB.y / ds.y),
+                                    IM_COL32_WHITE, raio);
+                dl->AddRectFilled(pA, pB, IM_COL32(11, 11, 12, 230), raio); // o mesmo veu do menu aberto
+            } else dl->AddRectFilled(pA, pB, Tk::Fundo, raio);
+            dl->AddRect(pA, pB, Tk::Linha, raio, 0, 1.0f);
+            if (eA <= 0.001f) { // recolhido: a pilula abre a lista de novo
+                ImGui::SetCursorScreenPos(pA);
+                bool clP = ImGui::InvisibleButton("##pilulajog", ImVec2(pB.x - pA.x, pB.y - pA.y));
+                bool hP = ImGui::IsItemHovered();
+                if (hP) dl->AddRectFilled(pA, pB, Cinza(255, 12), raio);
+                const float cyP = (pA.y + pB.y) * 0.5f;
+                IconePessoas(dl, ImVec2(pA.x + 14.0f + 8.0f, cyP), hP ? Tk::Texto : Tk::Texto2, 16.0f);
+                ImGui::PushFont(gFtBold);
+                dl->AddText(ImVec2(pA.x + 14.0f + 16.0f + 8.0f, floorf(cyP - numSz.y * 0.5f)), hP ? Tk::Texto : Tk::Texto2, nPil);
+                ImGui::PopFont();
+                Dica(T("Jogadores online"));
+                if (clP) { gJogRecolhido = false; SalvarConfig(); }
+            }
+            if (eA >= 0.999f) { // aberto: cabecalho, busca e a lista
+                TextoMicro(dl, ImVec2(jx0 + 18.0f, jy0 + 18.0f), Tk::Texto3, T("J O G A D O R E S   O N L I N E"), 0.3f);
+                {   // recolher: o icone no canto do cabecalho (vira a pilula)
+                    ImGui::SetCursorScreenPos(ImVec2(jx1 - 40.0f, jy0 + 11.0f));
+                    bool clR = ImGui::InvisibleButton("##recolherjog", ImVec2(26, 26));
+                    bool hR = ImGui::IsItemHovered();
+                    ImVec2 ra = ImGui::GetItemRectMin(), rb = ImGui::GetItemRectMax();
+                    if (hR) dl->AddRectFilled(ra, rb, Cinza(255, 16), 6.0f);
+                    IconeRecolherPainel(dl, ImVec2((ra.x + rb.x) * 0.5f, (ra.y + rb.y) * 0.5f), hR ? Tk::Texto : Tk::Texto3, 15.0f);
+                    Dica(T("Recolher"));
+                    if (clR) { gJogRecolhido = true; SalvarConfig(); }
+                }
+                static char buscaJog[32] = "";
+                ImGui::SetCursorScreenPos(ImVec2(jx0 + 12.0f, jy0 + 42.0f));
+                ImGui::PushFont(gFtMono); // o padrao da busca de servidores: mesma fonte, mesmo campo e a lupa no canto
+                ImGui::PushItemWidth(JW - 24.0f);
+                ImGui::InputTextWithHint("##buscajog", T("Buscar jogador..."), buscaJog, sizeof(buscaJog));
+                ImGui::PopItemWidth();
+                {
+                    ImVec2 ba2 = ImGui::GetItemRectMin(), bb2 = ImGui::GetItemRectMax();
+                    float lcx = bb2.x - 24, lcy = (ba2.y + bb2.y) * 0.5f - 2;
+                    dl->AddCircle(ImVec2(lcx, lcy), 5.5f, Cinza(125), 16, 1.7f);
+                    dl->AddLine(ImVec2(lcx + 4.2f, lcy + 4.2f), ImVec2(lcx + 8.5f, lcy + 8.5f), Cinza(125), 1.7f);
+                }
+                ImGui::PopFont();
+                const float yLista = ImGui::GetItemRectMax().y + 8.0f;
+                // ordem: marcados que estao online, voce, o resto (jogLoc ja vem por score)
+                char qJ[40];
+                Normalizar(buscaJog, qJ, sizeof(qJ));
+                int ordem[128], nOrd = 0, nMarc = 0;
+                for (int pass = 0; pass < 3; pass++) {
+                    for (int k = 0; k < nJogLoc; k++) {
+                        bool eu = _stricmp(jogLoc[k].nick, gNick) == 0;
+                        bool marc = !eu && NickMarcado(jogLoc[k].nick);
+                        if ((pass == 0 && !marc) || (pass == 1 && !eu) || (pass == 2 && (eu || marc))) continue;
+                        if (qJ[0]) { char nn[32]; Normalizar(jogLoc[k].nick, nn, sizeof(nn)); if (!strstr(nn, qJ)) continue; }
+                        ordem[nOrd++] = k;
+                        if (pass == 0) nMarc++;
+                    }
+                }
+                ImGui::SetCursorScreenPos(ImVec2(jx0 + 6.0f, yLista));
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 0));
+                ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarSize, 4.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 2));
+                ImGui::BeginChild("##jogadores", ImVec2(JW - 12.0f, jy1 - 8.0f - yLista), false);
+                ImDrawList* jl = ImGui::GetWindowDrawList();
+                const float wL = ImGui::GetContentRegionAvail().x;
+                for (int o = 0; o < nOrd; o++) {
+                    if (nMarc > 0 && (o == 0 || o == nMarc)) { // titulos dos grupos (sem marcados, a lista e uma so)
+                        ImVec2 tp = ImGui::GetCursorScreenPos();
+                        TextoMicro(jl, ImVec2(tp.x + 10.0f, tp.y + (o == 0 ? 4.0f : 10.0f)), Tk::Texto3,
+                                   o == 0 ? T("M A R C A D O S") : T("T O D O S"), 0.3f);
+                        ImGui::Dummy(ImVec2(wL, o == 0 ? 22.0f : 28.0f));
+                    }
+                    const JogadorOn& j = jogLoc[ordem[o]];
+                    bool eu = _stricmp(j.nick, gNick) == 0;
+                    bool marc = !eu && NickMarcado(j.nick);
+                    ImGui::PushID(j.nick);
+                    ImVec2 rA = ImGui::GetCursorScreenPos(), rB(rA.x + wL, rA.y + 44.0f);
+                    ImGui::Dummy(ImVec2(wL, 44.0f));
+                    bool hovR = ImGui::IsItemHovered();
+                    if (hovR) jl->AddRectFilled(rA, rB, Cinza(255, 14), 7.0f);
+                    ImGui::PushFont(gFtBold);
+                    jl->AddText(ImVec2(rA.x + 10.0f, rA.y + 5.0f), eu ? AC.cor : Tk::Texto, j.nick);
+                    float wNick = ImGui::CalcTextSize(j.nick).x;
+                    ImGui::PopFont();
+                    ImGui::PushFont(gFtMini);
+                    if (eu) jl->AddText(ImVec2(rA.x + 10.0f + wNick + 6.0f, rA.y + 7.0f), Tk::Texto3, T("você"));
+                    char scN[24], lin[48], pg[16];
+                    Milhar(j.score, scN, sizeof(scN));
+                    _snprintf(lin, sizeof(lin) - 1, "Score %s \xC2\xB7 ", scN); lin[sizeof(lin) - 1] = 0;
+                    jl->AddText(ImVec2(rA.x + 10.0f, rA.y + 24.0f), Tk::Texto3, lin);
+                    float wLin = ImGui::CalcTextSize(lin).x;
+                    sprintf(pg, "%d ms", j.ping);
+                    jl->AddText(ImVec2(rA.x + 10.0f + wLin, rA.y + 24.0f), CorPing(j.ping), pg);
+                    ImGui::PopFont();
+                    if (!eu) { // estrela a direita, so no hover da linha: vazia = marcar; cheia (nos marcados) = desmarcar
+                        ImVec2 e0(rB.x - 36.0f, rA.y + 8.0f);
+                        ImGui::SetCursorScreenPos(e0);
+                        bool clS = ImGui::InvisibleButton("##estrela", ImVec2(28, 28));
+                        bool hovS = ImGui::IsItemHovered();
+                        ImVec2 cE(e0.x + 14.0f, e0.y + 14.0f);
+                        if (marc) { if (hovR || hovS) Estrela(jl, cE, 5.5f, AC.cor, true); }
+                        else if (hovR || hovS) Estrela(jl, cE, 5.5f, hovS ? Tk::Texto2 : Cinza(255, 80), false); // so com o mouse na linha
+                        if (clS) AlternarMarcado(j.nick);
+                        ImGui::SetCursorScreenPos(ImVec2(rA.x, rB.y + 2.0f));
+                    }
+                    ImGui::PopID();
+                }
+                ImGui::Dummy(ImVec2(1, 4));
+                if (eJ < 1.0f) AplicarEntrada(jl, 0, eJ, 0.0f);
+                ImGui::EndChild();
+                ImGui::PopStyleVar(2);
+                ImGui::PopStyleColor();
+            }
+            if (eJ < 1.0f) AplicarEntrada(dl, vtxJog0, eJ, 0.0f);
+        }
     }
     else if (gTela == 1) {
         // ---- SERVIDORES ----
+        // a Internet comeca a baixar (e a ser consultada ao vivo) assim que a aba abre, sem precisar clicar nela (12/10)
+        if (gPubEstado == 0) { gPubEstado = 1; RodarThread(ThreadPublicos, NULL); }
+        static bool pingVivo = false;
+        if (!pingVivo) { pingVivo = true; RodarThread(ThreadPingPub, NULL); }
+        // quantos passam nos filtros e na busca: o numero da aba Internet acompanha. Nos Favoritos, a consulta ao
+        // vivo segue a lista da Internet na ordem dela (na aba Internet ela segue a ordem da tela)
+        int nPubFiltro = 0;
+        if (gPubEstado == 2) {
+            char qB[sizeof(gBusca)];
+            Normalizar(gBusca, qB, sizeof(qB));
+            static int filaF[MAX_PUB];
+            for (int i = 0; i < gNumPub; i++) if (PubPassaFiltros(gPub[i], qB)) filaF[nPubFiltro++] = i;
+            if (gSubAba == 0) {
+                EnterCriticalSection(&gLock);
+                memcpy(gPubFila, filaF, nPubFiltro * sizeof(int));
+                gPubFilaN = nPubFiltro;
+                LeaveCriticalSection(&gLock);
+            }
+        }
         ImGui::SetCursorScreenPos(ImVec2(RAIL_W + 20.0f, 74.0f)); // o x 24 de dentro cai alinhado com a Home
         ImGui::BeginChild("##painel", ImVec2(ds.x - RAIL_W - 40.0f, ds.y - 94.0f), false);
         ImDrawList* pl = ImGui::GetWindowDrawList();
@@ -5579,7 +6436,7 @@ static void DesenhaUI(HWND hwnd) {
         { // Favoritos | Internet: o controle segmentado do site, ao lado do titulo
             char abaF[32], abaI[32];
             _snprintf(abaF, sizeof(abaF) - 1, T("Favoritos (%d)"), gNumSrv); abaF[sizeof(abaF) - 1] = 0;
-            if (gPubEstado == 2) _snprintf(abaI, sizeof(abaI) - 1, T("Internet (%d)"), gNumPub); else strcpy(abaI, "Internet");
+            if (gPubEstado == 2) _snprintf(abaI, sizeof(abaI) - 1, T("Internet (%d)"), nPubFiltro); else strcpy(abaI, "Internet");
             abaI[sizeof(abaI) - 1] = 0;
             const char* rotSub[2] = { abaF, abaI };
             ImGui::PushFont(gFtTitulo);
@@ -5606,6 +6463,11 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::PushItemWidth(wBusca);
         if (gFocarBusca) { ImGui::SetKeyboardFocusHere(); gFocarBusca = false; } // Ctrl+F
         ImGui::InputTextWithHint("##busca", T("Buscar por nome, modo ou IP..."), gBusca, sizeof(gBusca));
+        // na busca: a seta para baixo desce para a lista e o Enter ja escolhe o primeiro resultado
+        bool buscaDesce = ImGui::IsItemActive() && ImGui::IsKeyPressed(ImGuiKey_DownArrow);
+        bool buscaEnter = ImGui::IsItemDeactivated() && gBusca[0] &&
+                          (ImGui::IsKeyPressed(ImGuiKey_Enter, false) || ImGui::IsKeyPressed(ImGuiKey_KeypadEnter, false));
+        if (buscaDesce) ImGui::SetWindowFocus(NULL); // solta o campo: no proximo quadro o teclado ja esta livre
         ImGui::PopItemWidth();
         {   // lupa no canto direito da barra de busca
             ImVec2 ba2 = ImGui::GetItemRectMin(), bb2 = ImGui::GetItemRectMax();
@@ -5625,21 +6487,26 @@ static void DesenhaUI(HWND hwnd) {
             float fcx = (fa.x + fb.x) * 0.5f, fcy = (fa.y + fb.y) * 0.5f;
             ImU32 fc = gFiltrosAberto ? AC.cor : (fh ? Cinza(230) : Cinza(160)); // aberto = funil no accent
             Icone(pl, ImVec2(fcx, fcy), I_FUNIL, fc, 17.0f);
-            if (gOcCheios || gOcSenha || gOcVazios || gOcOff) // badge: tem filtro ativo
+            if (gOcCheios || gOcSenha || gOcVazios || gOcOff ||
+                (gSubAba == 1 && (gFiltroIdioma || gFiltroTipo || gFiltroVersoes != 15))) // badge: tem filtro ativo
                 pl->AddCircleFilled(ImVec2(fb.x - 3, fa.y + 3), 3.5f, AC.cor, 16);
             Dica(T("Filtros da lista"));
         }
         // colunas proporcionais a largura (alinhadas entre header e linhas)
         float wLista = pb.x - pa.x - 48;
         float reserva = (gSubAba == 0) ? 100.0f : 200.0f; // espaco dos botoes a direita
-        float colModo = (wLista - reserva) * 0.42f;
-        float colJog  = (wLista - reserva) * 0.68f;
-        float colPing = (wLista - reserva) * 0.85f;
+        // internet: servidor | modo | jogadores | ping (ao vivo) | versao (so a lista da internet informa)
+        const bool net = (gSubAba == 1);
+        float colModo = (wLista - reserva) * (net ? 0.36f : 0.42f);
+        float colJog  = (wLista - reserva) * (net ? 0.57f : 0.68f);
+        float colPing = (wLista - reserva) * (net ? 0.71f : 0.85f);
+        float colVer  = (wLista - reserva) * 0.84f;
+        if (!net && gOrdCol == 4) gOrdCol = -1; // favorito nao tem versao: volta a ordem original
         // cabecalho clicavel: 1 clique crescente, 2 decrescente, 3 volta a ordem original
         {
-            const char* HC[4] = { "SERVIDOR", "MODO", "JOGADORES", "PING" };
-            float hx4[4] = { 34.0f, 24.0f + colModo, 24.0f + colJog, 24.0f + colPing };
-            int nCols = (gSubAba == 0) ? 4 : 3; // internet nao tem coluna de ping
+            const char* HC[5] = { "SERVIDOR", "MODO", "JOGADORES", "PING", "VERSÃO" };
+            float hx4[5] = { 34.0f, 24.0f + colModo, 24.0f + colJog, 24.0f + colPing, 24.0f + colVer };
+            const int nCols = net ? 5 : 4;
             ImGui::PushFont(gFtMini);
             for (int c = 0; c < nCols; c++) {
                 ImGui::SetCursorPos(ImVec2(hx4[c], 104));
@@ -5665,6 +6532,7 @@ static void DesenhaUI(HWND hwnd) {
         ImGui::BeginChild("##lista", ImVec2(pb.x - pa.x - 48, pb.y - pa.y - 148), false);
         if (gSubAba == 0) {
         int idxs[MAX_SERVIDORES];
+        int visL[MAX_SERVIDORES], nVisL = 0; // as linhas que estao na tela, na ordem dela (para as setas)
         for (int k = 0; k < gNumSrv; k++) idxs[k] = k;
         if (gOrdCol >= 0) qsort(idxs, gNumSrv, sizeof(int), CmpFav);
         for (int k = 0; k < gNumSrv; k++) {
@@ -5679,24 +6547,32 @@ static void DesenhaUI(HWND hwnd) {
             if (gOcCheios && sc.ping >= 0 && sc.maxp > 0 && sc.online >= sc.maxp) continue;
             if (gOcSenha && sc.ping >= 0 && sc.senha) continue;
             if (gOcVazios && sc.ping >= 0 && sc.online == 0) continue;
-            if (gBusca[0]) {
-                char tudo[256];
-                sprintf(tudo, "%s %s %s", nm, md, sc.ip);
-                bool acha = false;
-                for (char* pp = tudo; *pp; pp++) if (_strnicmp(pp, gBusca, strlen(gBusca)) == 0) { acha = true; break; }
-                if (!acha) continue;
+            if (gBusca[0]) { // sem acento e com as palavras em qualquer ordem, como na internet
+                char tudo[256], tudoN[256], qN[sizeof(gBusca)];
+                _snprintf(tudo, sizeof(tudo) - 1, "%s %s %s", nm, md, sc.ip); tudo[sizeof(tudo) - 1] = 0;
+                Normalizar(tudo, tudoN, sizeof(tudoN));
+                Normalizar(gBusca, qN, sizeof(qN));
+                if (!BuscaCasa(tudoN, qN)) continue;
             }
             ImGui::PushID(i);
             ImVec2 la = ImGui::GetCursorScreenPos();
             float wRow = ImGui::GetContentRegionAvail().x;
-            if (ImGui::InvisibleButton("##linha", ImVec2(wRow - 100, 54))) { gSel = i; gTela = 0; }
+            bool clLinha = ImGui::InvisibleButton("##linha", ImVec2(wRow - 100, 54));
+            bool hovLinha = ImGui::IsItemHovered();
+            if (clLinha || EnterNoItem(1, i, hovLinha)) { gSel = i; gTela = 0; } // Enter = o clique: escolhe e volta ao Inicio
             if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) { // botao direito = opcoes do servidor
                 gEditSrv = i;
                 strncpy(gEditApelido, sc.apelido, sizeof(gEditApelido) - 1);
             }
             ImVec2 lb = ImGui::GetItemRectMax();
             ImDrawList* ll = ImGui::GetWindowDrawList();
-            if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Tk::Sup2, 8);
+            visL[nVisL++] = i;
+            bool focoL = FocoNoItem(1, i, hovLinha);
+            if (hovLinha || focoL) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Tk::Sup2, 8);
+            if (focoL) {
+                AnelFoco(ll, la, ImVec2(la.x + wRow, lb.y), 8.0f);
+                if (gFocoRolar) RolarAte(la, ImVec2(la.x + wRow, lb.y));
+            }
             BolaStatus(ll, ImVec2(la.x + 14, la.y + 18), sc.ping, sc.senha); // alinhada ao NOME
             ImGui::PushFont(gFtBold);
             ll->AddText(ImVec2(la.x + 26, la.y + 8), Cinza(240), nm);
@@ -5744,6 +6620,15 @@ static void DesenhaUI(HWND hwnd) {
             ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep.y), ImVec2(la.x + wRow, sep.y), Tk::Linha, 1);
             ImGui::Dummy(ImVec2(0, 3));
         }
+        // setas: sobem e descem na ordem da tela (filtros, busca e ordenacao valem); comecam no servidor escolhido
+        if (nVisL > 0 && buscaDesce) { gFoco[1] = visL[0]; gFocoVisivel = true; gFocoRolar = 2; }
+        else if (nVisL > 0 && buscaEnter) { gSel = visL[0]; gTela = 0; }
+        else {
+            int pos = -1, posSel = 0;
+            for (int k = 0; k < nVisL; k++) { if (visL[k] == gFoco[1]) pos = k; if (visL[k] == gSel) posSel = k; }
+            int np = MoverFoco(pos, nVisL, 1, posSel, true);
+            if (np >= 0 && np < nVisL) gFoco[1] = visL[np];
+        }
         }
         else {
             // ---- INTERNET: lista publica (baixa uma vez, favoritar grava no ini) ----
@@ -5762,27 +6647,27 @@ static void DesenhaUI(HWND hwnd) {
                 static int idxsP[MAX_PUB];
                 static int ordColAnt = -99, nPAnt = -1;
                 static bool ordAscAnt = false;
+                static LONG vivoAnt = -1;
+                static DWORD vivoT = 0;
                 int nP = gNumPub;
-                if (gOrdCol != ordColAnt || gOrdAsc != ordAscAnt || nP != nPAnt) {
-                    // reordena SO quando algo muda (era um qsort de 500 itens POR FRAME)
+                bool porVivo = (gOrdCol == 2 || gOrdCol == 3) && gPubVivoVer != vivoAnt && GetTickCount() - vivoT > 1000;
+                if (gOrdCol != ordColAnt || gOrdAsc != ordAscAnt || nP != nPAnt || porVivo) {
+                    // reordena SO quando algo muda (era um qsort de 500 itens POR FRAME); por ping ou jogadores, tambem
+                    // quando chegam respostas ao vivo (no maximo 1x por segundo, pra lista nao ficar pulando)
                     for (int k = 0; k < nP; k++) idxsP[k] = k;
                     if (gOrdCol >= 0) qsort(idxsP, nP, sizeof(int), CmpPub);
-                    ordColAnt = gOrdCol; ordAscAnt = gOrdAsc; nPAnt = nP;
+                    ordColAnt = gOrdCol; ordAscAnt = gOrdAsc; nPAnt = nP; vivoAnt = gPubVivoVer; vivoT = GetTickCount();
                 }
-                int mostrados = 0;
-                for (int k = 0; k < nP && mostrados < 150; k++) {
+                char qBusca[sizeof(gBusca)];
+                Normalizar(gBusca, qBusca, sizeof(qBusca));
+                static int fila[MAX_PUB];
+                int nFila = 0, mostrados = 0;
+                for (int k = 0; k < nP; k++) {
                     int i = idxsP[k];
                     SrvPub& sp = gPub[i];
-                    if (gOcCheios && sp.maxp > 0 && sp.on >= sp.maxp) continue;
-                    if (gOcSenha && sp.pw) continue;
-                    if (gOcVazios && sp.on == 0) continue;
-                    if (gBusca[0]) {
-                        char tudo[256];
-                        sprintf(tudo, "%s %s %s", sp.nome, sp.modo, sp.ip);
-                        bool acha = false;
-                        for (char* pp = tudo; *pp; pp++) if (_strnicmp(pp, gBusca, strlen(gBusca)) == 0) { acha = true; break; }
-                        if (!acha) continue;
-                    }
+                    if (!PubPassaFiltros(sp, qBusca)) continue;
+                    fila[nFila++] = i;
+                    if (mostrados >= 150) continue; // a tela desenha 150; a consulta ao vivo segue a fila inteira
                     mostrados++;
                     bool jaFav = false;
                     for (int j = 0; j < gNumSrv; j++) if (_stricmp(gSrv[j].ip, sp.ip) == 0) { jaFav = true; break; }
@@ -5793,7 +6678,7 @@ static void DesenhaUI(HWND hwnd) {
                     ImVec2 lb = ImGui::GetItemRectMax();
                     ImDrawList* ll = ImGui::GetWindowDrawList();
                     if (ImGui::IsItemHovered()) ll->AddRectFilled(la, ImVec2(la.x + wRow, lb.y), Tk::Sup2, 8);
-                    BolaStatus(ll, ImVec2(la.x + 14, la.y + 18), 0, sp.pw); // na lista = online; alinhada ao NOME
+                    BolaStatus(ll, ImVec2(la.x + 14, la.y + 18), sp.ping == -2 ? -1 : 0, sp.pw); // cinza = nao respondeu ao vivo
                     ImGui::PushFont(gFtBold);
                     ImGui::PushClipRect(la, ImVec2(la.x + 316, lb.y), true);
                     ll->AddText(ImVec2(la.x + 26, la.y + 8), Cinza(240), sp.nome);
@@ -5809,6 +6694,14 @@ static void DesenhaUI(HWND hwnd) {
                     ll->AddText(ImVec2(la.x + colModo, la.y + 17), Cinza(165), sp.modo);
                     ImGui::PopClipRect();
                     ll->AddText(ImVec2(la.x + colJog, la.y + 17), sp.on > 0 ? Cinza(230) : Cinza(120), col);
+                    char ptP[24];
+                    if (sp.ping >= 0) sprintf(ptP, "%d ms", sp.ping); else strcpy(ptP, "-- ms");
+                    ll->AddText(ImVec2(la.x + colPing, la.y + 17), sp.ping >= 0 ? CorPing(sp.ping) : Cinza(110), ptP);
+                    bool naoCombina = VersaoNaoCombina(sp);
+                    ImGui::PushClipRect(ImVec2(la.x + colVer, la.y), ImVec2(la.x + wRow - 132, lb.y), true);
+                    ll->AddText(ImVec2(la.x + colVer, la.y + 17), naoCombina ? IM_COL32(240, 120, 116, 255) : Cinza(165),
+                                sp.ver[0] ? sp.ver : "--");
+                    ImGui::PopClipRect();
                     ImGui::PopFont();
                     ImGui::SameLine();
                     // marcador (bookmark) de favorito: contorno = favoritar; cheio no accent = salvo
@@ -5828,7 +6721,16 @@ static void DesenhaUI(HWND hwnd) {
                     if (favCl && !jaFav) FavoritarPublico(i);
                     {
                     ImGui::SetCursorScreenPos(ImVec2(la.x + wRow - 78, la.y + 11)); // mesmo y do marcador
-                    if (BotaoPrimario(T("Jogar"), ImVec2(70, 32)) && !gConectando) IniciarConexao(sp.nome, sp.ip, sp.pw);
+                    if (BotaoPrimario(T("Jogar"), ImVec2(70, 32)) && !gConectando) {
+                        if (VersaoNaoCombina(sp)) { // aviso, sem trava: se o servidor nao aceitar a 0.3.7, o jogo diz
+                            char avDL[320];
+                            _snprintf(avDL, sizeof(avDL) - 1, T("Este servidor parece ser 0.3.DL e a data em uso é %s. Se ele recusar, escolha uma data 0.3.DL na aba Datas."),
+                                      gDatas[gDataSel].versao);
+                            avDL[sizeof(avDL) - 1] = 0;
+                            Avisar(avDL);
+                        }
+                        IniciarConexao(sp.nome, sp.ip, sp.pw);
+                    }
                     }
                     ImGui::PopFont();
                     ImGui::PopID();
@@ -5836,12 +6738,46 @@ static void DesenhaUI(HWND hwnd) {
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(la.x, sep2.y), ImVec2(la.x + wRow, sep2.y), Tk::Linha, 1);
                     ImGui::Dummy(ImVec2(0, 3));
                 }
+                EnterCriticalSection(&gLock); // a consulta ao vivo segue a ordem da tela, ja filtrada
+                memcpy(gPubFila, fila, nFila * sizeof(int));
+                gPubFilaN = nFila;
+                LeaveCriticalSection(&gLock);
+                if (nFila == 0) {
+                    ImGui::SetCursorPos(ImVec2(10, 18));
+                    ImGui::PushFont(gFtBody);
+                    ImGui::TextColored(ImColor(Tk::Texto3), "%s", T("Nenhum servidor com esses filtros."));
+                    ImGui::PopFont();
+                } else if (nFila > mostrados) { // o resto fica pra busca e pros filtros
+                    char rodape[220];
+                    _snprintf(rodape, sizeof(rodape) - 1, T("Mostrando %d de %d. Use a busca ou os filtros para achar o resto."), mostrados, nFila);
+                    rodape[sizeof(rodape) - 1] = 0;
+                    ImGui::Dummy(ImVec2(0, 8));
+                    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10);
+                    ImGui::PushFont(gFtMiniLeve);
+                    ImGui::TextColored(ImColor(Tk::Texto3), "%s", rodape);
+                    ImGui::PopFont();
+                    ImGui::Dummy(ImVec2(0, 8));
+                }
             }
         }
         ImGui::EndChild();
         // dropdown de FILTROS, ancorado no funil (por cima da lista)
         if (gFiltrosAberto) {
-            const float FW = 250, FH = 188;
+            // internet: idioma, tipo de jogo e versao em pilulas + os "ocultar" em duas colunas; favoritos: so os "ocultar"
+            const bool netF = (gSubAba == 1);
+            const char* rotIdi[6] = { T("Todos"), "Brasil", "Español", "English", "Русский", "Indonesia" }; // no idioma de cada um
+            const char* rotTipo[7] = { T("Todos"), "Roleplay", "DM/TDM", "Freeroam", T("Stunt/Corrida"), T("Zumbi"), T("Polícia e ladrão") };
+            const char* rotVer[4] = { "0.3.7", "0.3.DL", "open.mp", T("Outras") };
+            const float FW = netF ? 620.0f : 250.0f, PX = 16.0f, WIN = FW - PX * 2.0f, SEC = 26.0f, GAPS = 16.0f;
+            float FH = 188.0f;
+            if (netF) { // altura medida: as pilulas quebram linha conforme o idioma do launcher
+                ImGui::PushFont(gFtBody);
+                FH = 40.0f + SEC + Pilulas("pi", rotIdi, 6, &gFiltroIdioma, NULL, PX, 0, WIN, false, NULL) + GAPS
+                           + SEC + Pilulas("pt", rotTipo, 7, &gFiltroTipo, NULL, PX, 0, WIN, false, NULL) + GAPS
+                           + SEC + Pilulas("pv", rotVer, 4, NULL, &gFiltroVersoes, PX, 0, WIN, false, NULL) + GAPS
+                           + SEC + 36.0f * 2.0f + 12.0f;
+                ImGui::PopFont();
+            }
             ImGui::SetCursorPos(ImVec2(pb.x - pa.x - 24 - FW, 92));
             ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::ColorConvertU32ToFloat4(Tk::Fundo));
             ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 12.0f);
@@ -5852,16 +6788,51 @@ static void DesenhaUI(HWND hwnd) {
             RotuloMicro(T("F I L T R O S"));
             ImGui::PopFont();
             bool fMud = false;
-            ImGui::PushFont(gFtBody);
-            ImGui::SetCursorPos(ImVec2(14, 36));
-            fMud |= LinhaFiltro(T("Ocultar cheios"), &gOcCheios);
-            ImGui::SetCursorPos(ImVec2(14, 72));
-            fMud |= LinhaFiltro(T("Ocultar com senha"), &gOcSenha);
-            ImGui::SetCursorPos(ImVec2(14, 108));
-            fMud |= LinhaFiltro(T("Ocultar vazios"), &gOcVazios);
-            ImGui::SetCursorPos(ImVec2(14, 144));
-            fMud |= LinhaFiltro(T("Ocultar sem resposta"), &gOcOff);
-            ImGui::PopFont();
+            if (netF) {
+                if (gFiltroIdioma || gFiltroTipo || gFiltroVersoes != 15 || gOcCheios || gOcSenha || gOcVazios || gOcOff) {
+                    ImGui::PushFont(gFtMini); // "Limpar filtros" no canto: volta tudo ao padrao
+                    const char* rl = T("Limpar filtros");
+                    ImVec2 lsz = ImGui::CalcTextSize(rl);
+                    ImGui::SetCursorPos(ImVec2(FW - PX - lsz.x - 8.0f, 6.0f));
+                    if (ImGui::InvisibleButton("##limparfiltros", ImVec2(lsz.x + 8.0f, lsz.y + 10.0f))) {
+                        gFiltroIdioma = 0; gFiltroTipo = 0; gFiltroVersoes = 15;
+                        gOcCheios = gOcSenha = gOcVazios = gOcOff = false;
+                        fMud = true;
+                    }
+                    ImVec2 lA = ImGui::GetItemRectMin();
+                    ImGui::GetWindowDrawList()->AddText(ImVec2(lA.x + 4.0f, lA.y + 5.0f), ImGui::IsItemHovered() ? AC.cor : Tk::Texto2, rl);
+                    ImGui::PopFont();
+                }
+                float y = 40.0f;
+                ImGui::PushFont(gFtMini); ImGui::SetCursorPos(ImVec2(PX, y)); RotuloMicro(T("I D I O M A")); ImGui::PopFont();
+                y += SEC;
+                ImGui::PushFont(gFtBody); y += Pilulas("pi", rotIdi, 6, &gFiltroIdioma, NULL, PX, y, WIN, true, &fMud) + GAPS; ImGui::PopFont();
+                ImGui::PushFont(gFtMini); ImGui::SetCursorPos(ImVec2(PX, y)); RotuloMicro(T("T I P O   D E   J O G O")); ImGui::PopFont();
+                y += SEC;
+                ImGui::PushFont(gFtBody); y += Pilulas("pt", rotTipo, 7, &gFiltroTipo, NULL, PX, y, WIN, true, &fMud) + GAPS; ImGui::PopFont();
+                ImGui::PushFont(gFtMini); ImGui::SetCursorPos(ImVec2(PX, y)); RotuloMicro(T("V E R S Ã O")); ImGui::PopFont();
+                y += SEC;
+                ImGui::PushFont(gFtBody); y += Pilulas("pv", rotVer, 4, NULL, &gFiltroVersoes, PX, y, WIN, true, &fMud) + GAPS; ImGui::PopFont();
+                ImGui::PushFont(gFtMini); ImGui::SetCursorPos(ImVec2(PX, y)); RotuloMicro(T("O C U L T A R")); ImGui::PopFont();
+                y += SEC;
+                ImGui::PushFont(gFtBody);
+                ImGui::SetCursorPos(ImVec2(14, y));                     fMud |= LinhaFiltro(T("Ocultar cheios"), &gOcCheios);
+                ImGui::SetCursorPos(ImVec2(14 + WIN * 0.5f, y));        fMud |= LinhaFiltro(T("Ocultar com senha"), &gOcSenha);
+                ImGui::SetCursorPos(ImVec2(14, y + 36));                fMud |= LinhaFiltro(T("Ocultar vazios"), &gOcVazios);
+                ImGui::SetCursorPos(ImVec2(14 + WIN * 0.5f, y + 36));   fMud |= LinhaFiltro(T("Ocultar sem resposta"), &gOcOff);
+                ImGui::PopFont();
+            } else {
+                ImGui::PushFont(gFtBody);
+                ImGui::SetCursorPos(ImVec2(14, 36));
+                fMud |= LinhaFiltro(T("Ocultar cheios"), &gOcCheios);
+                ImGui::SetCursorPos(ImVec2(14, 72));
+                fMud |= LinhaFiltro(T("Ocultar com senha"), &gOcSenha);
+                ImGui::SetCursorPos(ImVec2(14, 108));
+                fMud |= LinhaFiltro(T("Ocultar vazios"), &gOcVazios);
+                ImGui::SetCursorPos(ImVec2(14, 144));
+                fMud |= LinhaFiltro(T("Ocultar sem resposta"), &gOcOff);
+                ImGui::PopFont();
+            }
             if (fMud) SalvarConfig();
             ImGui::EndChild();
             ImGui::PopStyleVar();
@@ -5931,6 +6902,7 @@ static void DesenhaUI(HWND hwnd) {
         }
         float CW = (wGrid - (porLinha - 1) * GAP) / porLinha;
         float CH = CW * 9.0f / 16.0f;
+        gFoco[2] = MoverFoco(gFoco[2], totalCards, porLinha, gDataSel); // setas pela grade; a 1a acende a data em uso
         // ---- reordenar: o destino e a POSICAO entre cards mais perto do mouse, nao "o card
         //      embaixo do mouse". Da pra soltar no vao, em cima do "+" e no fim da grade, e a
         //      barra laranja mostra exatamente onde a data vai cair. Antes so o card de destino
@@ -5965,7 +6937,11 @@ static void DesenhaUI(HWND hwnd) {
             char id[16]; sprintf(id, "##data%d", i);
             bool cl = ImGui::InvisibleButton(id, ImVec2(CW, CH));
             ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
-            bool ch = ImGui::IsItemHovered();
+            bool hovD = ImGui::IsItemHovered();
+            bool fk = FocoNoItem(2, i, hovD);
+            bool enterAqui = EnterNoItem(2, i, hovD);
+            bool ch = hovD || fk; // o foco do teclado acende o card como o hover
+            if (fk && gFocoRolar) RolarAte(ca, cb);
             ImDrawList* wl = ImGui::GetWindowDrawList();
             // arrastar para reordenar (o fantasma completo e desenhado no fim do quadro)
             if (!ehAdd && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceNoPreviewTooltip)) {
@@ -5985,7 +6961,8 @@ static void DesenhaUI(HWND hwnd) {
                 ImVec2 asz = ImGui::CalcTextSize(T("Adicionar data"));
                 wl->AddText(ImVec2(c.x - asz.x * 0.5f, c.y + 26), tra, T("Adicionar data"));
                 ImGui::PopFont();
-                if (cl) gAddData = true;
+                if (fk) AnelFoco(wl, ca, cb, 12);
+                if (cl || enterAqui) gAddData = true;
                 continue;
             }
             DataGta& d = gDatas[i];
@@ -6028,6 +7005,7 @@ static void DesenhaUI(HWND hwnd) {
             }
             ImU32 borda = (i == gDataSel) ? AC.cor : (ch ? Tk::Linha3 : Tk::Linha);
             wl->AddRect(ca, cb, borda, 12, 0, (i == gDataSel) ? 2.0f : 1.0f);
+            if (fk) AnelFoco(wl, ImVec2(ca.x + 1, ca.y + 1), ImVec2(cb.x - 1, cb.y - 1), 11); // dentro da borda laranja da em uso
             if (i == gDataSel) { // selo EM USO (o rotulo maiusculo espacado do site, numa pilula no destaque)
                 float wP = LarguraMicro(T("EM USO"), 0.2f);
                 ImVec2 t0(ca.x + 12, ca.y + 11);
@@ -6060,7 +7038,7 @@ static void DesenhaUI(HWND hwnd) {
                 strncpy(gEditNome, d.nome, sizeof(gEditNome) - 1);
                 strncpy(gEditDesc, d.desc, sizeof(gEditDesc) - 1);
             }
-            if (cl && !mh && !fh2) {
+            if ((cl && !mh && !fh2) || enterAqui) { // Enter = o clique: esta data passa a ser a em uso
                 gDataSel = i;
                 gTrocouDataManual = true; // escolha manual vence a data padrao dos favoritos
                 strncpy(gPastaGta, d.caminho, sizeof(gPastaGta) - 1);
@@ -6258,6 +7236,12 @@ static void DesenhaUI(HWND hwnd) {
             if (porL < 1) porL = 1;
             float CW2 = (wG - (porL - 1) * GAP2 - 10) / porL; // -10 = folga da scrollbar
             float CH2 = CW2 * 9.0f / 16.0f;
+            gFoco[4] = MoverFoco(gFoco[4], gNumFotos, porL, 0);
+            if (gFocoRolar && gFoco[4] >= 0 && gFoco[4] < gNumFotos) { // o foco pode estar fora do trecho desenhado: rola pela conta
+                float yF = (gFoco[4] / porL) * (CH2 + GAP2), syF = ImGui::GetScrollY(), hF = ImGui::GetWindowSize().y;
+                if (yF < syF) ImGui::SetScrollY(yF);
+                else if (yF + CH2 > syF + hF) ImGui::SetScrollY(yF + CH2 - hF + 4.0f);
+            }
             // streaming: so os itens perto da tela viram widgets/texturas; o resto e liberado
             float syG = ImGui::GetScrollY();
             float altG = ImGui::GetWindowSize().y;
@@ -6273,7 +7257,9 @@ static void DesenhaUI(HWND hwnd) {
                 char idf[16]; sprintf(idf, "##foto%d", i);
                 bool clF = ImGui::InvisibleButton(idf, ImVec2(CW2, CH2));
                 ImVec2 ca = ImGui::GetItemRectMin(), cb = ImGui::GetItemRectMax();
-                bool chF = ImGui::IsItemHovered();
+                bool hovF = ImGui::IsItemHovered();
+                bool fkF = FocoNoItem(4, i, hovF);
+                bool chF = hovF || fkF;
                 bool visivel = ImGui::IsItemVisible();
                 Foto& f = gFotos[i];
                 if (visivel && !f.tex && !f.falhou) PedirImagem(f.caminho, 288, 0); // decodifica na thread, sem engasgo
@@ -6290,8 +7276,9 @@ static void DesenhaUI(HWND hwnd) {
                     gl2->AddRect(ca, cb, chF ? Cinza(150) : Cinza(44), 10, 0, chF ? 1.6f : 1.0f);
                     if (gGalSelecao) gl2->AddCircle(ImVec2(ca.x + 18, ca.y + 18), 11.0f, Cinza(chF ? 240 : 170), 20, 1.6f);
                 }
-                if (clF) {
-                    if (gGalSelecao || io.KeyCtrl) f.sel = !f.sel;
+                if (fkF) AnelFoco(gl2, ca, cb, 10.0f);
+                if (clF || EnterNoItem(4, i, hovF)) { // Enter abre a foto (no modo de selecao, marca/desmarca)
+                    if (gGalSelecao || (clF && io.KeyCtrl)) f.sel = !f.sel;
                     else gFotoVista = i;
                 }
             }
@@ -6403,6 +7390,7 @@ static void DesenhaUI(HWND hwnd) {
                                                                                : T("O blog ainda não tem um ranking de mais vistos."));
                 ImGui::PopFont();
             }
+            gFoco[5] = MoverFoco(gFoco[5], nOrd, porLinhaM, 0);
             for (int o = 0; o < nOrd; o++) {
                 int i = ordem[o];
                 int col = o % porLinhaM, lin = o / porLinhaM;
@@ -6410,7 +7398,10 @@ static void DesenhaUI(HWND hwnd) {
                 char idm[16]; sprintf(idm, "##post%d", i);
                 bool clP = ImGui::InvisibleButton(idm, ImVec2(CWM, CHM));
                 ImVec2 ca = ImGui::GetItemRectMin(), cb2(ca.x + CWM, ca.y + CHM);
-                bool hovP = ImGui::IsItemHovered();
+                bool hovP0 = ImGui::IsItemHovered();
+                bool fkP = FocoNoItem(5, o, hovP0);
+                bool hovP = hovP0 || fkP;
+                if (fkP && gFocoRolar) RolarAte(ca, cb2);
                 ml->AddRectFilled(ca, cb2, hovP ? Tk::Sup2 : Tk::Fundo, 12.0f);
                 // capa: pedida a fila de imagens SO quando o card esta na tela; quem ficou longe devolve a textura
                 {
@@ -6456,7 +7447,8 @@ static void DesenhaUI(HWND hwnd) {
                 TextoTruncado(ml, ImVec2(ca.x + PADX, yb + HMETA + 7.0f + altT * 2.0f + 6.0f), CWM - PADX * 2, Tk::Texto3, gMods[i].resumo);
                 ImGui::PopFont();
                 ml->AddRect(ca, cb2, hovP ? Tk::Linha2 : Tk::Linha, 12.0f, 0, 1.0f);
-                if (clP && UrlWebOk(gMods[i].url))
+                if (fkP) AnelFoco(ml, ca, cb2, 12.0f);
+                if ((clP || EnterNoItem(5, o, hovP0)) && UrlWebOk(gMods[i].url)) // Enter abre o post no navegador
                     ShellExecuteA(NULL, "open", gMods[i].url, NULL, NULL, SW_SHOWNORMAL);
             }
             int linhasM = (nOrd + porLinhaM - 1) / porLinhaM;
@@ -7338,14 +8330,7 @@ static void DesenhaUI(HWND hwnd) {
             float y = 76.0f + p * 53.0f;
             ImGui::SetCursorPos(ImVec2(0, y));
             char id[8]; sprintf(id, "##nav%d", i);
-            if (ImGui::InvisibleButton(id, ImVec2(wSide, 53))) {
-                gTela = i;
-                if (i == 5) { // abriu a aba mods: a bolinha do icone some; os cards publicados
-                    gModsNovo = false; // depois da ultima visita ainda mostram a bolinha deles
-                    gModsVistoAteOrdem = gModsUltimoOrdem;
-                    if (gModsEstado == 0) RodarThread(ThreadMods, NULL);
-                }
-            }
+            if (ImGui::InvisibleButton(id, ImVec2(wSide, 53))) IrParaAba(i);
             bool hov = ImGui::IsItemHovered();
             bool atual = (gTela == i);
             if (atual) sl->AddRectFilled(ImVec2(0, y + 13.0f), ImVec2(3.0f, y + 40.0f), AC.cor, 2.0f);
@@ -7825,6 +8810,8 @@ static void DesenhaUI(HWND hwnd) {
                 if (ImGui::IsKeyPressed(ImGuiKey_RightArrow) && gFotoVista < gNumFotos - 1) gFotoVista++;
                 if (ImGui::IsKeyPressed(ImGuiKey_Escape)) fechar = true;
                 if (fechar) {
+                    gFoco[4] = gFotoVista; // de volta na grade, o foco fica na ultima foto vista
+                    gFocoRolar = 2;
                     gFotoVista = -1;
                     FGLimpar(); // full-res nao fica na memoria com o viewer fechado
                     ImGui::CloseCurrentPopup();
@@ -8194,6 +9181,7 @@ static void DesenhaUI(HWND hwnd) {
 
     // borda externa da janela
     dl->AddRect(ImVec2(0.5f, 0.5f), ImVec2(ds.x - 0.5f, ds.y - 0.5f), Cinza(255, 26), 0, 0, 1);
+    if (gFocoRolar > 0) gFocoRolar--;
     ImGui::End();
     ImGui::PopStyleVar(2);
 }
@@ -8350,6 +9338,108 @@ static ImFont* FonteEmbutida(ImGuiIO& io, int id, float tam, const ImWchar* rang
     return io.Fonts->AddFontFromMemoryTTF(p, (int)n, tam, &cfg, rango);
 }
 
+// Tamanho da janela pelo monitor: ~74% da largura, proporcao 1420:800, entre 1180 e 1440.
+// Mede pela resolucao SALVA da area de trabalho (a escolhida nas configuracoes do Windows), nao pela
+// do instante: logo depois de ligar o PC, ou com jogo em tela cheia, a do instante pode estar menor e
+// a janela nascia no tamanho minimo e ficava assim (12/10: 1180x665 num monitor 2K). 'cabeNaAtual' so
+// na abertura: com a tela do instante menor que a salva, a janela nao pode nascer maior que a tela -
+// e quando a resolucao de verdade chega (WM_DISPLAYCHANGE), o loop recalcula e ela cresce.
+static void CalcularJanela(int& jw, int& jh, float& esc, int& salvaW, int& salvaH, int& atualW, int& atualH, bool cabeNaAtual) {
+    atualW = GetSystemMetrics(SM_CXSCREEN); atualH = GetSystemMetrics(SM_CYSCREEN);
+#ifdef TROK_TESTE_LIVRE
+    if (gSimTelaW > 0) { atualW = gSimTelaW; atualH = gSimTelaH; }
+#endif
+    salvaW = atualW; salvaH = atualH;
+    DEVMODEA dm; ZeroMemory(&dm, sizeof(dm)); dm.dmSize = sizeof(dm);
+    if (EnumDisplaySettingsA(NULL, ENUM_REGISTRY_SETTINGS, &dm) && dm.dmPelsWidth >= 640 && dm.dmPelsHeight >= 480) {
+        salvaW = (int)dm.dmPelsWidth; salvaH = (int)dm.dmPelsHeight;
+    }
+    jw = (int)(salvaW * 0.74f);
+    if (jw < 1180) jw = 1180;
+    if (jw > 1440) jw = 1440; // teto: 1600 ficou grande no 2K (12/10); antes, 1780 tambem (o do Valorant)
+    jh = jw * JANELA_H / JANELA_W;
+    if (jh > (int)(salvaH * 0.88f)) { jh = (int)(salvaH * 0.88f); jw = jh * JANELA_W / JANELA_H; } // tela baixa: a altura manda
+    if (cabeNaAtual) {
+        if (jw > (int)(atualW * 0.96f)) { jw = (int)(atualW * 0.96f); jh = jw * JANELA_H / JANELA_W; }
+        if (jh > (int)(atualH * 0.90f)) { jh = (int)(atualH * 0.90f); jw = jh * JANELA_W / JANELA_H; }
+    }
+    // escala AMORTECIDA: o conteudo cresce metade do que a janela cresce
+    // (1:1 ficou pequeno no 2K, escala cheia ficou grande demais - o meio-termo agrada)
+    float razao = jw / (float)JANELA_W;
+    esc = 1.0f + (razao - 1.0f) * 0.5f;
+    if (esc < 0.85f) esc = 0.85f;
+    if (esc > 1.25f) esc = 1.25f;
+}
+
+// Fontes rasterizadas na escala ATUAL da janela (nitidas). Na abertura e de novo quando a resolucao do
+// Windows muda e a escala muda junto - senao o texto sai esticado e borrado.
+static void CarregarFontes(ImGuiIO& io) {
+    // fontes do sistema, rasterizadas no tamanho FISICO (nitidas) e medidas no logico
+    static const ImWchar RANGO_TXT[] = { 0x0020, 0x024F, 0x0400, 0x04FF, 0x2013, 0x2014, 0x2018, 0x201D, 0x2022, 0x2022, 0x2026, 0x2026, 0 }; // latim + estendido (turco) + cirilico (russo) + travessao/aspas/reticencias // latin + travessao/aspas curvas/reticencias (titulos do blog)
+    // Montserrat embutida (a fonte do site). Tamanhos = os do mockup do launcher x 1,11 (o mockup tem
+    // 1280 de largura; o launcher, 1420). Sem os recursos (exe montado sem eles), cai no Segoe UI do Windows.
+    const float E = gEscala;
+    gFtBody      = FonteEmbutida(io, 14, 14.5f * E, RANGO_TXT); // Medium: texto corrido
+    gFtBold      = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nomes, rotulos de botao
+    gFtMono      = FonteEmbutida(io, 14, 14.0f * E, RANGO_TXT); // Medium: ip, jogadores, ping
+    gFtDisplay   = FonteEmbutida(io, 16, 38.0f * E, RANGO_TXT); // Bold: nome grande do servidor
+    gFtBotao     = FonteEmbutida(io, 16, 15.5f * E, RANGO_TXT); // Bold: Jogar e botoes principais
+    gFtMini      = FonteEmbutida(io, 15, 13.0f * E, RANGO_TXT); // SemiBold: texto pequeno
+    gFtMonoS     = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: numeros pequenos
+    gFtMiniLeve  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: descricoes
+    gFtCardNome  = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nome nas abas dos favoritos
+    gFtPostTit   = FonteEmbutida(io, 16, 16.5f * E, RANGO_TXT); // Bold: titulo do card de post (15px do site)
+    gFtBotaoPost = FonteEmbutida(io, 16, 14.0f * E, RANGO_TXT); // Bold: rotulo de botao secundario
+    gFtCardDesc  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium
+    gFtTitulo    = FonteEmbutida(io, 16, 26.0f * E, RANGO_TXT); // Bold: titulo das telas e dos paineis
+    gFtMicro     = FonteEmbutida(io, 16, 11.5f * E, RANGO_TXT); // Bold: rotulos maiusculos espacados
+    if (!gFtBody) { // recursos ausentes: o visual antigo (Segoe UI) em vez de quebrar
+        gFtBody    = FonteDoWindows(io, "segoeui.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtBold    = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtMono    = FonteDoWindows(io, "consola.ttf", 14.5f * gEscala, RANGO_TXT);
+        gFtDisplay = FonteDoWindows(io, "seguibl.ttf", 44.0f * gEscala, RANGO_TXT);
+        gFtBotao   = FonteDoWindows(io, "seguibl.ttf", 19.0f * gEscala, RANGO_TXT);
+        gFtMini    = FonteDoWindows(io, "segoeuib.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtMonoS   = FonteDoWindows(io, "consola.ttf", 14.0f * gEscala, RANGO_TXT);
+        gFtMiniLeve = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtCardNome = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
+        gFtPostTit  = FonteDoWindows(io, "segoeuib.ttf", 18.0f * gEscala, RANGO_TXT);
+        gFtBotaoPost = FonteDoWindows(io, "segoeuib.ttf", 15.0f * gEscala, RANGO_TXT);
+        gFtCardDesc = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
+        gFtTitulo   = FonteDoWindows(io, "segoeuib.ttf", 26.0f * gEscala, RANGO_TXT);
+        gFtMicro    = FonteDoWindows(io, "segoeuib.ttf", 12.0f * gEscala, RANGO_TXT);
+    }
+    { // fonte de icones LUCIDE embutida no exe (recurso 11) - so os glifos usados (atlas leve)
+        HRSRC rL = FindResourceA(NULL, MAKEINTRESOURCEA(11), (LPCSTR)RT_RCDATA);
+        if (rL) {
+            HGLOBAL hL = LoadResource(NULL, rL);
+            void* pL = LockResource(hL);
+            DWORD tamL = SizeofResource(NULL, rL);
+            static const ImWchar RANGO_ICO[] = {
+                0xE060,0xE060, 0xE06C,0xE06F, 0xE09E,0xE09E, 0xE0B2,0xE0B2, 0xE0D7,0xE0D7,
+                0xE0DC,0xE0DC, 0xE0E8,0xE0E8, 0xE0F5,0xE0F6, 0xE0F9,0xE0F9, 0xE11C,0xE11C, 0xE129,0xE129,
+                0xE145,0xE145, 0xE153,0xE154, 0xE18E,0xE18E, 0xE19E,0xE19E, 0xE1B2,0xE1B2,
+                0xE21C,0xE21D, 0xE247,0xE247, 0xE40D,0xE40D, 0xE5C4,0xE5C4, 0 };
+            static ImFontConfig cfgL;
+            cfgL.FontDataOwnedByAtlas = false; // o ttf mora no recurso do exe, o atlas nao da free
+            if (pL && tamL) {
+                gFtIco  = io.Fonts->AddFontFromMemoryTTF(pL, (int)tamL, 19.0f * gEscala, &cfgL, RANGO_ICO);
+                gFtIcoG = io.Fonts->AddFontFromMemoryTTF(pL, (int)tamL, 26.0f * gEscala, &cfgL, RANGO_ICO);
+            }
+        }
+    }
+    if (!gFtBody) { gFtBody = gFtBold = gFtMono = gFtDisplay = gFtBotao = gFtMini = gFtMonoS = io.Fonts->AddFontDefault(); }
+    // fontes novas caem numa ja carregada: nunca na default do ImGui (que sai minuscula)
+    if (!gFtBotaoPost) gFtBotaoPost = gFtBold;
+    if (!gFtMiniLeve)  gFtMiniLeve  = gFtBody;
+    if (!gFtPostTit)   gFtPostTit   = gFtBold;
+    if (!gFtCardNome)  gFtCardNome  = gFtBold;
+    if (!gFtCardDesc)  gFtCardDesc  = gFtBody;
+    if (!gFtTitulo)    gFtTitulo    = gFtBotao;
+    if (!gFtMicro)     gFtMicro     = gFtMini;
+    io.FontGlobalScale = 1.0f / gEscala; // layout logico; o vertice escala de volta no render
+}
+
 static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
     // qualquer input acorda o render preguicoso
     if ((m >= WM_MOUSEFIRST && m <= WM_MOUSELAST) || (m >= WM_KEYFIRST && m <= WM_KEYLAST) ||
@@ -8361,8 +9451,21 @@ static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
         int my = (int)((short)HIWORD(l) / gEscala);
         l = MAKELPARAM(mx, my);
     }
+    // Tab fora de campo de texto troca a aba do trilho (o DesenhaUI decide se pode): nao chega ao imgui, que o
+    // usaria para pular para o primeiro campo de texto da tela. A soltura passa sempre (a tecla nao fica presa)
+    if (m == WM_KEYDOWN && w == VK_TAB && ImGui::GetCurrentContext() && !ImGui::GetIO().WantTextInput) {
+        gTabPedido = (GetKeyState(VK_SHIFT) & 0x8000) ? -1 : 1;
+        return 0;
+    }
     if (ImGui_ImplWin32_WndProcHandler(h, m, w, l)) return 1;
     switch (m) {
+    case WM_DISPLAYCHANGE: // a resolucao do Windows mudou: o loop principal recalcula o tamanho da janela
+#ifdef TROK_TESTE_LIVRE
+        gSimTelaW = gSimTelaH = 0; // teste: a tela "pequena" simulada na abertura acabou
+#endif
+        gTelaMudou = true;
+        gUltimaAtividade = GetTickCount();
+        break;
     case WM_SIZE:
         if (gDev && w != SIZE_MINIMIZED && LOWORD(l) && HIWORD(l)) {
             gPP.BackBufferWidth = LOWORD(l); gPP.BackBufferHeight = HIWORD(l);
@@ -8716,26 +9819,21 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     HICON hIco = LoadIconA(hInst, MAKEINTRESOURCEA(1)); // icone do .rc (NULL se compilado sem ele)
     WNDCLASSEXA wc = { sizeof(wc), CS_CLASSDC, WndProc, 0, 0, hInst, hIco, LoadCursorA(NULL, (LPCSTR)IDC_ARROW), NULL, NULL, "TrokLauncher", hIco };
     RegisterClassExA(&wc);
-    // janela PROPORCIONAL ao monitor: ~74% da largura, proporcao 1420:800, com limites
-    int sw = GetSystemMetrics(SM_CXSCREEN), sh = GetSystemMetrics(SM_CYSCREEN);
-    int jw = (int)(sw * 0.74f);
-    if (jw < 1180) jw = 1180;
-    if (jw > 1600) jw = 1600; // teto = tamanho do launcher do Valorant (1780 ficou grande no 2K)
-    int jh = jw * JANELA_H / JANELA_W;
-    if (jh > (int)(sh * 0.88f)) { // tela baixa (1366x768 etc): a altura manda
-        jh = (int)(sh * 0.88f);
-        jw = jh * JANELA_W / JANELA_H;
-    }
-    // escala AMORTECIDA: o conteudo cresce metade do que a janela cresce
-    // (1:1 ficou pequeno no 2K, escala cheia ficou grande demais - o meio-termo agrada)
-    {
-        float razao = jw / (float)JANELA_W;
-        gEscala = 1.0f + (razao - 1.0f) * 0.5f;
-        if (gEscala < 0.85f) gEscala = 0.85f;
-        if (gEscala > 1.25f) gEscala = 1.25f;
-    }
+    // janela PROPORCIONAL ao monitor (regra e limites em CalcularJanela)
+#ifdef TROK_TESTE_LIVRE
+    if (cmdLinha) { const char* st = strstr(cmdLinha, "--simular-tela "); if (st) sscanf(st + 15, "%dx%d", &gSimTelaW, &gSimTelaH); }
+#endif
+    int sw, sh, jw, jh, telaSalvaW, telaSalvaH;
+    CalcularJanela(jw, jh, gEscala, telaSalvaW, telaSalvaH, sw, sh, true);
     HWND hwnd = CreateWindowA("TrokLauncher", "Trok Launcher", WS_POPUP,
         (sw - jw) / 2, (sh - jh) / 2, jw, jh, NULL, NULL, hInst, NULL);
+    { // o que o Windows informou na abertura: se a janela nascer pequena de novo, a causa fica aqui
+        char d[200];
+        _snprintf(d, sizeof(d) - 1, "janela: tela %dx%d (salva no Windows %dx%d) -> %dx%d, escala %.3f",
+                  sw, sh, telaSalvaW, telaSalvaH, jw, jh, gEscala);
+        d[sizeof(d) - 1] = 0;
+        RegistrarNoLog(d);
+    }
 
     // cantos arredondados + a borda padrao do Windows 11 (no Win10 e ignorado sem erro). A sombra vem junto e
     // nao da para separar: em 06/10 tirei o arredondado para sumir com a sombra e ele pediu de volta - a borda
@@ -8823,70 +9921,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
     gLogoDiscord = CarregarImagemRecurso(gDev, 13, 64); // logo do Discord (pedido: o icone real, nao o desenhado)
     CriarTexturasDoDestaque(gDev); // granulado e trama de pontos do fundo da Home (gerados aqui, sem arquivo)
 
-    // fontes do sistema, rasterizadas no tamanho FISICO (nitidas) e medidas no logico
-    static const ImWchar RANGO_TXT[] = { 0x0020, 0x024F, 0x0400, 0x04FF, 0x2013, 0x2014, 0x2018, 0x201D, 0x2022, 0x2022, 0x2026, 0x2026, 0 }; // latim + estendido (turco) + cirilico (russo) + travessao/aspas/reticencias // latin + travessao/aspas curvas/reticencias (titulos do blog)
-    // Montserrat embutida (a fonte do site). Tamanhos = os do mockup do launcher x 1,11 (o mockup tem
-    // 1280 de largura; o launcher, 1420). Sem os recursos (exe montado sem eles), cai no Segoe UI do Windows.
-    const float E = gEscala;
-    gFtBody      = FonteEmbutida(io, 14, 14.5f * E, RANGO_TXT); // Medium: texto corrido
-    gFtBold      = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nomes, rotulos de botao
-    gFtMono      = FonteEmbutida(io, 14, 14.0f * E, RANGO_TXT); // Medium: ip, jogadores, ping
-    gFtDisplay   = FonteEmbutida(io, 16, 38.0f * E, RANGO_TXT); // Bold: nome grande do servidor
-    gFtBotao     = FonteEmbutida(io, 16, 15.5f * E, RANGO_TXT); // Bold: Jogar e botoes principais
-    gFtMini      = FonteEmbutida(io, 15, 13.0f * E, RANGO_TXT); // SemiBold: texto pequeno
-    gFtMonoS     = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: numeros pequenos
-    gFtMiniLeve  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium: descricoes
-    gFtCardNome  = FonteEmbutida(io, 15, 14.5f * E, RANGO_TXT); // SemiBold: nome nas abas dos favoritos
-    gFtPostTit   = FonteEmbutida(io, 16, 16.5f * E, RANGO_TXT); // Bold: titulo do card de post (15px do site)
-    gFtBotaoPost = FonteEmbutida(io, 16, 14.0f * E, RANGO_TXT); // Bold: rotulo de botao secundario
-    gFtCardDesc  = FonteEmbutida(io, 14, 13.0f * E, RANGO_TXT); // Medium
-    gFtTitulo    = FonteEmbutida(io, 16, 26.0f * E, RANGO_TXT); // Bold: titulo das telas e dos paineis
-    gFtMicro     = FonteEmbutida(io, 16, 11.5f * E, RANGO_TXT); // Bold: rotulos maiusculos espacados
-    if (!gFtBody) { // recursos ausentes: o visual antigo (Segoe UI) em vez de quebrar
-        gFtBody    = FonteDoWindows(io, "segoeui.ttf", 16.0f * gEscala, RANGO_TXT);
-        gFtBold    = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
-        gFtMono    = FonteDoWindows(io, "consola.ttf", 14.5f * gEscala, RANGO_TXT);
-        gFtDisplay = FonteDoWindows(io, "seguibl.ttf", 44.0f * gEscala, RANGO_TXT);
-        gFtBotao   = FonteDoWindows(io, "seguibl.ttf", 19.0f * gEscala, RANGO_TXT);
-        gFtMini    = FonteDoWindows(io, "segoeuib.ttf", 13.5f * gEscala, RANGO_TXT);
-        gFtMonoS   = FonteDoWindows(io, "consola.ttf", 14.0f * gEscala, RANGO_TXT);
-        gFtMiniLeve = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
-        gFtCardNome = FonteDoWindows(io, "segoeuib.ttf", 16.0f * gEscala, RANGO_TXT);
-        gFtPostTit  = FonteDoWindows(io, "segoeuib.ttf", 18.0f * gEscala, RANGO_TXT);
-        gFtBotaoPost = FonteDoWindows(io, "segoeuib.ttf", 15.0f * gEscala, RANGO_TXT);
-        gFtCardDesc = FonteDoWindows(io, "segoeui.ttf", 13.5f * gEscala, RANGO_TXT);
-        gFtTitulo   = FonteDoWindows(io, "segoeuib.ttf", 26.0f * gEscala, RANGO_TXT);
-        gFtMicro    = FonteDoWindows(io, "segoeuib.ttf", 12.0f * gEscala, RANGO_TXT);
-    }
-    { // fonte de icones LUCIDE embutida no exe (recurso 11) - so os glifos usados (atlas leve)
-        HRSRC rL = FindResourceA(NULL, MAKEINTRESOURCEA(11), (LPCSTR)RT_RCDATA);
-        if (rL) {
-            HGLOBAL hL = LoadResource(NULL, rL);
-            void* pL = LockResource(hL);
-            DWORD tamL = SizeofResource(NULL, rL);
-            static const ImWchar RANGO_ICO[] = {
-                0xE060,0xE060, 0xE06C,0xE06F, 0xE09E,0xE09E, 0xE0B2,0xE0B2, 0xE0D7,0xE0D7,
-                0xE0DC,0xE0DC, 0xE0E8,0xE0E8, 0xE0F5,0xE0F6, 0xE0F9,0xE0F9, 0xE11C,0xE11C, 0xE129,0xE129,
-                0xE145,0xE145, 0xE153,0xE154, 0xE18E,0xE18E, 0xE19E,0xE19E, 0xE1B2,0xE1B2,
-                0xE21C,0xE21D, 0xE247,0xE247, 0xE40D,0xE40D, 0xE5C4,0xE5C4, 0 };
-            static ImFontConfig cfgL;
-            cfgL.FontDataOwnedByAtlas = false; // o ttf mora no recurso do exe, o atlas nao da free
-            if (pL && tamL) {
-                gFtIco  = io.Fonts->AddFontFromMemoryTTF(pL, (int)tamL, 19.0f * gEscala, &cfgL, RANGO_ICO);
-                gFtIcoG = io.Fonts->AddFontFromMemoryTTF(pL, (int)tamL, 26.0f * gEscala, &cfgL, RANGO_ICO);
-            }
-        }
-    }
-    if (!gFtBody) { gFtBody = gFtBold = gFtMono = gFtDisplay = gFtBotao = gFtMini = gFtMonoS = io.Fonts->AddFontDefault(); }
-    // fontes novas caem numa ja carregada: nunca na default do ImGui (que sai minuscula)
-    if (!gFtBotaoPost) gFtBotaoPost = gFtBold;
-    if (!gFtMiniLeve)  gFtMiniLeve  = gFtBody;
-    if (!gFtPostTit)   gFtPostTit   = gFtBold;
-    if (!gFtCardNome)  gFtCardNome  = gFtBold;
-    if (!gFtCardDesc)  gFtCardDesc  = gFtBody;
-    if (!gFtTitulo)    gFtTitulo    = gFtBotao;
-    if (!gFtMicro)     gFtMicro     = gFtMini;
-    io.FontGlobalScale = 1.0f / gEscala; // layout logico; o vertice escala de volta no render
+    CarregarFontes(io); // na escala da janela; refeitas se a resolucao do Windows mudar
 
     ImGuiStyle& st = ImGui::GetStyle();
     // os tokens do site: campos em #111113 com contorno branco a 15%, cantos de 8, rolagem fina
@@ -8981,6 +10016,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                             gAttBaixa == 1 || // barra de download da atualizacao
                             (gModsNovo && gTela != 5) || // bolinha pulsando na sidebar
                             gHomeSlide < 1.0f || // slide de entrada da Home
+                            gJogAnimando || // painel de jogadores entrando
                             fabsf(gSideAnim - (gSideAberta ? 1.0f : 0.0f)) > 0.001f; // menu expandindo
             if (!animando && (GetTickCount() - gUltimaAtividade) > 1500) Sleep(70);
         }
@@ -9012,6 +10048,29 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR cmdLinha, int) {
                 for (int k = 0; k < MAX_MODS; k++) if (gModsPedida[k] == 2) gModsPedida[k] = 0; // capa que falhou no sumico: tenta de novo
                 gUltimaAtividade = GetTickCount(); // acorda o render
                 if (avisouPerda) { RegistrarNoLog("device Direct3D recuperado"); avisouPerda = false; }
+            }
+        }
+        if (gTelaMudou && gDev->TestCooperativeLevel() == D3D_OK) { // resolucao mudou: tamanho e escala de novo
+            gTelaMudou = false;
+            int nw, nh, sW, sH, aW, aH; float ne;
+            CalcularJanela(nw, nh, ne, sW, sH, aW, aH, false); // sem prender na tela do instante: jogo em tela cheia nao encolhe a janela
+            RECT rcAt; GetClientRect(hwnd, &rcAt);
+            if (nw != rcAt.right - rcAt.left || nh != rcAt.bottom - rcAt.top) {
+                jw = nw; jh = nh;
+                if (ne != gEscala) { // escala nova: fontes de novo nesse tamanho (fora do quadro, com o atlas livre)
+                    gEscala = ne;
+                    ImGui_ImplDX9_InvalidateDeviceObjects();
+                    io.Fonts->Clear();
+                    CarregarFontes(io);
+                }
+                SetWindowPos(hwnd, NULL, (aW - jw) / 2, (aH - jh) / 2, jw, jh, SWP_NOZORDER | SWP_NOACTIVATE); // WM_SIZE reseta o device
+                ImGui_ImplDX9_InvalidateDeviceObjects(); // textura da fonte sai do atlas atual
+                ImGui_ImplDX9_CreateDeviceObjects();
+                char d[200];
+                _snprintf(d, sizeof(d) - 1, "janela: a tela mudou para %dx%d -> %dx%d, escala %.3f", aW, aH, jw, jh, gEscala);
+                d[sizeof(d) - 1] = 0;
+                RegistrarNoLog(d);
+                gUltimaAtividade = GetTickCount();
             }
         }
         ImGui_ImplDX9_NewFrame();

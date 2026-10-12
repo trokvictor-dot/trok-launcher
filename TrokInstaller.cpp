@@ -34,7 +34,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND, UINT, WPARAM,
 
 #define JAN_W 880
 #define JAN_H 540
-#define VERSAO_INST "1.12"
+#define VERSAO_INST "1.13"
 
 // identidade do site (trokmods.blogspot.com): os mesmos tokens do launcher
 static const ImU32 COR_ACCENT    = IM_COL32(252,  94,  58, 255); // --laranja
@@ -66,6 +66,7 @@ static D3DPRESENT_PARAMETERS gPP;
 static bool gRodando = true;
 static ImFont *gFtBody, *gFtBold, *gFtMini, *gFtTitulo;
 static IDirect3DTexture9* gTexArte = NULL;
+static IDirect3DTexture9* gTexLogo = NULL; // o ALVO oficial (artes\alvo-512.png), branco: pinta na cor
 static float gTexArteAR = 0.52f; // largura/altura
 
 // idioma (Rockstar-style): a primeira tela pergunta; o launcher nasce com a escolha gravada no ini
@@ -484,41 +485,60 @@ static void DesenhaMira(ImDrawList* dl, ImVec2 c, float tam, ImU32 cor) {
     }
 }
 
-// ---------- arte (recurso 3, png) ----------
-static void CarregarArte(LPDIRECT3DDEVICE9 dev) {
-    HRSRC r = FindResourceA(NULL, MAKEINTRESOURCEA(3), (LPCSTR)RT_RCDATA);
-    if (!r) return;
+// ---------- imagens dos recursos (png): a arte (3) e o logo (4) ----------
+// maxLado > 0: ja sai reduzida no tamanho de desenho (o alvo de 512 desenhado a 28 px serrilhava sem isso)
+static IDirect3DTexture9* TexturaDeRecurso(LPDIRECT3DDEVICE9 dev, int id, int maxLado, float* ar) {
+    HRSRC r = FindResourceA(NULL, MAKEINTRESOURCEA(id), (LPCSTR)RT_RCDATA);
+    if (!r) return NULL;
     HGLOBAL h = LoadResource(NULL, r);
     const unsigned char* p = (const unsigned char*)LockResource(h);
     DWORD tam = SizeofResource(NULL, r);
-    if (!p || !tam) return;
+    if (!p || !tam) return NULL;
     IStream* st = SHCreateMemStream(p, tam);
-    if (!st) return;
+    if (!st) return NULL;
+    IDirect3DTexture9* tex = NULL;
     IWICImagingFactory* fab = NULL;
     IWICBitmapDecoder* dec = NULL;
     IWICBitmapFrameDecode* frame = NULL;
+    IWICBitmapScaler* esc = NULL;
     IWICBitmapSource* src = NULL;
     do {
         if (FAILED(CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER,
                                     IID_IWICImagingFactory, (void**)&fab))) break;
         if (FAILED(fab->CreateDecoderFromStream(st, NULL, WICDecodeMetadataCacheOnDemand, &dec))) break;
         if (FAILED(dec->GetFrame(0, &frame))) break;
-        if (FAILED(WICConvertBitmapSource(GUID_WICPixelFormat32bppBGRA, frame, &src))) break;
         UINT w = 0, hh = 0;
-        src->GetSize(&w, &hh);
+        frame->GetSize(&w, &hh);
         if (!w || !hh || w > 4096 || hh > 4096) break;
-        if (FAILED(dev->CreateTexture(w, hh, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &gTexArte, NULL))) { gTexArte = NULL; break; }
+        IWICBitmapSource* base = frame;
+        if (maxLado > 0 && (w > (UINT)maxLado || hh > (UINT)maxLado)) {
+            UINT nw = w >= hh ? (UINT)maxLado : (UINT)(maxLado * (float)w / hh);
+            UINT nh = hh >= w ? (UINT)maxLado : (UINT)(maxLado * (float)hh / w);
+            if (nw < 1) nw = 1;
+            if (nh < 1) nh = 1;
+            if (SUCCEEDED(fab->CreateBitmapScaler(&esc)) && SUCCEEDED(esc->Initialize(frame, nw, nh, WICBitmapInterpolationModeFant))) {
+                base = esc; w = nw; hh = nh;
+            }
+        }
+        if (FAILED(WICConvertBitmapSource(GUID_WICPixelFormat32bppBGRA, base, &src))) break;
+        if (FAILED(dev->CreateTexture(w, hh, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &tex, NULL))) { tex = NULL; break; }
         D3DLOCKED_RECT lr;
-        if (FAILED(gTexArte->LockRect(0, &lr, NULL, 0))) { gTexArte->Release(); gTexArte = NULL; break; }
+        if (FAILED(tex->LockRect(0, &lr, NULL, 0))) { tex->Release(); tex = NULL; break; }
         src->CopyPixels(NULL, lr.Pitch, lr.Pitch * hh, (BYTE*)lr.pBits);
-        gTexArte->UnlockRect(0);
-        gTexArteAR = (float)w / (float)hh;
+        tex->UnlockRect(0);
+        if (ar) *ar = (float)w / (float)hh;
     } while (0);
     if (src) src->Release();
+    if (esc) esc->Release();
     if (frame) frame->Release();
     if (dec) dec->Release();
     if (fab) fab->Release();
     st->Release();
+    return tex;
+}
+static void CarregarArte(LPDIRECT3DDEVICE9 dev) {
+    gTexArte = TexturaDeRecurso(dev, 3, 0, &gTexArteAR);
+    gTexLogo = TexturaDeRecurso(dev, 4, (int)S(28.0f) + 2, NULL); // o alvo no tamanho em que e desenhado
 }
 
 // ---------- instalacao passo a passo (1 arquivo por frame = barra animada) ----------
@@ -703,7 +723,91 @@ static void LimparSobrasDoTemp() {
     FindClose(h);
 }
 
+// ---------- fundo do Inicio do launcher: granulado em overlay + trama de pontos (gerados aqui, sem arquivo) ----------
+static IDirect3DTexture9* gTexGrao = NULL;
+static IDirect3DTexture9* gTexPontos = NULL;
+static void CbBlendDobroMultiplica(const ImDrawList*, const ImDrawCmd*) { // overlay na parte escura = 2 x grao x fundo
+    gDev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_DESTCOLOR);
+    gDev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_SRCCOLOR);
+}
+static void CriarTexturasDoFundo(LPDIRECT3DDEVICE9 dev) { // os mesmos do launcher: grao a 2%, trama a 6%
+    const int G = 180;
+    if (SUCCEEDED(dev->CreateTexture(G, G, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &gTexGrao, NULL))) {
+        static float base[180 * 180];
+        unsigned int sm = 0x9E3779B9u; // semente fixa: o mesmo grao do launcher
+        for (int i = 0; i < G * G; i++) { sm ^= sm << 13; sm ^= sm >> 17; sm ^= sm << 5; base[i] = (sm & 0xFFFF) / 65535.0f; }
+        D3DLOCKED_RECT lr;
+        if (SUCCEEDED(gTexGrao->LockRect(0, &lr, NULL, 0))) {
+            for (int y = 0; y < G; y++) {
+                DWORD* lin = (DWORD*)((BYTE*)lr.pBits + y * lr.Pitch);
+                for (int x = 0; x < G; x++) {
+                    float v = base[y * G + x] * 0.5f + 0.125f * (base[y * G + (x + 1) % G] + base[y * G + (x + G - 1) % G] +
+                                                               base[((y + 1) % G) * G + x] + base[((y + G - 1) % G) * G + x]);
+                    float g = 0.5f + 0.5f * 0.02f * ((v - 0.5f) / 0.16f);
+                    int gi = (int)(g * 255.0f + 0.5f);
+                    if (gi < 0) gi = 0;
+                    if (gi > 255) gi = 255;
+                    lin[x] = 0xFF000000u | ((DWORD)gi << 16) | ((DWORD)gi << 8) | (DWORD)gi;
+                }
+            }
+            gTexGrao->UnlockRect(0);
+        }
+    } else gTexGrao = NULL;
+    if (SUCCEEDED(dev->CreateTexture(3, 3, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &gTexPontos, NULL))) {
+        D3DLOCKED_RECT lr;
+        if (SUCCEEDED(gTexPontos->LockRect(0, &lr, NULL, 0))) {
+            for (int y = 0; y < 3; y++) {
+                DWORD* lin = (DWORD*)((BYTE*)lr.pBits + y * lr.Pitch);
+                for (int x = 0; x < 3; x++) lin[x] = (abs(x - 1) + abs(y - 1) <= 1) ? 0x0F000000u : 0x00000000u;
+            }
+            gTexPontos->UnlockRect(0);
+        }
+    } else gTexPontos = NULL;
+}
+
+// minimizar e fechar como no launcher: quadrados de 38 com canto 8, fundo branco a 6% no hover e um fio antes
+static void BotoesJanela(ImDrawList* dl, HWND hwnd, bool ocupado) {
+    ImVec2 ds = ImGui::GetIO().DisplaySize;
+    const float L = S(38), Y = S(16);
+    const ImVec2 xa(ds.x - S(18) - L, Y), ma(xa.x - S(2) - L, Y);
+    dl->AddLine(ImVec2(ma.x - S(11), Y + S(4)), ImVec2(ma.x - S(11), Y + L - S(4)), Cinza(255, 20), 1.0f);
+    ImGui::SetCursorScreenPos(ma);
+    if (ImGui::InvisibleButton("##fmin", ImVec2(L, L))) ShowWindow(hwnd, SW_MINIMIZE);
+    bool hM = ImGui::IsItemHovered();
+    ImGui::SetCursorScreenPos(xa);
+    bool clX = ImGui::InvisibleButton("##fx", ImVec2(L, L));
+    bool hX = ImGui::IsItemHovered() && !ocupado;
+    if (clX && !ocupado) gRodando = false;
+    if (hM) { ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); dl->AddRectFilled(ma, ImVec2(ma.x + L, ma.y + L), Cinza(255, 16), S(8)); }
+    if (hX) { ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); dl->AddRectFilled(xa, ImVec2(xa.x + L, xa.y + L), Cinza(255, 16), S(8)); }
+    const ImVec2 cm(ma.x + L * 0.5f, ma.y + L * 0.5f), cx(xa.x + L * 0.5f, xa.y + L * 0.5f);
+    const float r = S(5.5f);
+    dl->AddLine(ImVec2(cm.x - r, cm.y), ImVec2(cm.x + r, cm.y), hM ? Tk::Texto : Tk::Texto2, S(1.6f));
+    ImU32 cX = ocupado ? Tk::Texto4 : (hX ? Tk::Texto : Tk::Texto2);
+    dl->AddLine(ImVec2(cx.x - r, cx.y - r), ImVec2(cx.x + r, cx.y + r), cX, S(1.6f));
+    dl->AddLine(ImVec2(cx.x - r, cx.y + r), ImVec2(cx.x + r, cx.y - r), cX, S(1.6f));
+}
+
+// pilula de escolha (os filtros do launcher): marcada = fundo e contorno no laranja
+static bool Pilula(const char* id, const char* rot, bool marcada, ImVec2 pos) {
+    ImVec2 tsz = ImGui::CalcTextSize(rot);
+    const float h = S(40);
+    ImGui::SetCursorScreenPos(pos);
+    bool cl = ImGui::InvisibleButton(id, ImVec2(tsz.x + S(34), h));
+    bool hov = ImGui::IsItemHovered();
+    if (hov) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
+    ImDrawList* d = ImGui::GetWindowDrawList();
+    d->AddRectFilled(a, b, marcada ? ((COR_ACCENT & 0x00FFFFFFu) | (41u << 24)) : (hov ? Tk::Realce : Cinza(255, 6)), h * 0.5f);
+    d->AddRect(a, b, marcada ? COR_ACCENT : (hov ? Tk::Linha3 : Tk::Linha2), h * 0.5f, 0, S(1.0f));
+    d->AddText(ImVec2(floorf(a.x + S(17)), floorf((a.y + b.y - tsz.y) * 0.5f)), (marcada || hov) ? Tk::Texto : Tk::Texto2, rot);
+    return cl;
+}
+
 // ---------- UI ----------
+// A cara do INICIO do launcher: a arte ancorada na direita com a altura da janela (escurecida, com o degrade
+// que a funde no fundo, o granulado e a trama), o conteudo a esquerda no lugar do bloco do servidor, o rotulo
+// espacado em cinza, o titulo grande e os botoes da casa. Minimizar e fechar como os do launcher.
 static void DesenhaUI(HWND hwnd) {
     ImGuiIO& io = ImGui::GetIO();
     ImVec2 ds = io.DisplaySize;
@@ -718,79 +822,71 @@ static void DesenhaUI(HWND hwnd) {
     const bool emRemocao = (gEtapa == ET_REMOVER || gEtapa == ET_REMOVENDO || gEtapa == ET_REMOVIDO);
     const bool ocupado = (gEtapa == ET_INSTALANDO || gEtapa == ET_REMOVENDO);
 
-    // ===== painel de ARTE a esquerda (proporcional a janela) =====
-    float wArte = ds.x * (340.0f / 880.0f);
+    // ===== fundo: a arte de ponta a ponta, como a capa do servidor no Inicio do launcher =====
     if (gTexArte) {
-        // cover crop
-        float arPainel = wArte / ds.y;
+        float wA = ds.y * gTexArteAR, x0;
         ImVec2 uv0(0, 0), uv1(1, 1);
-        if (gTexArteAR > arPainel) { float f = arPainel / gTexArteAR; uv0.x = 0.5f - f * 0.5f; uv1.x = 0.5f + f * 0.5f; }
-        else { float f = gTexArteAR / arPainel; uv0.y = 0.5f - f * 0.5f; uv1.y = 0.5f + f * 0.5f; }
-        dl->AddImage((ImTextureID)gTexArte, ImVec2(0, 0), ImVec2(wArte, ds.y), uv0, uv1);
-        dl->AddRectFilledMultiColor(ImVec2(0, ds.y - S(150)), ImVec2(wArte, ds.y),
-            IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 200), IM_COL32(11, 11, 12, 200));
+        if (wA > ds.x * 0.62f) { // arte larga: corta as laterais em vez de cobrir o conteudo
+            float f = (ds.x * 0.62f) / wA;
+            uv0.x = 0.5f - f * 0.5f; uv1.x = 0.5f + f * 0.5f;
+            wA = ds.x * 0.62f;
+        }
+        x0 = ds.x - wA;
+        dl->AddImage((ImTextureID)gTexArte, ImVec2(x0, 0), ImVec2(ds.x, ds.y), uv0, uv1, IM_COL32(179, 179, 179, 255)); // a 70%
+        if (gTexGrao) {
+            dl->AddCallback(CbBlendDobroMultiplica, NULL);
+            dl->AddImage((ImTextureID)gTexGrao, ImVec2(0, 0), ds, ImVec2(0, 0), ImVec2(ds.x / 180.0f, ds.y / 180.0f));
+            dl->AddCallback(ImDrawCallback_ResetRenderState, NULL);
+        }
+        if (gTexPontos) // 3 px de tela: a textura casa pixel a pixel
+            dl->AddImage((ImTextureID)gTexPontos, ImVec2(0, 0), ds, ImVec2(0, 0), ImVec2(ds.x / 3.0f, ds.y / 3.0f));
+        // o degrade que funde a borda esquerda da arte no fundo, o do topo e o da base
+        dl->AddRectFilledMultiColor(ImVec2(x0 - 1.0f, 0), ImVec2(x0 + wA * 0.55f, ds.y),
+            IM_COL32(11, 11, 12, 255), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 255));
+        dl->AddRectFilledMultiColor(ImVec2(0, 0), ImVec2(ds.x, S(150)),
+            IM_COL32(11, 11, 12, 184), IM_COL32(11, 11, 12, 184), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0));
+        dl->AddRectFilledMultiColor(ImVec2(0, ds.y - S(170)), ds,
+            IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 0), IM_COL32(11, 11, 12, 230), IM_COL32(11, 11, 12, 230));
     } else {
-        dl->AddRectFilled(ImVec2(0, 0), ImVec2(wArte, ds.y), Tk::Sup);
-        DesenhaMira(dl, ImVec2(wArte * 0.5f, ds.y * 0.42f), wArte * 0.44f, COR_ACCENT);
-    }
-    dl->AddRectFilled(ImVec2(wArte, 0), ImVec2(wArte + 1, ds.y), Tk::Linha);
-
-    // fechar (X): o botao de janela do launcher (quadrado de 38, fundo branco a 6% no hover)
-    ImGui::SetCursorScreenPos(ImVec2(ds.x - S(50), S(12)));
-    if (ImGui::InvisibleButton("##fx", ImVec2(S(38), S(38))) && !ocupado)
-        gRodando = false;
-    {
-        ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
-        bool hX = ImGui::IsItemHovered() && !ocupado;
-        if (hX) { ImGui::SetMouseCursor(ImGuiMouseCursor_Hand); dl->AddRectFilled(a, b, Cinza(255, 16), S(8)); }
-        ImU32 cX = ocupado ? Tk::Texto4 : (hX ? Tk::Texto : Tk::Texto2);
-        ImVec2 c((a.x + b.x) * 0.5f, (a.y + b.y) * 0.5f);
-        float r = S(5.5f);
-        dl->AddLine(ImVec2(c.x - r, c.y - r), ImVec2(c.x + r, c.y + r), cX, S(1.6f));
-        dl->AddLine(ImVec2(c.x - r, c.y + r), ImVec2(c.x + r, c.y - r), cX, S(1.6f));
+        DesenhaMira(dl, ImVec2(ds.x * 0.78f, ds.y * 0.45f), ds.y * 0.42f, Cinza(255, 18));
     }
 
-    float px = wArte + S(44); // margem do painel direito
-    float wCampo = ds.x - px - S(44);
-    const float yBot = ds.y - S(96); // a fileira de botoes
+    BotoesJanela(dl, hwnd, ocupado);
 
-    // cabecalho: o rotulo espacado no destaque (o selo da Home do launcher) e o nome
+    const float px = S(56);                    // o conteudo comeca alinhado com o logo
+    const float wCampo = ds.x * 0.52f - px;    // e para antes da arte
+    const float yBot = ds.y - S(96);           // a fileira de botoes
+    const float yC = S(166);                   // o conteudo de cada tela, abaixo do titulo
+
+    // logo (o alvo no laranja, como no canto do launcher), o rotulo espacado em cinza e o nome
+    if (gTexLogo) // o ALVO oficial do TrokMods, pintado no laranja (o mesmo do canto do launcher)
+        dl->AddImage((ImTextureID)gTexLogo, ImVec2(px, S(35) - S(14)), ImVec2(px + S(28), S(35) + S(14)), ImVec2(0, 0), ImVec2(1, 1), COR_ACCENT);
+    else
+        DesenhaMira(dl, ImVec2(px + S(14), S(35)), S(28), COR_ACCENT); // reserva: o desenho, se o recurso faltar
     ImGui::PushFont(gFtMini);
-    dl->AddText(ImVec2(px, S(50)), COR_ACCENT, emRemocao ? T("D E S I N S T A L A D O R") : T("I N S T A L A D O R"));
+    dl->AddText(ImVec2(px, S(96)), Tk::Texto3, emRemocao ? T("D E S I N S T A L A D O R") : T("I N S T A L A D O R"));
     ImGui::PopFont();
     ImGui::PushFont(gFtTitulo);
-    dl->AddText(ImVec2(px - S(1), S(66)), Tk::Texto, "Trok Launcher");
+    dl->AddText(ImVec2(px - S(1), S(112)), Tk::Texto, "Trok Launcher");
     ImGui::PopFont();
 
     if (gEtapa == ET_IDIOMA) {
         // primeira tela: idioma (ja vem marcado o do Windows); os dois rotulos aparecem nas duas linguas
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(120)), Tk::Texto2, "Escolha o idioma do launcher");
-        dl->AddText(ImVec2(px, S(144)), Tk::Texto4, "Choose the launcher language");
-        ImGui::PopFont();
-        ImGui::PushFont(gFtBold);
+        dl->AddText(ImVec2(px, yC), Tk::Texto2, "Escolha o idioma do launcher");
+        dl->AddText(ImVec2(px, yC + S(24)), Tk::Texto4, "Choose the launcher language");
         const char* OPI[6] = { "Portugu\u00eas (Brasil)", "English", "Espa\u00f1ol", "\u0420\u0443\u0441\u0441\u043a\u0438\u0439", "Bahasa Indonesia", "T\u00fcrk\u00e7e" };
-        float wOp = (wCampo - S(10)) * 0.5f; // duas colunas de tres
-        for (int k = 0; k < 6; k++) {
-            ImGui::SetCursorScreenPos(ImVec2(px + (k % 2) * (wOp + S(10)), S(182) + (k / 2) * S(54)));
+        float x = px, y = yC + S(62);
+        for (int k = 0; k < 6; k++) { // pilulas que quebram a linha na largura do conteudo
+            float w = ImGui::CalcTextSize(OPI[k]).x + S(34);
+            if (x > px && x + w > px + wCampo) { x = px; y += S(50); }
             char idi[12]; sprintf(idi, "##idi%d", k);
-            bool cli = ImGui::InvisibleButton(idi, ImVec2(wOp, S(46)));
-            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-            ImVec2 a = ImGui::GetItemRectMin(), b = ImGui::GetItemRectMax();
-            bool sel = (gLangI == k), hov = ImGui::IsItemHovered();
-            // os cartoes do site: sup com linha a 9%; o escolhido ganha a borda no laranja
-            dl->AddRectFilled(a, b, sel ? Tk::Sup2 : (hov ? Tk::Realce : Tk::Sup), S(12));
-            dl->AddRect(a, b, sel ? COR_ACCENT : (hov ? Tk::Linha2 : Tk::Linha), S(12), 0, sel ? S(1.5f) : S(1.0f));
-            ImVec2 rc(a.x + S(22), (a.y + b.y) * 0.5f);
-            dl->AddCircle(rc, S(7), sel ? COR_ACCENT : Tk::Linha3, 24, S(1.6f));
-            if (sel) dl->AddCircleFilled(rc, S(3.5f), COR_ACCENT, 24);
-            ImVec2 tsz = ImGui::CalcTextSize(OPI[k]);
-            dl->AddText(ImVec2(a.x + S(40), (a.y + b.y - tsz.y) * 0.5f), sel ? Tk::Texto : Tk::Texto2, OPI[k]);
-            if (cli) gLangI = k;
+            if (Pilula(idi, OPI[k], gLangI == k, ImVec2(x, y))) gLangI = k;
+            x += w + S(8);
         }
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px, S(350)), Tk::Texto4, T("Dá para trocar depois nas Configurações."));
+        dl->AddText(ImVec2(px, y + S(56)), Tk::Texto4, T("Dá para trocar depois nas Configurações."));
         ImGui::PopFont();
         static const char* CONT[6] = { "Continuar", "Continue", "Continuar", "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c", "Lanjut", "Devam" };
         int rI = BotoesRodape(px, yBot, CONT[gLangI], T("Cancelar"));
@@ -799,15 +895,15 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_CONFIG) {
         ImGui::PushFont(gFtBody);
-        TextoQuebra(dl, ImVec2(px, S(120)), Tk::Texto2, T("O seu SA-MP, moderno. Não substitui nenhum arquivo do jogo."), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC), Tk::Texto2, T("O seu SA-MP, moderno. Não substitui nenhum arquivo do jogo."), wCampo);
         ImGui::PopFont();
 
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px, S(168)), Tk::Texto4, T("P A S T A   D E   I N S T A L A Ç Ã O"));
+        dl->AddText(ImVec2(px, yC + S(54)), Tk::Texto3, T("P A S T A   D E   I N S T A L A Ç Ã O"));
         ImGui::PopFont();
         // campo da pasta (o campo do site: sup, contorno a 15%) + procurar
         ImGui::PushFont(gFtBody);
-        ImVec2 ca(px, S(188)), cb(px + wCampo - S(118), S(188) + S(38));
+        ImVec2 ca(px, yC + S(74)), cb(px + wCampo - S(118), yC + S(74) + S(38));
         dl->AddRectFilled(ca, cb, Tk::Sup, S(8));
         dl->AddRect(ca, cb, Tk::Linha2, S(8), 0, S(1.0f));
         char pastaU8[MAX_PATH * 3];
@@ -816,14 +912,14 @@ static void DesenhaUI(HWND hwnd) {
         ImVec2 psz = ImGui::CalcTextSize(pastaU8);
         dl->AddText(ImVec2(ca.x + S(12), (ca.y + cb.y - psz.y) * 0.5f), Tk::Texto2, pastaU8);
         ImGui::PopClipRect();
-        ImGui::SetCursorScreenPos(ImVec2(cb.x + S(10), S(188)));
+        ImGui::SetCursorScreenPos(ImVec2(cb.x + S(10), ca.y));
         if (BotaoSec(T("Procurar..."), ImVec2(S(108), S(38)))) gPedirPasta = true;
         ImGui::PopFont();
 
         ImGui::PushFont(gFtBody);
-        ImGui::SetCursorScreenPos(ImVec2(px - S(8), S(244)));
+        ImGui::SetCursorScreenPos(ImVec2(px - S(8), yC + S(128)));
         LinhaCheck(T("Criar atalho na área de trabalho"), &gAtalhoDesktop, wCampo + S(8));
-        ImGui::SetCursorScreenPos(ImVec2(px - S(8), S(280)));
+        ImGui::SetCursorScreenPos(ImVec2(px - S(8), yC + S(164)));
         LinhaCheck(T("Criar atalho no menu Iniciar"), &gAtalhoIniciar, wCampo + S(8));
         ImGui::PopFont();
 
@@ -834,7 +930,7 @@ static void DesenhaUI(HWND hwnd) {
         _snprintf(inf, sizeof(inf) - 1, T("Espaço necessário: %.1f MB"), total / 1048576.0f);
         inf[sizeof(inf) - 1] = 0;
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px, S(330)), Tk::Texto4, inf);
+        dl->AddText(ImVec2(px, yC + S(212)), Tk::Texto4, inf);
         ImGui::PopFont();
 
         int rC = BotoesRodape(px, yBot, T("Instalar"), T("Cancelar"));
@@ -847,8 +943,8 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_EMUSO) {
         ImGui::PushFont(gFtBody);
-        TextoQuebra(dl, ImVec2(px, S(124)), Tk::Texto, T("O Trok Launcher está aberto neste computador."), wCampo);
-        TextoQuebra(dl, ImVec2(px, S(152)), Tk::Texto3, T("Preciso fechar ele para atualizar os arquivos (suas configurações ficam)."), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC), Tk::Texto, T("O Trok Launcher está aberto neste computador."), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC + S(30)), Tk::Texto3, T("Preciso fechar ele para atualizar os arquivos (suas configurações ficam)."), wCampo);
         ImGui::PopFont();
         int rE = BotoesRodape(px, yBot, T("Fechar e instalar"), T("Voltar"));
         if (rE == 1) {
@@ -859,6 +955,7 @@ static void DesenhaUI(HWND hwnd) {
         else if (rE == 2) gEtapa = ET_CONFIG;
     }
     else if (gEtapa == ET_INSTALANDO) {
+#ifndef TROK_INST_FOTO
         // 1 arquivo por frame
         if (!InstalarProximo()) gEtapa = ET_ERRO;
         else if (gArqAtual >= gNumPak) {
@@ -872,32 +969,34 @@ static void DesenhaUI(HWND hwnd) {
             }
             gEtapa = ET_PRONTO;
         }
+#endif
         float frac = gNumPak ? (float)gArqAtual / gNumPak : 1.0f;
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Tk::Texto2, gModoAtt ? T("Atualizando o Trok Launcher...") : T("Instalando..."));
+        dl->AddText(ImVec2(px, yC + S(10)), Tk::Texto2, gModoAtt ? T("Atualizando o Trok Launcher...") : T("Instalando..."));
         ImGui::PopFont();
         { // porcentagem na ponta direita, em cima da barra
             char pct[16];
             _snprintf(pct, sizeof(pct) - 1, "%d%%", (int)(frac * 100.0f + 0.5f)); pct[sizeof(pct) - 1] = 0;
             ImGui::PushFont(gFtMini);
             ImVec2 pcs = ImGui::CalcTextSize(pct);
-            dl->AddText(ImVec2(px + wCampo - pcs.x, S(146)), Tk::Texto3, pct);
+            dl->AddText(ImVec2(px + wCampo - pcs.x, yC + S(14)), Tk::Texto3, pct);
             ImGui::PopFont();
         }
-        ImVec2 ba(px, S(176)), bb(px + wCampo, S(182));
-        dl->AddRectFilled(ba, bb, Tk::Sup2, S(3));
+        // barra fina da casa: trilho a 8%, preenchimento no laranja
+        ImVec2 ba(px, yC + S(46)), bb(px + wCampo, yC + S(50));
+        dl->AddRectFilled(ba, bb, Cinza(255, 20), S(2));
         if (frac > 0)
-            dl->AddRectFilled(ba, ImVec2(ba.x + (bb.x - ba.x) * frac, bb.y), COR_ACCENT, S(3));
+            dl->AddRectFilled(ba, ImVec2(ba.x + (bb.x - ba.x) * frac, bb.y), COR_ACCENT, S(2));
         if (gArqAtual < gNumPak) {
             ImGui::PushFont(gFtMini);
-            dl->AddText(ImVec2(px, S(196)), Tk::Texto4, gPak[gArqAtual].nome);
+            dl->AddText(ImVec2(px, yC + S(64)), Tk::Texto4, gPak[gArqAtual].nome);
             ImGui::PopFont();
         }
     }
     else if (gEtapa == ET_PRONTO) {
         ImGui::PushFont(gFtBody);
-        TextoQuebra(dl, ImVec2(px, S(124)), Tk::Texto, T("Pronto! O Trok Launcher está instalado."), wCampo);
-        TextoQuebra(dl, ImVec2(px, S(152)), Tk::Texto3, T("Na primeira abertura ele importa seu nick e seus favoritos do SA-MP."), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC), Tk::Texto, T("Pronto! O Trok Launcher está instalado."), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC + S(30)), Tk::Texto3, T("Na primeira abertura ele importa seu nick e seus favoritos do SA-MP."), wCampo);
         ImGui::PopFont();
         int rP = BotoesRodape(px, yBot, T("Abrir o launcher"), T("Fechar"));
         if (rP == 1) {
@@ -911,12 +1010,12 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_REMOVER) {
         ImGui::PushFont(gFtBody);
-        TextoQuebra(dl, ImVec2(px, S(124)), Tk::Texto, T("Remover o Trok Launcher deste computador?"), wCampo);
-        ImGui::SetCursorScreenPos(ImVec2(px - S(8), S(166)));
+        TextoQuebra(dl, ImVec2(px, yC), Tk::Texto, T("Remover o Trok Launcher deste computador?"), wCampo);
+        ImGui::SetCursorScreenPos(ImVec2(px - S(8), yC + S(42)));
         LinhaCheck(T("Apagar também configurações, contas e imagens"), &gApagarConfig, wCampo + S(8));
         ImGui::PopFont();
         ImGui::PushFont(gFtMini);
-        dl->AddText(ImVec2(px + S(28), S(204)), Tk::Texto4, T("(vai para a Lixeira do Windows, dá para recuperar)"));
+        TextoQuebra(dl, ImVec2(px + S(28), yC + S(80)), Tk::Texto4, T("(vai para a Lixeira do Windows, dá para recuperar)"), wCampo - S(28));
         ImGui::PopFont();
         int rR = BotoesRodape(px, yBot, T("Remover"), T("Cancelar"), Tk::Vermelho); // o --vermelho do site
         if (rR == 1) gEtapa = ET_REMOVENDO;
@@ -924,26 +1023,28 @@ static void DesenhaUI(HWND hwnd) {
     }
     else if (gEtapa == ET_REMOVENDO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(140)), Tk::Texto2, T("Removendo..."));
+        dl->AddText(ImVec2(px, yC + S(10)), Tk::Texto2, T("Removendo..."));
         ImGui::PopFont();
+#ifndef TROK_INST_FOTO
         static int frameRem = 0; // o "Removendo..." aparece ANTES do trabalho pesado
         if (++frameRem >= 2) {
             ExecutarRemocao(gPastaRemover, gApagarConfig);
             gEtapa = ET_REMOVIDO;
         }
+#endif
     }
     else if (gEtapa == ET_REMOVIDO) {
         ImGui::PushFont(gFtBody);
-        TextoQuebra(dl, ImVec2(px, S(124)), Tk::Texto, T("Trok Launcher removido. Valeu por ter usado!"), wCampo);
+        TextoQuebra(dl, ImVec2(px, yC), Tk::Texto, T("Trok Launcher removido. Valeu por ter usado!"), wCampo);
         if (gSobrouDesinstalador) // disco diferente do %TEMP%: o desinstalador aberto nao saiu da pasta
-            TextoQuebra(dl, ImVec2(px, S(152)), Tk::Texto3, T("Só o Desinstalar.exe ficou na pasta (aberto, ele não se apaga). Pode apagar a pasta à mão."), wCampo);
+            TextoQuebra(dl, ImVec2(px, yC + S(30)), Tk::Texto3, T("Só o Desinstalar.exe ficou na pasta (aberto, ele não se apaga). Pode apagar a pasta à mão."), wCampo);
         ImGui::PopFont();
         if (BotoesRodape(px, yBot, T("Fechar"), NULL) == 1) gRodando = false;
     }
     else if (gEtapa == ET_ERRO) {
         ImGui::PushFont(gFtBody);
-        dl->AddText(ImVec2(px, S(124)), Tk::Vermelho, T("Algo deu errado:"));
-        TextoQuebra(dl, ImVec2(px, S(150)), Tk::Texto2, gErro, wCampo);
+        dl->AddText(ImVec2(px, yC), Tk::Vermelho, T("Algo deu errado:"));
+        TextoQuebra(dl, ImVec2(px, yC + S(26)), Tk::Texto2, gErro, wCampo);
         ImGui::PopFont();
         int rX = BotoesRodape(px, yBot, T("Tentar de novo"), T("Fechar"));
         if (rX == 1) gEtapa = ET_CONFIG;
@@ -956,8 +1057,8 @@ static void DesenhaUI(HWND hwnd) {
                                                              : "Trok Launcher v" VERSAO_INST "  \xC2\xB7  equipe TrokMods");
     ImGui::PopFont();
 
-    // arrastar a janela pela faixa do topo
-    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && io.MousePos.y < S(40) && io.MousePos.x > wArte) {
+    // arrastar a janela pela faixa do topo (fora dos botoes)
+    if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && io.MousePos.y < S(70)) {
         ReleaseCapture();
         SendMessageA(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
     }
@@ -968,6 +1069,10 @@ static void DesenhaUI(HWND hwnd) {
 
 // ---------- main ----------
 static LRESULT WINAPI WndProc(HWND h, UINT m, WPARAM w, LPARAM l) {
+#ifdef TROK_INST_FOTO
+    // exe de FOTO: mouse e teclado nao chegam na interface (nada e clicado; nao instala nem remove nada)
+    if ((m >= WM_MOUSEFIRST && m <= WM_MOUSELAST) || (m >= WM_KEYFIRST && m <= WM_KEYLAST)) return 0;
+#endif
     if (ImGui_ImplWin32_WndProcHandler(h, m, w, l)) return 1;
     if (m == WM_DESTROY) { gRodando = false; PostQuitMessage(0); return 0; }
     return DefWindowProcW(h, m, w, l); // janela Unicode: o titulo em russo/turco aparece certo na barra de tarefas
@@ -1077,8 +1182,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
             CoUninitialize();
             return 1;
         }
+#ifndef TROK_INST_FOTO
         LimparSobrasDoTemp(); // desinstaladores de remocoes anteriores que ficaram no %TEMP%
+#endif
     }
+#ifdef TROK_INST_FOTO
+    { // exe de FOTO: "--etapa N" escolhe a tela, "--idioma N" o idioma; nada daqui grava nada
+        const char* pe = strstr(linha, "--etapa ");
+        if (pe) gEtapa = atoi(pe + 8);
+        const char* pi = strstr(linha, "--idioma ");
+        if (pi) gLangI = atoi(pi + 9);
+        if (gEtapa == ET_INSTALANDO) gArqAtual = gNumPak * 6 / 10;
+        if (gEtapa == ET_ERRO) _snprintf(gErro, sizeof(gErro) - 1, T("Não consegui gravar: %s"), "Trok Launcher.exe");
+    }
+#endif
     {
         char base[MAX_PATH];
         if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, base)))
@@ -1202,11 +1319,18 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     if (!gFtMini)   gFtMini   = gFtBody;
     if (!gFtTitulo) gFtTitulo = gFtBold;
     CarregarArte(gDev);
+    CriarTexturasDoFundo(gDev); // granulado e trama do fundo (os do Inicio do launcher)
 
     ShowWindow(hwnd, SW_SHOWDEFAULT);
     UpdateWindow(hwnd);
 
+#ifdef TROK_INST_FOTO
+    const DWORD tFoto0 = GetTickCount();
+#endif
     while (gRodando) {
+#ifdef TROK_INST_FOTO
+        if (GetTickCount() - tFoto0 > 8000) break; // exe de FOTO: fecha sozinho
+#endif
         MSG msg;
         while (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
@@ -1266,6 +1390,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR linha, int) {
     }
 
     if (gTexArte) gTexArte->Release();
+    if (gTexGrao) gTexGrao->Release();
+    if (gTexLogo) gTexLogo->Release();
+    if (gTexPontos) gTexPontos->Release();
     ImGui_ImplDX9_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
