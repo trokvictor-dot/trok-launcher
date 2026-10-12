@@ -1,4 +1,4 @@
-v1.13
-https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.13/TrokLauncher-Setup.exe
-Jogadores online no Inicio, aba Internet com 1400+ servidores (open.mp + SAMonitor), filtros de idioma, tipo de jogo e versao, ping ao vivo, atalhos de teclado (Tab, setas e Enter), janela sempre no tamanho certo e instalador com a cara do launcher.
-sha256=9d55aa6add7906c02294ca10d8897e39939ac9e20b2ee14969cbcea0b5b754ba
+v1.14
+https://github.com/trokvictor-dot/trok-launcher/releases/download/v1.14/TrokLauncher-Setup.exe
+Busca de jogadores mais esperta (quem comeca com o que voce digita vem primeiro) e icones oficiais da biblioteca do launcher no painel de jogadores, nos links do servidor e no Reportar problema.
+sha256=b9c5ad27bc04d0694d31970545f00a8efc01a6f6f7a2bde94560e2fa857591f2
